@@ -1,0 +1,4 @@
+oe_newsroom_newsletter.settings_form_tab:
+  base_route: oe_newsroom_newsletter.settings_form
+  title: 'Newsroom Settings'
+  route_name: oe_newsroom_newsletter.settings_form

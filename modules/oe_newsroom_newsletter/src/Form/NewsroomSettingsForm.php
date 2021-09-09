@@ -1,10 +1,10 @@
 <?php
 
-namespace Drupal\oe_newsroom\Form;
+namespace Drupal\oe_newsroom_newsletter\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\oe_newsroom\OeNewsroom;
+use Drupal\oe_newsroom_newsletter\OeNewsroom;
 
 /**
  * Newsroom Settings Form.

@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\oe_newsroom\Controller;
+namespace Drupal\oe_newsroom_newsletter\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Link;

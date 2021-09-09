@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\oe_newsroom\Form;
+namespace Drupal\oe_newsroom_newsletter\Form;
 
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Form\FormBase;
@@ -9,7 +9,7 @@ use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\oe_newsroom\Api\NewsroomMessengerInterface;
-use Drupal\oe_newsroom\OeNewsroom;
+use Drupal\oe_newsroom_newsletter\OeNewsroom;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**

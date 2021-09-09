@@ -1,5 +1,0 @@
-oe_newsroom.newsroom_settings_form:
-  title: 'Newsroom Settings Form'
-  base_route_name: oe_newsroom.newsroom_settings_form
-  names:
-    - oe_newsroom.newsroomsettings
