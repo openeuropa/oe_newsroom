@@ -1,0 +1,36 @@
+oe_newsroom.newsroom_settings_form:
+  path: '/admin/config/system/newsroom-settings'
+  defaults:
+    _form: '\Drupal\oe_newsroom\Form\NewsroomSettingsForm'
+    _title: 'Newsroom Settings Form'
+  requirements:
+    _permission: 'manage newsroom settings'
+  options:
+    _admin_route: TRUE
+
+oe_newsroom.newsroom_subscribe:
+  path: '/newsletter/subscribe'
+  defaults:
+    _form: '\Drupal\oe_newsroom\Form\SubscribeForm'
+    _title: 'Subscribe for newsletter'
+  requirements:
+    _permission: 'manage own subscription'
+
+oe_newsroom.newsroom_unsubscribe:
+  path: '/newsletter/unsubscribe/{email}'
+  defaults:
+    _controller: '\Drupal\oe_newsroom\Controller\NewsroomController::unsubscribe'
+    _title: 'Unsubscribe from newsletter'
+    email: ''
+  requirements:
+    _permission: 'manage own subscription'
+  options:
+    no_cache: TRUE
+
+oe_newsroom.newsroom_edit_subscription:
+  path: '/newsletter/edit-subscription'
+  defaults:
+    _form: '\Drupal\oe_newsroom\Form\SubscribeForm'
+    _title: 'Edit subscription'
+  requirements:
+    _permission: 'manage own subscription'

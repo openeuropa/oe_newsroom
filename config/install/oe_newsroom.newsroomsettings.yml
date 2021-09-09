@@ -1,0 +1,12 @@
+sv_id: ''
+hash_method: sha256
+normalized: true
+universe: ''
+app: ''
+intro_text: ''
+privacy_uri: ''
+success_subscription_text: ''
+already_registered_text: ''
+langcode: en
+newsletters_language: []
+newsletters_language_default: en

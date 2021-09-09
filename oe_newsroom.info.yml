@@ -1,0 +1,8 @@
+name: OpenEuropa Newsroom
+description: OpenEuropa Newsroom module, provides integration to Newsroom service.
+package: OpenEuropa
+php: 7.2
+core_version_requirement: ^8 || ^9
+
+type: module
+core: 8.x

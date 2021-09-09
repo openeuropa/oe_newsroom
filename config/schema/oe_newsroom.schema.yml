@@ -1,0 +1,40 @@
+oe_newsroom.newsroomsettings:
+  type: config_object
+  label: 'Newsroom settings'
+  mapping:
+    hash_method:
+      type: string
+      label: 'Used hashing method'
+    normalized:
+      type: boolean
+      label: 'E-mail address should be normalized?'
+    sv_id:
+      type: string
+      label: 'SV ID from Newsroom'
+    universe:
+      type: string
+      label: 'Universe ID from Newsroom'
+    app:
+      type: string
+      label: 'App ID from Newsroom'
+    intro_text:
+      type: label
+      label: 'Introduction text on the subscription page'
+    privacy_uri:
+      type: label
+      label: 'Privacy url'
+    success_subscription_text:
+      type: label
+      label: 'Message displayed if a subscriber successfully subscribed to the service'
+    already_registered_text:
+      type: label
+      label: 'Message displayed if a subscriber is already subscribed'
+    newsletters_language:
+      type: sequence
+      label: 'Array of selectable languages for newsletter'
+      sequence:
+        type: string
+        label: 'Language code'
+    newsletters_language_default:
+      type: string
+      label: 'Default language for newsletter'

@@ -1,0 +1,18 @@
+oe_newsroom.newsroom_settings_form:
+  title: 'Newsroom Settings'
+  route_name: oe_newsroom.newsroom_settings_form
+  description: 'Configure Newsroom integration'
+  parent: system.admin_config_system
+  weight: 99
+oe_newsroom.newsroom_subscribe:
+  title: 'Subscribe to newsletters'
+  route_name: oe_newsroom.newsroom_subscribe
+  description: 'Subscribe to newsletters'
+oe_newsroom.newsroom_unsubscribe:
+  title: 'Unsubscribe to newsletters'
+  route_name: oe_newsroom.newsroom_unsubscribe
+  description: 'Unsubscribe to newsletters'
+oe_newsroom.newsroom_edit_subscription:
+  title: 'Edit subscription to newsletters'
+  route_name: oe_newsroom.newsroom_edit_subscription
+  description: 'Edit subscription to newsletters'
