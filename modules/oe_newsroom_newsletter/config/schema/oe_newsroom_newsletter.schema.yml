@@ -2,24 +2,25 @@ oe_newsroom_newsletter.settings:
   type: config_object
   label: 'Newsroom settings'
   mapping:
-    hash_method:
-      type: string
-      label: 'Used hashing method'
-    normalized:
-      type: boolean
-      label: 'E-mail address should be normalized?'
-    sv_id:
-      type: string
-      label: 'SV ID from Newsroom'
-    universe:
-      type: string
-      label: 'Universe ID from Newsroom'
-    app:
-      type: string
-      label: 'App ID from Newsroom'
+    distribution_list:
+      type: sequence
+      label: 'Array of distribution list values'
+      sequence:
+        type: mapping
+        label: 'Distribution list values'
+        mapping:
+          sv_id:
+            type: string
+            label: 'SV ID from Newsroom'
+          name:
+            type: label
+            label: 'Name of the distribution list'
     intro_text:
       type: label
       label: 'Introduction text on the subscription page'
+    link_classes:
+      type: string
+      label: 'Extra link classes'
     privacy_uri:
       type: label
       label: 'Privacy url'

@@ -3,7 +3,6 @@
 namespace Drupal\oe_newsroom\Api;
 
 use Drupal\Component\Serialization\Json;
-use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Site\Settings;
@@ -23,13 +22,6 @@ use GuzzleHttp\Exception\ClientException;
 class NewsroomMessenger implements NewsroomMessengerInterface {
 
   use StringTranslationTrait;
-
-  /**
-   * Id(s) of the newsletter/distribution list.
-   *
-   * @var string
-   */
-  protected $svId;
 
   /**
    * Private key for communication.
@@ -123,32 +115,22 @@ class NewsroomMessenger implements NewsroomMessengerInterface {
   protected $messenger;
 
   /**
-   * Config for the Api.
-   *
-   * @var \Drupal\Core\Config\ImmutableConfig
-   */
-  protected $config;
-
-  /**
    * Messenger constructor.
    */
   public function __construct(ConfigFactoryInterface $configFactory, Settings $settings, ClientInterface $httpClient, MessengerInterface $messenger) {
     $config = $configFactory->get(OeNewsroom::OE_NEWSLETTER_CONFIG_VAR_NAME);
-    $universe = $config->get('universe');
 
-    $this->svId = $config->get('sv_id');
     $this->privateKey = $settings::get('newsroom_api_private_key');
     $this->hashMethod = $config->get('hash_method');
     $this->normalized = $config->get('normalized');
-    $this->universe = $universe;
+    $this->universe = $config->get('universe');
     $this->app = $config->get('app');
     $this->httpClient = $httpClient;
     $this->messenger = $messenger;
-    $this->config = $config;
 
     // These fields should be filled up and has no default value, without it
     // it's not possible to communicate with newsroom.
-    $this->newsroomApiUsable = !empty($this->svId) && !empty($this->privateKey) && !empty($universe) && !empty($this->app);
+    $this->newsroomApiUsable = !empty($this->privateKey) && !empty($this->universe) && !empty($this->app);
 
     // Api endpoints.
     $this->topicUrl = "https://ec.europa.eu/newsroom/api/v1/topic";
@@ -188,7 +170,7 @@ class NewsroomMessenger implements NewsroomMessengerInterface {
   /**
    * {@inheritDoc}
    */
-  public function subscribe(string $email, string $topicId = NULL, string $topicExtId = NULL, string $language = NULL) : ?array {
+  public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], string $language = NULL, array $topicExtId = []) : ?array {
     if (!$this->subscriptionServiceConfigured()) {
       return NULL;
     }
@@ -199,11 +181,18 @@ class NewsroomMessenger implements NewsroomMessengerInterface {
       'subscription' => [
         'universeAcronym' => $this->universe,
         'topicExtWebsite' => $this->app,
-        'sv_id' => $this->svId,
+        'sv_id' => implode(',', $svIds),
         'email' => $this->normalized ? mb_strtolower($email) : $email,
         'language' => $language,
       ],
     ];
+
+    if (!empty($relatedSvIds)) {
+      $input['subscription']['relatedSv_Id'] = implode(',', $relatedSvIds);
+    }
+    if (!empty($topicExtId)) {
+      $input['subscription']['topicExtId'] = implode(',', $topicExtId);
+    }
 
     // Send the request.
     $request = $this->httpClient->request('POST', $this->subscriptionSubscribeUrl, ['json' => $input]);
@@ -213,7 +202,8 @@ class NewsroomMessenger implements NewsroomMessengerInterface {
 
       $response = NULL;
       foreach ($data as $subscription_item) {
-        if ($this->svId == $subscription_item['newsletterId']) {
+        // This will fetch only the first item found.
+        if (in_array($subscription_item['newsletterId'], $svIds, FALSE)) {
           $response = $subscription_item;
           break;
         }
@@ -232,13 +222,17 @@ class NewsroomMessenger implements NewsroomMessengerInterface {
   /**
    * {@inheritDoc}
    */
-  public function unsubscribe(string $email): ?bool {
+  public function unsubscribe(string $email, array $svIds = []): ?bool {
+    if (!$this->subscriptionServiceConfigured()) {
+      return NULL;
+    }
+
     $options = [
       'query' => [
         'user_email' => $this->normalized ? mb_strtolower($email) : $email,
         'key' => $this->generateKey($email),
         'app' => $this->app,
-        'sv_id' => $this->svId,
+        'sv_id' => implode(',', $svIds),
       ],
     ];
     try {
@@ -257,27 +251,7 @@ class NewsroomMessenger implements NewsroomMessengerInterface {
   /**
    * {@inheritDoc}
    */
-  public function subscriptionMessage(array $subscription): void {
-    if ($subscription['isNewSubscription'] === TRUE) {
-      $success_message = $this->config->get('success_subscription_text');
-      // Success message should be translatable and it can be set from the
-      // Newsroom Settings Form.
-      // @codingStandardsIgnoreLine
-      $this->messenger->addStatus(empty($success_message) ? trim($subscription['feedbackMessage']) : $success_message);
-    }
-    else {
-      $already_reg_message = $this->config->get('already_registered_text');
-      // Already registered message should be translatable and it can be set
-      // from the Newsroom Settings Form.
-      // @codingStandardsIgnoreLine
-      $this->messenger->addWarning(empty($already_reg_message) ? trim($subscription['feedbackMessage']) : $already_reg_message);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public function isSubscribed(string $email): ?bool {
+  public function isSubscribed(string $email, array $svIds = []): ?bool {
     if (!$this->subscriptionServiceConfigured()) {
       return NULL;
     }
@@ -288,7 +262,7 @@ class NewsroomMessenger implements NewsroomMessengerInterface {
         'key' => $this->generateKey($email),
         'app' => $this->app,
         'universe_acronym' => $this->universe,
-        'sv_id' => $this->svId,
+        'sv_id' => $svIds,
       ],
     ];
 
@@ -296,10 +270,7 @@ class NewsroomMessenger implements NewsroomMessengerInterface {
       $response = $this->httpClient->get($this->subscriptionDataUrl, $options);
       if ($response->getStatusCode() === 200) {
         $subscriptions = Json::decode((string) $response->getBody()->getContents());
-        if ($subscriptions === NULL || count($subscriptions) === 0) {
-          return FALSE;
-        }
-        return TRUE;
+        return !($subscriptions === NULL || count($subscriptions) === 0);
       }
     }
     catch (ClientException $e) {
@@ -307,111 +278,6 @@ class NewsroomMessenger implements NewsroomMessengerInterface {
     }
 
     return NULL;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public function requestEditSubscription(string $email): void {
-    if (!$this->subscriptionServiceConfigured()) {
-      return;
-    }
-
-    // @todo this whole function is not fully implemented and tested.
-    if (!$this->isSubscribed($email)) {
-      $this->messenger->addMessage($this->t('Please enter the email address you used to subscribe to our newsletters.'), 'error');
-      return;
-    }
-
-    // Send the email.
-    $send_email = [
-      'actionData' => [
-        'response_type' => 'boolean',
-        'universeAcronym' => $this->universe,
-        'ExtWebsite' => $this->app,
-        // @todo set a proper link for this.
-        'customLoginLink' => '',
-      ],
-      'email' => $email,
-      'key' => $this->generateKey($email),
-      'action' => 'sendMailLogin',
-    ];
-
-    // Prepare the post.
-    $input = [
-      'dataJson' => Json::encode($send_email),
-    ];
-
-    // Set the options.
-    $options = [
-      'head' => [
-        'Content-Type' => 'application/x-www-form-urlencoded',
-        'Accept' => 'application/json',
-      ],
-      'body' => UrlHelper::buildQuery($input),
-    ];
-
-    // Send the request.
-    $request = $this->httpClient->request('POST', $this->subscriptionDataUrl, $options);
-    if (!empty($request->data)) {
-      if ($request->data == TRUE) {
-        $message = $this->t("Please check your email. We've sent you the information to edit your subscription.");
-        $message_type = 'status';
-      }
-    }
-    $this->messenger->addMessage($message, $message_type);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public function requestLoginForUnsubscription(string $email): void {
-    if (!$this->subscriptionServiceConfigured()) {
-      return;
-    }
-
-    // @todo this whole function is not fully implemented and tested.
-    if (!$this->isSubscribed($email)) {
-      $this->messenger->addMessage($this->t('Please enter the email address you used to subscribe to our newsletters.'), 'error');
-      return;
-    }
-
-    // Send the email.
-    $send_email = [
-      'actionData' => [
-        'response_type' => 'boolean',
-        'universeAcronym' => $this->universe,
-        'ExtWebsite' => $this->app,
-        'customLoginLink' => '',
-      ],
-      'email' => $email,
-      'key' => $this->generateKey($email),
-      'action' => 'sendMailLogin',
-    ];
-
-    // Prepare the post.
-    $input = [
-      'dataJson' => Json::encode($send_email),
-    ];
-
-    // Set the options.
-    $options = [
-      'head' => [
-        'Content-Type' => 'application/x-www-form-urlencoded',
-        'Accept' => 'application/json',
-      ],
-      'body' => UrlHelper::buildQuery($input),
-    ];
-
-    // Send the request.
-    $request = $this->httpClient->request('POST', $this->subscriptionDataUrl, $options);
-    if (!empty($request->data)) {
-      if ($request->data == TRUE) {
-        $message = $this->t("Please check your email. We've sent you the information to unsubscribe from our newsletters.");
-        $message_type = 'status';
-      }
-    }
-    $this->messenger->addMessage($message, $message_type);
   }
 
 }

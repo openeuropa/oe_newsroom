@@ -7,7 +7,7 @@ namespace Drupal\oe_newsroom_newsletter;
  *
  * @package Drupal\oe_newsroom_newsletter
  */
-class OeNewsroom {
+class OeNewsroomNewsletter {
 
   public const OE_NEWSLETTER_CONFIG_VAR_NAME = 'oe_newsroom_newsletter.settings';
 

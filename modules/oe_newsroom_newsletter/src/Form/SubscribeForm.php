@@ -9,7 +9,7 @@ use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\oe_newsroom\Api\NewsroomMessengerInterface;
-use Drupal\oe_newsroom_newsletter\OeNewsroom;
+use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -61,7 +61,7 @@ class SubscribeForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $currentUser = $this->currentUser();
-    $config = $this->config(OeNewsroom::OE_NEWSLETTER_CONFIG_VAR_NAME);
+    $config = $this->config(OeNewsroomNewsletter::OE_NEWSLETTER_CONFIG_VAR_NAME);
 
     // Choose the proper language according to the user setting or interface
     // settings.
@@ -104,6 +104,29 @@ class SubscribeForm extends FormBase {
       '#default_value' => $currentUser->isAnonymous() ? '' : $currentUser->getEmail(),
       '#required' => TRUE,
     ];
+    $distribution_lists = $config->get('distribution_list');
+    $distribution_list_options = [];
+    foreach ($distribution_lists as $distribution_list) {
+      $distribution_list_options[$distribution_list['sv_id']] = $distribution_list['name'];
+    }
+    if (count($distribution_list_options) > 1) {
+      $form['distribution_list'] = [
+        '#type' => 'checkboxes',
+        '#title' => $this->t('Newsletter lists'),
+        '#description' => $this->t('Please select which newsletter list interests you.'),
+        '#options' => $distribution_list_options,
+        '#weight' => '0',
+        '#required' => TRUE,
+      ];
+    }
+    else {
+      $id = array_keys($distribution_list_options)[0];
+      $form['distribution_list'] = [
+        '#type' => 'hidden',
+        '#value' => $id,
+        '#default_value' => $id,
+      ];
+    }
     $languages = $this->languageManager->getLanguages();
     $options = [];
     foreach ($languages as $language) {
@@ -120,6 +143,13 @@ class SubscribeForm extends FormBase {
         '#options' => $options,
         '#default_value' => $selected_language,
         '#weight' => '0',
+      ];
+    }
+    else {
+      $form['newsletters_language'] = [
+        '#type' => 'hidden',
+        '#value' => $selected_language,
+        '#default_value' => $selected_language,
       ];
     }
     $form['agree_privacy_statement'] = [
@@ -146,14 +176,38 @@ class SubscribeForm extends FormBase {
     // Get form values.
     $values = $form_state->getValues();
 
+    $distribution_list = is_array($values['distribution_list']) ? array_keys(array_filter($values['distribution_list'])) : [$values['distribution_list']];
+
     // Let's call the subscription service.
-    $response = $this->newsroomMessenger->subscribe($values['email'], NULL, NULL, $values['newsletters_language']);
+    $response = $this->newsroomMessenger->subscribe($values['email'], $distribution_list, [], $values['newsletters_language']);
     // Set response (if there is) into form state, if somebody need it.
     if (is_array($response)) {
       $form_state->set('subscription', $response);
 
       // Set the correct message here.
-      $this->newsroomMessenger->subscriptionMessage($response);
+      $this->subscriptionMessage($response);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function subscriptionMessage(array $subscription): void {
+    $config = $this->config(OeNewsroomNewsletter::OE_NEWSLETTER_CONFIG_VAR_NAME);
+
+    if ($subscription['isNewSubscription'] === TRUE) {
+      $success_message = $config->get('success_subscription_text');
+      // Success message should be translatable and it can be set from the
+      // Newsroom Settings Form.
+      // @codingStandardsIgnoreLine
+      $this->messenger()->addStatus(empty($success_message) ? trim($subscription['feedbackMessage']) : $success_message);
+    }
+    else {
+      $already_reg_message = $config->get('already_registered_text');
+      // Already registered message should be translatable and it can be set
+      // from the Newsroom Settings Form.
+      // @codingStandardsIgnoreLine
+      $this->messenger()->addWarning(empty($already_reg_message) ? trim($subscription['feedbackMessage']) : $already_reg_message);
     }
   }
 
