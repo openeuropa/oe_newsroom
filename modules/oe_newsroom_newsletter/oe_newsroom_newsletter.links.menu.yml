@@ -4,13 +4,13 @@ oe_newsroom_newsletter.settings_form:
   description: 'Configure Newsroom Newsletter integration'
   parent: oe_newsroom.settings_form
   weight: 99
-oe_newsroom_newsletter.subscribe:
+oe_newsroom_newsletter.subscribe_form:
   title: 'Subscribe to newsletters'
-  route_name: oe_newsroom_newsletter.subscribe
+  route_name: oe_newsroom_newsletter.subscribe_form
   description: 'Subscribe to newsletters'
-oe_newsroom_newsletter.unsubscribe:
+oe_newsroom_newsletter.unsubscribe_form:
   title: 'Unsubscribe to newsletters'
-  route_name: oe_newsroom_newsletter.unsubscribe
+  route_name: oe_newsroom_newsletter.unsubscribe_form
   description: 'Unsubscribe to newsletters'
 oe_newsroom_newsletter.edit_subscription:
   title: 'Edit subscription to newsletters'
