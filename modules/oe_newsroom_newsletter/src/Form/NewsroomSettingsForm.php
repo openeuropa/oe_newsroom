@@ -25,7 +25,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'newsroom_newsletter_settings_form';
+    return 'oe_newsroom_newsletter_settings_form';
   }
 
   /**

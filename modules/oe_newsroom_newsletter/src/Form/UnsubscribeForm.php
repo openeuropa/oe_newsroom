@@ -2,10 +2,13 @@
 
 namespace Drupal\oe_newsroom_newsletter\Form;
 
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\oe_newsroom\Api\NewsroomMessengerInterface;
+use Drupal\oe_newsroom\NewsroomMessengerFactoryInterface;
 use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
+use GuzzleHttp\Exception\BadResponseException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -23,8 +26,8 @@ class UnsubscribeForm extends FormBase {
   /**
    * {@inheritDoc}
    */
-  public function __construct(NewsroomMessengerInterface $newsroomMessenger) {
-    $this->newsroomMessenger = $newsroomMessenger;
+  public function __construct(NewsroomMessengerFactoryInterface $newsroomMessengerFactory) {
+    $this->newsroomMessenger = $newsroomMessengerFactory->get();
   }
 
   /**
@@ -32,7 +35,7 @@ class UnsubscribeForm extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('oe_newsroom.messenger')
+      $container->get('oe_newsroom.messenger_factory')
     );
   }
 
@@ -40,7 +43,7 @@ class UnsubscribeForm extends FormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'unsubscribe_form';
+    return 'oe_newsroom_newsletter_unsubscribe_form';
   }
 
   /**
@@ -50,6 +53,14 @@ class UnsubscribeForm extends FormBase {
     $currentUser = $this->currentUser();
     $config = $this->config(OeNewsroomNewsletter::OE_NEWSLETTER_CONFIG_VAR_NAME);
 
+    // Add wrapper for ajax.
+    // @todo I think this will break if somebody puts multiple unsubscription
+    // form to the same page... However I can't find right now in the core a
+    // proper solution for this issue.
+    $form['#prefix'] = '<div id="newsroom-newsletter-unsubscription-form">';
+    $form['#suffix'] = '</div>';
+
+    // Start building the form itself.
     $form['email'] = [
       '#type' => 'email',
       '#title' => $this->t('Your e-mail'),
@@ -80,10 +91,15 @@ class UnsubscribeForm extends FormBase {
         '#default_value' => $id,
       ];
     }
-    $form['unsubscribe'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Unsubscribe'),
-      '#weight' => '0',
+    $form['actions'] = [
+      '#type' => 'actions',
+      'submit' => [
+        '#type' => 'submit',
+        '#value' => $this->t('Unsubscribe'),
+        '#ajax' => [
+          'callback' => '::submitFormCallback',
+        ],
+      ],
     ];
 
     return $form;
@@ -91,8 +107,6 @@ class UnsubscribeForm extends FormBase {
 
   /**
    * {@inheritdoc}
-   *
-   * @throws \GuzzleHttp\Exception\GuzzleException
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // Get form values.
@@ -100,14 +114,43 @@ class UnsubscribeForm extends FormBase {
 
     $distribution_list = is_array($values['distribution_list']) ? array_keys(array_filter($values['distribution_list'])) : [$values['distribution_list']];
 
-    // Let's call the subscription service.
-    $status = $this->newsroomMessenger->unsubscribe($values['email'], $distribution_list);
-    if ($status === TRUE) {
-      $this->messenger()->addStatus($this->t('Successfully unsubscribed!'));
+    try {
+      // Let's call the subscription service.
+      if ($this->newsroomMessenger->unsubscribe($values['email'], $distribution_list)) {
+        $this->messenger()->addStatus($this->t('Successfully unsubscribed!'));
+      }
+      else {
+        $this->messenger()->addError($this->t('There was a problem.'));
+      }
     }
-    elseif ($status === FALSE) {
-      $this->messenger()->addError($this->t('There was a problem.'));
+    catch (BadResponseException $e) {
+      $this->messenger()->addError($e->getMessage());
     }
+  }
+
+  /**
+   * Ajax callback to update the subscription form after it is submitted.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   An ajax response object.
+   */
+  public function submitFormCallback(array &$form, FormStateInterface $form_state): AjaxResponse {
+    $response = new AjaxResponse();
+
+    if ($form_state->getErrors()) {
+      unset($form['#prefix'], $form['#suffix']);
+      $form['status_messages'] = [
+        '#type' => 'status_messages',
+        '#weight' => -10,
+      ];
+      $response->addCommand(new HtmlCommand('#newsroom-newsletter-unsubscription-form', $form));
+    }
+    else {
+      $messages = ['#type' => 'status_messages'];
+      $response->addCommand(new HtmlCommand('#newsroom-newsletter-unsubscription-form', $messages));
+    }
+
+    return $response;
   }
 
 }

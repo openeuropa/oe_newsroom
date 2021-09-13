@@ -2,20 +2,29 @@
 
 namespace Drupal\oe_newsroom\Api;
 
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+
 /**
  * Interface for newsroom messenger api class.
  *
  * @package Drupal\oe_newsroom\Api
  */
-interface NewsroomMessengerInterface {
+interface NewsroomMessengerInterface extends ContainerInjectionInterface {
 
   /**
    * Precheck for API usability.
    *
+   * @param bool $throw_error
+   *   If it's true it will throw an InvalidApiConfiguration if there's a
+   *   problem. Otherwise it will return true/false.
+   *
    * @return bool
    *   Returns true if every mandatory data is set to be able to use newsroom.
+   *
+   * @throws \Drupal\oe_newsroom\Exception\InvalidApiConfiguration
+   *   Thrown if $throw_error = true and there's a problem.
    */
-  public function subscriptionServiceConfigured(): bool;
+  public function subscriptionServiceConfigured(bool $throw_error = TRUE): bool;
 
   /**
    * Subscribe a user to a newsletter.
@@ -38,6 +47,10 @@ interface NewsroomMessengerInterface {
    *
    * @throws \GuzzleHttp\Exception\GuzzleException
    *   If the HTTP requests fails or if the response is not proper.
+   * @throws \GuzzleHttp\Exception\BadResponseException
+   *   If response is not proper we throw this exception.
+   * @throws \Drupal\oe_newsroom\Exception\InvalidApiConfiguration
+   *   If the API is not configure and this function is being called.
    */
   public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], string $language = NULL, array $topicExtId = []): ?array;
 
@@ -55,8 +68,12 @@ interface NewsroomMessengerInterface {
    *
    * @throws \GuzzleHttp\Exception\GuzzleException
    *   If the HTTP requests fails or if the response is not proper.
+   * @throws \GuzzleHttp\Exception\BadResponseException
+   *   If response is not proper we throw this exception.
+   * @throws \Drupal\oe_newsroom\Exception\InvalidApiConfiguration
+   *   If the API is not configure and this function is being called.
    */
-  public function unsubscribe(string $email, array $svIds = []): ?bool;
+  public function unsubscribe(string $email, array $svIds = []): bool;
 
   /**
    * Checks whether an email is subscribed or not.
@@ -67,12 +84,15 @@ interface NewsroomMessengerInterface {
    *   An array of distribution list IDs.
    *
    * @return bool
-   *   True if the user is not subscribed, false if subscribed and null if an
-   *   error accord in the data process.
+   *   False if the user is not subscribed, true if subscribed.
    *
    * @throws \GuzzleHttp\Exception\GuzzleException
-   *   If the HTTP requests fails.
+   *   If the HTTP requests fails or if the response is not proper.
+   * @throws \GuzzleHttp\Exception\BadResponseException
+   *   If response is not proper we throw this exception.
+   * @throws \Drupal\oe_newsroom\Exception\InvalidApiConfiguration
+   *   If the API is not configure and this function is being called.
    */
-  public function isSubscribed(string $email, array $svIds = []): ?bool;
+  public function isSubscribed(string $email, array $svIds = []): bool;
 
 }

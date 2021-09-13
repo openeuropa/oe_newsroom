@@ -3,12 +3,14 @@
 namespace Drupal\oe_newsroom_newsletter\Form;
 
 use Drupal\Component\Utility\UrlHelper;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
-use Drupal\oe_newsroom\Api\NewsroomMessengerInterface;
+use Drupal\oe_newsroom\NewsroomMessengerFactoryInterface;
 use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -34,8 +36,8 @@ class SubscribeForm extends FormBase {
   /**
    * {@inheritDoc}
    */
-  public function __construct(NewsroomMessengerInterface $newsroomMessenger, LanguageManagerInterface $languageManager) {
-    $this->newsroomMessenger = $newsroomMessenger;
+  public function __construct(NewsroomMessengerFactoryInterface $newsroomMessengerFactory, LanguageManagerInterface $languageManager) {
+    $this->newsroomMessenger = $newsroomMessengerFactory->get();
     $this->languageManager = $languageManager;
   }
 
@@ -44,7 +46,7 @@ class SubscribeForm extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('oe_newsroom.messenger'),
+      $container->get('oe_newsroom.messenger_factory'),
       $container->get('language_manager')
     );
   }
@@ -53,7 +55,7 @@ class SubscribeForm extends FormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'subscribe_form';
+    return 'oe_newsroom_newsletter_subscribe_form';
   }
 
   /**
@@ -83,6 +85,13 @@ class SubscribeForm extends FormBase {
     else {
       $privacy_uri = Url::fromUserInput($path, $attributes);
     }
+
+    // Add wrapper for ajax.
+    // @todo I think this will break if somebody puts multiple subscription form
+    // to the same page... However I can't find right now in the core a proper
+    // solution for this issue.
+    $form['#prefix'] = '<div id="newsroom-newsletter-subscription-form">';
+    $form['#suffix'] = '</div>';
 
     // Start building up form.
     $form['intro_text'] = [
@@ -158,10 +167,15 @@ class SubscribeForm extends FormBase {
       '#weight' => '0',
       '#required' => TRUE,
     ];
-    $form['subscribe'] = [
-      '#type' => 'submit',
-      '#value' => $this->t('Subscribe'),
-      '#weight' => '0',
+    $form['actions'] = [
+      '#type' => 'actions',
+      'submit' => [
+        '#type' => 'submit',
+        '#value' => $this->t('Subscribe'),
+        '#ajax' => [
+          'callback' => '::submitFormCallback',
+        ],
+      ],
     ];
 
     return $form;
@@ -178,21 +192,26 @@ class SubscribeForm extends FormBase {
 
     $distribution_list = is_array($values['distribution_list']) ? array_keys(array_filter($values['distribution_list'])) : [$values['distribution_list']];
 
-    // Let's call the subscription service.
-    $response = $this->newsroomMessenger->subscribe($values['email'], $distribution_list, [], $values['newsletters_language']);
-    // Set response (if there is) into form state, if somebody need it.
-    if (is_array($response)) {
-      $form_state->set('subscription', $response);
+    try {
+      // Let's call the subscription service.
+      $response = $this->newsroomMessenger->subscribe($values['email'], $distribution_list, [], $values['newsletters_language']);
+      // Set response (if there is) into form state, if somebody need it.
+      if (is_array($response)) {
+        $form_state->set('subscription', $response);
 
-      // Set the correct message here.
-      $this->subscriptionMessage($response);
+        // Set the correct message here.
+        $this->subscriptionMessage($response);
+      }
+    }
+    catch (\InvalidArgumentException $e) {
+      $this->messenger()->addError($e->getMessage());
     }
   }
 
   /**
    * {@inheritDoc}
    */
-  public function subscriptionMessage(array $subscription): void {
+  protected function subscriptionMessage(array $subscription): void {
     $config = $this->config(OeNewsroomNewsletter::OE_NEWSLETTER_CONFIG_VAR_NAME);
 
     if ($subscription['isNewSubscription'] === TRUE) {
@@ -209,6 +228,31 @@ class SubscribeForm extends FormBase {
       // @codingStandardsIgnoreLine
       $this->messenger()->addWarning(empty($already_reg_message) ? trim($subscription['feedbackMessage']) : $already_reg_message);
     }
+  }
+
+  /**
+   * Ajax callback to update the subscription form after it is submitted.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   An ajax response object.
+   */
+  public function submitFormCallback(array &$form, FormStateInterface $form_state): AjaxResponse {
+    $response = new AjaxResponse();
+
+    if ($form_state->getErrors()) {
+      unset($form['#prefix'], $form['#suffix']);
+      $form['status_messages'] = [
+        '#type' => 'status_messages',
+        '#weight' => -10,
+      ];
+      $response->addCommand(new HtmlCommand('#newsroom-newsletter-subscription-form', $form));
+    }
+    else {
+      $messages = ['#type' => 'status_messages'];
+      $response->addCommand(new HtmlCommand('#newsroom-newsletter-subscription-form', $messages));
+    }
+
+    return $response;
   }
 
 }
