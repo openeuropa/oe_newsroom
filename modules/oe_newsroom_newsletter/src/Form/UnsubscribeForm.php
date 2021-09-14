@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\oe_newsroom_newsletter\Form;
 
 use Drupal\Core\Ajax\AjaxResponse;

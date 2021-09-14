@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\oe_newsroom\Api;
 
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
