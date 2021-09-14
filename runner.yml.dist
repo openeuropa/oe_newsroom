@@ -1,15 +1,15 @@
 drupal:
   root: "build"
-  base_url: "http://web:8080/build"
+  base_url: ${env.DRUPAL_BASE_URL}
   site:
     name: "OpenEuropa"
     profile: "minimal"
   database:
-    host: "mysql"
-    port: "3306"
-    name: "oe_newsroom"
-    user: "root"
-    password: ""
+    host: ${env.DRUPAL_DATABASE_HOST}
+    port: ${env.DRUPAL_DATABASE_PORT}
+    name: ${env.DRUPAL_DATABASE_NAME}
+    user: ${env.DRUPAL_DATABASE_USERNAME}
+    password: ''
   post_install:
     # Prepare the instance.
     - "./vendor/bin/drush en toolbar -y"
@@ -22,6 +22,9 @@ drupal:
     - "./vendor/bin/drush en config_devel -y"
     - "./vendor/bin/drush en oe_newsroom -y"
     - "./vendor/bin/drush cr"
+  additional_settings: |
+    $settings['file_private_path'] = getenv('DRUPAL_PRIVATE_FILE_SYSTEM');
+    $settings['newsroom_api_private_key'] = getenv('NEWSROOM_API_PRIVATE_KEY');
   settings:
     settings:
       file_scan_ignore_directories:
@@ -30,6 +33,16 @@ drupal:
         - "vendor"
         - "${drupal.root}"
 
+behat:
+  drupal_base_url: ${env.DRUPAL_BEHAT_BASE_URL}
+  tags: ~@wip
+
+selenium:
+  host: ${env.SELINIUM_HOST}
+  port: ${env.SELINIUM_PORT}
+  browser: ${env.SELINIUM_BROWSER}
+  
+  
 commands:
   drupal:site-setup:
     - { task: "symlink", from: "../../..", to: "${drupal.root}/modules/custom/oe_newsroom" }
@@ -41,3 +54,4 @@ commands:
     - { task: "process", source: "phpunit.xml.dist", destination: "phpunit.xml" }
   setup:behat:
     - { task: "process", source: "behat.yml.dist", destination: "behat.yml" }
+
