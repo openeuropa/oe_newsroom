@@ -43,7 +43,7 @@ method, normalization; from this location: `/admin/config/system/newsroom-settin
 
 The private key is a server settings, which needs to be configured via `.env` file (and settings.php).
 In your demo `.env` file create a new variable called `NEWSROOM_API_PRIVATE_KEY=`
-and place the key after it.
+in your local `.env` file create the same and place the key after it.
 In your demo runner file add `$settings['newsroom_api_private_key'] = getenv('NEWSROOM_API_PRIVATE_KEY');`
 into the settings file, i.e. with `additional_settings` option. Create a devops
 ticket for acceptance and production. Do not commit into git the private key!
