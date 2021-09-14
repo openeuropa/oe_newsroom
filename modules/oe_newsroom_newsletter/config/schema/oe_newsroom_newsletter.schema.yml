@@ -39,3 +39,19 @@ oe_newsroom_newsletter.settings:
     newsletters_language_default:
       type: string
       label: 'Default language for newsletter'
+
+field.storage_settings.oe_newsroom_newsletter:
+  type: mapping
+  label: Newsletter storage settings
+
+field.field_settings.oe_newsroom_newsletter:
+  type: mapping
+  label: Newsletter field settings
+
+field.value.oe_newsroom_newsletter:
+  type: mapping
+  label: Default value
+  mapping:
+    enabled:
+      type: boolean
+      label: Whether or not newsletter subscriptions are enabled.
