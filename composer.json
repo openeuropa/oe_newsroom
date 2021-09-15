@@ -43,7 +43,7 @@
             "load.environment.php"
         ],
         "psr-4": {
-            "Drupal\\Tests\\oe_newsroom\\": "./tests/src/"
+            "Drupal\\Tests\\oe_newsroom\\": "./tests/"
         }
     },
     "extra": {
