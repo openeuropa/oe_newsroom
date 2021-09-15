@@ -35,6 +35,7 @@ drupal:
         - "${drupal.root}"
 
 behat:
+  drupal_base_url: ${env.DRUPAL_BEHAT_BASE_URL}
   tags: ~@wip
 
 selenium:

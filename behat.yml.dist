@@ -11,12 +11,17 @@ default:
   extensions:
     Drupal\MinkExtension:
       goutte: ~
-      selenium2: ~
       ajax_timeout: 10
+      browser_name: "${selenium.browser}"
+      files_path: "${drupal.root}/tests/fixtures/files"
       javascript_session: selenium2
-      base_url: "${drupal.base_url}"
+      base_url: "${behat.drupal_base_url}"
+      selenium2:
+        wd_host: "${selenium.host}:${selenium.port}/wd/hub"
+        capabilities: { "browser": "chrome", "version": "*" }
     Drupal\DrupalExtension:
       api_driver: "drupal"
+      blackbox: ~
       drupal:
         drupal_root: "${drupal.root}"
   formatters:
