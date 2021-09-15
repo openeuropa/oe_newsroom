@@ -42,28 +42,28 @@ interface NewsroomMessengerInterface extends ContainerInjectionInterface {
    * @param string|null $language
    *   Specify the language of the subscription (for all services).
    * @param array $topicExtId
-   *   Topic ids, comma separated, only used for notifications.
+   *   Topic IDs, comma separated, only used for notifications.
    *
    * @return array|null
-   *   Returns api resposne as an array.
+   *   Returns api response as an array.
    *
    * @throws \GuzzleHttp\Exception\GuzzleException
    *   If the HTTP requests fails or if the response is not proper.
    * @throws \GuzzleHttp\Exception\BadResponseException
    *   If response is not proper we throw this exception.
    * @throws \Drupal\oe_newsroom\Exception\InvalidApiConfiguration
-   *   If the API is not configure and this function is being called.
+   *   If the API is not configured then this function is being called.
    */
   public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], string $language = NULL, array $topicExtId = []): ?array;
 
   /**
-   * Unsubscribe an email from newsletter.
+   * Unsubscribe an email from a newsletter.
    *
    * @param string $email
    *   Subscriber e-mail address.
    * @param array $svIds
    *   An array of distribution list IDs. The user will get notification when
-   *   they are subscribing for these list(s).
+   *   they are unsubscribing from these list(s).
    *
    * @return bool
    *   True in case unsubscribe correctly, false otherwise.
@@ -73,7 +73,7 @@ interface NewsroomMessengerInterface extends ContainerInjectionInterface {
    * @throws \GuzzleHttp\Exception\BadResponseException
    *   If response is not proper we throw this exception.
    * @throws \Drupal\oe_newsroom\Exception\InvalidApiConfiguration
-   *   If the API is not configure and this function is being called.
+   *   If the API is not configured then this function is being called.
    */
   public function unsubscribe(string $email, array $svIds = []): bool;
 
@@ -93,7 +93,7 @@ interface NewsroomMessengerInterface extends ContainerInjectionInterface {
    * @throws \GuzzleHttp\Exception\BadResponseException
    *   If response is not proper we throw this exception.
    * @throws \Drupal\oe_newsroom\Exception\InvalidApiConfiguration
-   *   If the API is not configure and this function is being called.
+   *   If the API is not configured then this function is being called.
    */
   public function isSubscribed(string $email, array $svIds = []): bool;
 
