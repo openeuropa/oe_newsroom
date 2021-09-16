@@ -18,7 +18,7 @@ interface NewsroomMessengerInterface extends ContainerInjectionInterface {
    *
    * @param bool $throw_error
    *   If it's true it will throw an InvalidApiConfiguration if there's a
-   *   problem. Otherwise it will return true/false.
+   *   problem. Otherwise, it will return true/false.
    *
    * @return bool
    *   Returns true if every mandatory data is set to be able to use newsroom.
@@ -29,7 +29,7 @@ interface NewsroomMessengerInterface extends ContainerInjectionInterface {
   public function subscriptionServiceConfigured(bool $throw_error = TRUE): bool;
 
   /**
-   * Subscribe a user to a newsletter.
+   * Subscribe an email to the newsletters.
    *
    * @param string $email
    *   Subscriber e-mail address.
@@ -42,28 +42,28 @@ interface NewsroomMessengerInterface extends ContainerInjectionInterface {
    * @param string|null $language
    *   Specify the language of the subscription (for all services).
    * @param array $topicExtId
-   *   Topic ids, comma separated, only used for notifications.
+   *   An array of Topic IDs, only used for notifications.
    *
    * @return array|null
-   *   Returns api resposne as an array.
+   *   Returns api response as an array.
    *
    * @throws \GuzzleHttp\Exception\GuzzleException
    *   If the HTTP requests fails or if the response is not proper.
    * @throws \GuzzleHttp\Exception\BadResponseException
    *   If response is not proper we throw this exception.
    * @throws \Drupal\oe_newsroom\Exception\InvalidApiConfiguration
-   *   If the API is not configure and this function is being called.
+   *   If the API is not configured then this Exception is thrown.
    */
   public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], string $language = NULL, array $topicExtId = []): ?array;
 
   /**
-   * Unsubscribe an email from newsletter.
+   * Unsubscribe an email from the newsletters.
    *
    * @param string $email
    *   Subscriber e-mail address.
    * @param array $svIds
    *   An array of distribution list IDs. The user will get notification when
-   *   they are subscribing for these list(s).
+   *   they are unsubscribing from these list(s).
    *
    * @return bool
    *   True in case unsubscribe correctly, false otherwise.
@@ -73,7 +73,7 @@ interface NewsroomMessengerInterface extends ContainerInjectionInterface {
    * @throws \GuzzleHttp\Exception\BadResponseException
    *   If response is not proper we throw this exception.
    * @throws \Drupal\oe_newsroom\Exception\InvalidApiConfiguration
-   *   If the API is not configure and this function is being called.
+   *   If the API is not configured then this Exception is thrown.
    */
   public function unsubscribe(string $email, array $svIds = []): bool;
 
@@ -93,7 +93,7 @@ interface NewsroomMessengerInterface extends ContainerInjectionInterface {
    * @throws \GuzzleHttp\Exception\BadResponseException
    *   If response is not proper we throw this exception.
    * @throws \Drupal\oe_newsroom\Exception\InvalidApiConfiguration
-   *   If the API is not configure and this function is being called.
+   *   If the API is not configured then this Exception is thrown.
    */
   public function isSubscribed(string $email, array $svIds = []): bool;
 

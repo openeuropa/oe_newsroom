@@ -21,6 +21,7 @@ drupal:
     # Enable the modules.
     - "./vendor/bin/drush en config_devel -y"
     - "./vendor/bin/drush en oe_newsroom -y"
+    - "./vendor/bin/drush en oe_newsroom_newsletter -y"
     - "./vendor/bin/drush cr"
   additional_settings: |
     $settings['file_private_path'] = getenv('DRUPAL_PRIVATE_FILE_SYSTEM');
@@ -38,11 +39,10 @@ behat:
   tags: ~@wip
 
 selenium:
-  host: ${env.SELINIUM_HOST}
-  port: ${env.SELINIUM_PORT}
-  browser: ${env.SELINIUM_BROWSER}
-  
-  
+  host: ${env.SELENIUM_HOST}
+  port: ${env.SELENIUM_PORT}
+  browser: ${env.SELENIUM_BROWSER}
+
 commands:
   drupal:site-setup:
     - { task: "symlink", from: "../../..", to: "${drupal.root}/modules/custom/oe_newsroom" }
@@ -54,4 +54,3 @@ commands:
     - { task: "process", source: "phpunit.xml.dist", destination: "phpunit.xml" }
   setup:behat:
     - { task: "process", source: "behat.yml.dist", destination: "behat.yml" }
-
