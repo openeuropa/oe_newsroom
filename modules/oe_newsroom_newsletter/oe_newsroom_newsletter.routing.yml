@@ -4,14 +4,14 @@ oe_newsroom_newsletter.settings_form:
     _form: '\Drupal\oe_newsroom_newsletter\Form\NewsroomSettingsForm'
     _title: 'Newsroom Settings Form'
   requirements:
-    _permission: 'manage newsroom settings'
+    _permission: 'manage newsroom newsletter settings'
   options:
     _admin_route: TRUE
 
 oe_newsroom_newsletter.settings_form_translate:
   path: '/admin/config/system/newsroom-settings/newsletter/translate'
   requirements:
-    _permission: 'manage newsroom settings'
+    _permission: 'manage newsroom newsletter settings'
   options:
     _admin_route: TRUE
 
@@ -21,7 +21,7 @@ oe_newsroom_newsletter.subscribe_form:
     _form: '\Drupal\oe_newsroom_newsletter\Form\SubscribeForm'
     _title: 'Subscribe for newsletter'
   requirements:
-    _permission: 'manage own subscription'
+    _permission: 'manage own newsletter subscription'
 
 oe_newsroom_newsletter.unsubscribe_form:
   path: '/newsletter/unsubscribe'
@@ -29,7 +29,7 @@ oe_newsroom_newsletter.unsubscribe_form:
     _form: '\Drupal\oe_newsroom_newsletter\Form\UnsubscribeForm'
     _title: 'Unsubscribe from newsletter'
   requirements:
-    _permission: 'manage own subscription'
+    _permission: 'manage own newsletter subscription'
 
 oe_newsroom_newsletter.edit_subscription:
   path: '/newsletter/edit-subscription'
@@ -37,4 +37,4 @@ oe_newsroom_newsletter.edit_subscription:
     _form: '\Drupal\oe_newsroom_newsletter\Form\SubscribeForm'
     _title: 'Edit subscription'
   requirements:
-    _permission: 'manage own subscription'
+    _permission: 'manage own newsletter subscription'

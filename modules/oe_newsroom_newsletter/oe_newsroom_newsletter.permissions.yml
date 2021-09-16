@@ -1,6 +1,6 @@
-manage own subscription:
-  title: 'Manage own subscription'
+manage own newsletter subscription:
+  title: 'Manage own newsletter subscription'
   description: 'Allows users to subscribe, edit and unsubscribe from newsletters'
-manage newsroom settings:
-  title: 'Manage newsroom settings'
-  description: 'Allows users to configure newsroom'
+manage newsroom newsletter settings:
+  title: 'Manage newsroom newsletter settings'
+  description: 'Allows users to configure newsroom newsletter'
