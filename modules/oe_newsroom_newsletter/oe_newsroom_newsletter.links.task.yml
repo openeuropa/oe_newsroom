@@ -6,5 +6,3 @@ oe_newsroom_newsletter.settings_form_tab.sub:
   title: 'Newsroom Newsletter Settings'
   route_name: oe_newsroom_newsletter.settings_form
   parent_id: oe_newsroom_newsletter.settings_form_tab.collection
-config_translation.local_tasks:config_translation.item.overview.oe_newsroom_newsletter.settings_form:
-  parent_id: oe_newsroom_newsletter.settings_form_tab.collection
