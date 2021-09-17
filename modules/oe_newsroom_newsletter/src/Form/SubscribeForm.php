@@ -176,7 +176,7 @@ class SubscribeForm extends FormBase {
     }
     $form['agree_privacy_statement'] = [
       '#type' => 'checkbox',
-      '#title' => '<span>' . $this->t('By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link', ['@privacy_link' => Link::fromTextAndUrl($this->t('privacy statement'), $privacy_uri)->toString()]) . '</span>',
+      '#title' => $this->t('By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link', ['@privacy_link' => Link::fromTextAndUrl($this->t('privacy statement'), $privacy_uri)->toString()]),
       '#weight' => '0',
       '#required' => TRUE,
     ];

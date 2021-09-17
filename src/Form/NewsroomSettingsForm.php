@@ -78,8 +78,6 @@ class NewsroomSettingsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
-    // The language_select field is buggy, it doesn't give back empty value.
-    $user_input = $form_state->getUserInput();
 
     $this->config(OeNewsroom::OE_NEWSLETTER_CONFIG_VAR_NAME)
       ->set('universe', $form_state->getValue('universe'))
