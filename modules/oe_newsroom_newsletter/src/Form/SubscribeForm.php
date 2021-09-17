@@ -14,6 +14,8 @@ use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\oe_newsroom\NewsroomMessengerFactoryInterface;
 use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
+use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\ServerException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -75,6 +77,13 @@ class SubscribeForm extends FormBase {
     }
 
     $path = str_replace('[lang_code]', str_replace('pt-pt', 'pt', $ui_language), $config->get('privacy_uri'));
+    if (empty($path)) {
+      $this->messenger()->addWarning($this->t('Subscription form can by only used after privacy url is set.'));
+      return [
+        '#markup' => '',
+      ];
+    }
+
     $attributes = [];
     if (!empty($config->get('link_classes'))) {
       $attributes['attributes'] = [
@@ -143,7 +152,9 @@ class SubscribeForm extends FormBase {
     foreach ($languages as $language) {
       $options[$language->getId()] = $language->getName();
     }
-    $options = array_intersect_key($options, array_flip($config->get('newsletters_language')));
+    if (!empty($config->get('newsletters_language'))) {
+      $options = array_intersect_key($options, array_flip($config->get('newsletters_language')));
+    }
     if (array_key_exists($selected_language, $options)) {
       $selected_language = $config->get('newsletters_language_default');
     }
@@ -206,6 +217,19 @@ class SubscribeForm extends FormBase {
       }
     }
     catch (\InvalidArgumentException $e) {
+      $this->messenger()->addError($e->getMessage());
+    }
+    catch (ServerException $e) {
+      $this->logger('oe_newsroom_newsletter')->error('An error occurred with %code code and a %message message in the %file file %line line.\n\rTrace: %trace', [
+        '%code' => $e->getCode(),
+        '%message' => $e->getMessage(),
+        '%file' => $e->getFile(),
+        '%line' => $e->getLine(),
+        '%trace' => $e->getTraceAsString(),
+      ]);
+      $this->messenger()->addError('An error happened in the communication. If this persist, connect with the site owner.');
+    }
+    catch (BadResponseException $e) {
       $this->messenger()->addError($e->getMessage());
     }
   }

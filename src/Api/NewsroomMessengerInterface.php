@@ -47,7 +47,7 @@ interface NewsroomMessengerInterface extends ContainerInjectionInterface {
    * @return array|null
    *   Returns api resposne as an array.
    *
-   * @throws \GuzzleHttp\Exception\GuzzleException
+   * @throws \GuzzleHttp\Exception\ServerException
    *   If the HTTP requests fails or if the response is not proper.
    * @throws \GuzzleHttp\Exception\BadResponseException
    *   If response is not proper we throw this exception.
@@ -68,7 +68,7 @@ interface NewsroomMessengerInterface extends ContainerInjectionInterface {
    * @return bool
    *   True in case unsubscribe correctly, false otherwise.
    *
-   * @throws \GuzzleHttp\Exception\GuzzleException
+   * @throws \GuzzleHttp\Exception\ServerException
    *   If the HTTP requests fails or if the response is not proper.
    * @throws \GuzzleHttp\Exception\BadResponseException
    *   If response is not proper we throw this exception.
@@ -88,7 +88,7 @@ interface NewsroomMessengerInterface extends ContainerInjectionInterface {
    * @return bool
    *   False if the user is not subscribed, true if subscribed.
    *
-   * @throws \GuzzleHttp\Exception\GuzzleException
+   * @throws \GuzzleHttp\Exception\ServerException
    *   If the HTTP requests fails or if the response is not proper.
    * @throws \GuzzleHttp\Exception\BadResponseException
    *   If response is not proper we throw this exception.
