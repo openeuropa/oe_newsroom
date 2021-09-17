@@ -23,7 +23,7 @@ class MockNewsroomMessenger extends NewsroomMessenger {
   /**
    * The key of the state entry that contains the mocked api subscriptions.
    */
-  const STATE_KEY = 'oe_newsroom.mock_api_subscriptions';
+  public const STATE_KEY = 'oe_newsroom.mock_api_subscriptions';
 
   /**
    * The state service.
