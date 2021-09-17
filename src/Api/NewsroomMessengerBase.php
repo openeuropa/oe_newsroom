@@ -90,13 +90,6 @@ class NewsroomMessengerBase implements NewsroomMessengerInterface {
   protected $subscriptionUnsubscribeUrl;
 
   /**
-   * True if we have all the information which is needed to use the Api.
-   *
-   * @var bool
-   */
-  protected $newsroomApiUsable;
-
-  /**
    * Http client to send http messages.
    *
    * @var \GuzzleHttp\Client
@@ -112,10 +105,6 @@ class NewsroomMessengerBase implements NewsroomMessengerInterface {
   public function __construct(ClientInterface $httpClient) {
     $this->httpClient = $httpClient;
 
-    // These fields should be filled up and has no default value, without it
-    // it's not possible to communicate with newsroom.
-    $this->newsroomApiUsable = !empty($this->privateKey) && !empty($this->universe) && !empty($this->app);
-
     // Api endpoints.
     $this->topicUrl = "https://ec.europa.eu/newsroom/api/v1/topic";
     $this->subscriptionDataUrl = "https://ec.europa.eu/newsroom/api/v1/subscriptions";
@@ -130,6 +119,18 @@ class NewsroomMessengerBase implements NewsroomMessengerInterface {
     return new static(
       $container->get('http_client')
     );
+  }
+
+  /**
+   * Checks if the class is functional.
+   *
+   * @return bool
+   *   True if the class is functional.
+   */
+  protected function newsroomApiUsable() {
+    // These fields should be filled up and has no default value, without it
+    // it's not possible to communicate with newsroom.
+    return !empty($this->privateKey) && !empty($this->universe) && !empty($this->app);
   }
 
   /**
@@ -198,10 +199,10 @@ class NewsroomMessengerBase implements NewsroomMessengerInterface {
    */
   public function subscriptionServiceConfigured(bool $throw_error = TRUE): bool {
     if (!$throw_error) {
-      return $this->newsroomApiUsable;
+      return $this->newsroomApiUsable();
     }
 
-    if (!$this->newsroomApiUsable) {
+    if (!$this->newsroomApiUsable()) {
       throw new InvalidApiConfiguration($this->t('The subscription service is not configured at the moment. Please try again later.'));
     }
 
