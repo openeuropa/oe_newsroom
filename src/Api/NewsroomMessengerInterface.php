@@ -66,7 +66,9 @@ interface NewsroomMessengerInterface extends ContainerInjectionInterface {
    *   they are unsubscribing from these list(s).
    *
    * @return bool
-   *   True in case unsubscribe correctly, false otherwise.
+   *   True in case unsubscribe correctly, false otherwise. In case if there's
+   *   multiple distribution list provided, all must succeed to be returned
+   *   true.
    *
    * @throws \GuzzleHttp\Exception\ServerException
    *   If the HTTP requests fails or if the response is not proper.

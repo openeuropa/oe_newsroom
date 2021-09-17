@@ -291,21 +291,31 @@ class NewsroomMessengerBase implements NewsroomMessengerInterface {
   public function unsubscribe(string $email, array $svIds = []): bool {
     $this->subscriptionServiceConfigured();
 
-    $options = [
-      'query' => [
-        'user_email' => $this->normalized ? mb_strtolower($email) : $email,
-        'key' => $this->generateKey($email),
-        'app' => $this->app,
-        'sv_id' => implode(',', $svIds),
-      ],
-    ];
     try {
-      // Send the request.
-      $response = $this->httpClient->get($this->subscriptionUnsubscribeUrl, $options);
+      // The API does not support multiple unsubscription, so we need to call it
+      // one by one.
+      foreach ($svIds as $svId) {
+        $options = [
+          'query' => [
+            'user_email' => $this->normalized ? mb_strtolower($email) : $email,
+            'key' => $this->generateKey($email),
+            'app' => $this->app,
+            'sv_id' => $svId,
+          ],
+        ];
 
-      // If the unsubscription was success the API returns HTTP code 200.
-      // And a text message in the HTTP message body that we don't need now.
-      return $response->getStatusCode() === 200;
+        // Send the request.
+        $response = $this->httpClient->get($this->subscriptionUnsubscribeUrl, $options);
+
+        // If the unsubscription was success the API returns HTTP code 200.
+        // And a text message in the HTTP message body that we don't need now.
+        if ($response->getStatusCode() !== 200) {
+          return FALSE;
+        }
+      }
+
+      // If all were succeeded, we return true.
+      return TRUE;
     }
     catch (ClientException $e) {
       throw new BadResponseException($this->t('Invalid response returned by Newsroom API.')->render(), $e->getRequest(), $e->getResponse());
