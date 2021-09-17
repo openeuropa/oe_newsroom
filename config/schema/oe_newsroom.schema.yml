@@ -14,3 +14,11 @@ oe_newsroom.settings:
     app:
       type: string
       label: 'App ID from Newsroom'
+
+oe_newsroom.messenger:
+  type: config_object
+  label: 'Messenger config'
+  mapping:
+    class:
+      type: string
+      label: 'Messenger class'
