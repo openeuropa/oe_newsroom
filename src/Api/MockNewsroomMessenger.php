@@ -4,7 +4,10 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_newsroom\Api;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Site\Settings;
 use Drupal\Core\State\StateInterface;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -30,20 +33,30 @@ class MockNewsroomMessenger extends NewsroomMessenger {
   protected $state;
 
   /**
-   * Constructs a new NewsletterSubscriber object.
+   * Messenger constructor.
    *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   Configuration factory to automatically load configurations.
+   * @param \Drupal\Core\Site\Settings $settings
+   *   Required for API private key.
+   * @param \GuzzleHttp\ClientInterface $httpClient
+   *   Http client to send requests to the API.
    * @param \Drupal\Core\State\StateInterface $state
    *   The state service.
    */
-  public function __construct(StateInterface $state) {
+  public function __construct(ConfigFactoryInterface $configFactory, Settings $settings, ClientInterface $httpClient, StateInterface $state) {
     $this->state = $state;
+    parent::__construct($configFactory, $settings, $httpClient);
   }
 
   /**
-   * {@inheritdoc}
+   * {@inheritDoc}
    */
   public static function create(ContainerInterface $container) {
     return new static(
+      $container->get('config.factory'),
+      $container->get('settings'),
+      $container->get('http_client'),
       $container->get('state')
     );
   }
