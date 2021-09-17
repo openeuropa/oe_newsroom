@@ -8,9 +8,11 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\oe_newsroom\Exception\InvalidApiConfiguration;
 use Drupal\oe_newsroom\NewsroomMessengerFactoryInterface;
 use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\ServerException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -124,6 +126,19 @@ class UnsubscribeForm extends FormBase {
       else {
         $this->messenger()->addError($this->t('There was a problem.'));
       }
+    }
+    catch (InvalidApiConfiguration $e) {
+      $this->messenger()->addError($e->getMessage());
+    }
+    catch (ServerException $e) {
+      $this->logger('oe_newsroom_newsletter')->error('An error occurred with %code code and a %message message in the %file file %line line.\n\rTrace: %trace', [
+        '%code' => $e->getCode(),
+        '%message' => $e->getMessage(),
+        '%file' => $e->getFile(),
+        '%line' => $e->getLine(),
+        '%trace' => $e->getTraceAsString(),
+      ]);
+      $this->messenger()->addError($this->t('An error happened in the communication. If this persist, connect with the site owner.'));
     }
     catch (BadResponseException $e) {
       $this->messenger()->addError($e->getMessage());

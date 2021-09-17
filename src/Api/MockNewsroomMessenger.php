@@ -156,7 +156,7 @@ class MockNewsroomMessenger extends NewsroomMessenger {
       // When you try to unsubscribe a user that newsroom does not have at all,
       // you will get an internal error which will converted by our API to this.
       if (!isset($subscriptions[$this->universe][$svId][$email])) {
-        throw new BadResponseException($this->t('Invalid response returned by Newsroom API.'), NULL);
+        throw new BadResponseException($this->t('Invalid response returned by Newsroom API.')->render(), NULL);
       }
 
       $subscriptions[$this->universe][$svId][$email] = FALSE;

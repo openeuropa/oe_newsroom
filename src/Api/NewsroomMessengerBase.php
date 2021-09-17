@@ -155,19 +155,19 @@ class NewsroomMessengerBase implements NewsroomMessengerInterface {
   public function setConfiguration(string $privateKey, string $hashMethod, bool $normalized, string $universe, string $app) {
     $hash_method = mb_strtolower($hashMethod);
     if (empty($privateKey)) {
-      throw new \InvalidArgumentException($this->t("Private key can't be empty."));
+      throw new \InvalidArgumentException($this->t("Private key can't be empty.")->render());
     }
     if (empty($hash_method)) {
-      throw new \InvalidArgumentException($this->t("Hash method can't be empty."));
+      throw new \InvalidArgumentException($this->t("Hash method can't be empty.")->render());
     }
     elseif ($hash_method !== 'md5' && $hash_method !== 'sha256') {
-      throw new \InvalidArgumentException($this->t("Hash method must be md5 or sha256."));
+      throw new \InvalidArgumentException($this->t("Hash method must be md5 or sha256.")->render());
     }
     if (empty($universe)) {
-      throw new \InvalidArgumentException($this->t("Universe can't be empty."));
+      throw new \InvalidArgumentException($this->t("Universe can't be empty.")->render());
     }
     if (empty($app)) {
-      throw new \InvalidArgumentException($this->t("App can't be empty."));
+      throw new \InvalidArgumentException($this->t("App can't be empty.")->render());
     }
 
     $this->privateKey = $privateKey;
@@ -203,7 +203,7 @@ class NewsroomMessengerBase implements NewsroomMessengerInterface {
     }
 
     if (!$this->newsroomApiUsable()) {
-      throw new InvalidApiConfiguration($this->t('The subscription service is not configured at the moment. Please try again later.'));
+      throw new InvalidApiConfiguration($this->t('The subscription service is not configured at the moment. Please try again later.')->render());
     }
 
     return TRUE;
@@ -259,7 +259,7 @@ class NewsroomMessengerBase implements NewsroomMessengerInterface {
         $data = Json::decode($body);
 
         if (empty($data)) {
-          throw new BadResponseException($this->t('Empty response returned by Newsroom newsletter API.'), NULL);
+          throw new BadResponseException($this->t('Empty response returned by Newsroom newsletter API.')->render(), NULL);
         }
 
         $response = NULL;
@@ -275,14 +275,14 @@ class NewsroomMessengerBase implements NewsroomMessengerInterface {
           return $response;
         }
 
-        throw new BadResponseException($this->t('Newsroom API returned a response with HTTP status %status', ['%status' => $request->getStatusCode()]), NULL);
+        throw new BadResponseException($this->t('Newsroom API returned a response with HTTP status %status', ['%status' => $request->getStatusCode()])->render(), NULL);
       }
     }
     catch (ClientException $e) {
-      throw new BadResponseException($this->t('Invalid response returned by Newsroom API.'), $e->getRequest(), $e->getResponse());
+      throw new BadResponseException($this->t('Invalid response returned by Newsroom API.')->render(), $e->getRequest(), $e->getResponse());
     }
 
-    throw new BadResponseException($this->t('The subscription service is not available at the moment. Please try again later.'), NULL);
+    throw new BadResponseException($this->t('The subscription service is not available at the moment. Please try again later.')->render(), NULL);
   }
 
   /**
@@ -308,7 +308,7 @@ class NewsroomMessengerBase implements NewsroomMessengerInterface {
       return $response->getStatusCode() === 200;
     }
     catch (ClientException $e) {
-      throw new BadResponseException($this->t('Invalid response returned by Newsroom API.'), $e->getRequest(), $e->getResponse());
+      throw new BadResponseException($this->t('Invalid response returned by Newsroom API.')->render(), $e->getRequest(), $e->getResponse());
     }
   }
 
@@ -336,10 +336,10 @@ class NewsroomMessengerBase implements NewsroomMessengerInterface {
       }
     }
     catch (ClientException $e) {
-      throw new BadResponseException($this->t('Invalid response returned by Newsroom API.'), $e->getRequest(), $e->getResponse());
+      throw new BadResponseException($this->t('Invalid response returned by Newsroom API.')->render(), $e->getRequest(), $e->getResponse());
     }
 
-    throw new BadResponseException($this->t('The subscription service is not available at the moment. Please try again later.'), NULL);
+    throw new BadResponseException($this->t('The subscription service is not available at the moment. Please try again later.')->render(), NULL);
   }
 
 }

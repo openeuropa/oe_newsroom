@@ -12,6 +12,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
+use Drupal\oe_newsroom\Exception\InvalidApiConfiguration;
 use Drupal\oe_newsroom\NewsroomMessengerFactoryInterface;
 use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 use GuzzleHttp\Exception\BadResponseException;
@@ -219,6 +220,9 @@ class SubscribeForm extends FormBase {
     catch (\InvalidArgumentException $e) {
       $this->messenger()->addError($e->getMessage());
     }
+    catch (InvalidApiConfiguration $e) {
+      $this->messenger()->addError($e->getMessage());
+    }
     catch (ServerException $e) {
       $this->logger('oe_newsroom_newsletter')->error('An error occurred with %code code and a %message message in the %file file %line line.\n\rTrace: %trace', [
         '%code' => $e->getCode(),
@@ -227,7 +231,7 @@ class SubscribeForm extends FormBase {
         '%line' => $e->getLine(),
         '%trace' => $e->getTraceAsString(),
       ]);
-      $this->messenger()->addError('An error happened in the communication. If this persist, connect with the site owner.');
+      $this->messenger()->addError($this->t('An error happened in the communication. If this persist, connect with the site owner.'));
     }
     catch (BadResponseException $e) {
       $this->messenger()->addError($e->getMessage());
