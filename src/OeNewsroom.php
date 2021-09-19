@@ -11,6 +11,6 @@ namespace Drupal\oe_newsroom;
  */
 class OeNewsroom {
 
-  public const OE_NEWSLETTER_CONFIG_VAR_NAME = 'oe_newsroom.settings';
+  public const CONFIG_NAME = 'oe_newsroom.settings';
 
 }

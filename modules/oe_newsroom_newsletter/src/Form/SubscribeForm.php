@@ -68,7 +68,7 @@ class SubscribeForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $currentUser = $this->currentUser();
-    $config = $this->config(OeNewsroomNewsletter::OE_NEWSLETTER_CONFIG_VAR_NAME);
+    $config = $this->config(OeNewsroomNewsletter::CONFIG_NAME);
 
     // Choose the proper language according to the user setting or interface
     // settings.
@@ -242,7 +242,7 @@ class SubscribeForm extends FormBase {
    * {@inheritDoc}
    */
   protected function subscriptionMessage(array $subscription): void {
-    $config = $this->config(OeNewsroomNewsletter::OE_NEWSLETTER_CONFIG_VAR_NAME);
+    $config = $this->config(OeNewsroomNewsletter::CONFIG_NAME);
 
     if ($subscription['isNewSubscription'] === TRUE) {
       $success_message = $config->get('success_subscription_text');

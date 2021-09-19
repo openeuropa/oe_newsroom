@@ -55,7 +55,7 @@ class UnsubscribeForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $currentUser = $this->currentUser();
-    $config = $this->config(OeNewsroomNewsletter::OE_NEWSLETTER_CONFIG_VAR_NAME);
+    $config = $this->config(OeNewsroomNewsletter::CONFIG_NAME);
 
     // Add wrapper for ajax.
     // @todo I think this will break if somebody puts multiple unsubscription

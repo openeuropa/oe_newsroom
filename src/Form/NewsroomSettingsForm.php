@@ -18,7 +18,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
    */
   protected function getEditableConfigNames() {
     return [
-      OeNewsroom::OE_NEWSLETTER_CONFIG_VAR_NAME,
+      OeNewsroom::CONFIG_NAME,
     ];
   }
 
@@ -33,7 +33,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->config(OeNewsroom::OE_NEWSLETTER_CONFIG_VAR_NAME);
+    $config = $this->config(OeNewsroom::CONFIG_NAME);
 
     $form['universe'] = [
       '#type' => 'textfield',
@@ -79,7 +79,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
 
-    $this->config(OeNewsroom::OE_NEWSLETTER_CONFIG_VAR_NAME)
+    $this->config(OeNewsroom::CONFIG_NAME)
       ->set('universe', $form_state->getValue('universe'))
       ->set('app', $form_state->getValue('app'))
       ->set('hash_method', $form_state->getValue('hash_method'))
