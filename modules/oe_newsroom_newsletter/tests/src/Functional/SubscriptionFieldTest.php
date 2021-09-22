@@ -103,6 +103,7 @@ class SubscriptionFieldTest extends BrowserTestBase {
       'type' => $node_type->id(),
       'title' => 'Newsletter 1',
     ]);
+    $this->drupalLogout();
     // Subscribe form will not be displayed.
     $this->drupalGet($node->toUrl());
     $this->assertSession()->pageTextContains('Newsletter 1');
@@ -112,12 +113,15 @@ class SubscriptionFieldTest extends BrowserTestBase {
     $this->assertSession()->buttonNotExists('Subscribe');
 
     // Enable newsletter subscriptions.
+    $this->drupalLogin($user);
     $this->drupalGet("node/" . $node->id() . "/edit");
     $this->getSession()->getPage()->checkField('Enable newsletter subscriptions');
     $this->getSession()->getPage()->pressButton('Save');
     $this->assertSession()->pageTextContains($node_type->id() . ' Newsletter 1 has been updated.');
+    $this->drupalLogout();
 
     // Subscribe to the newsletter.
+    $this->drupalGet($node->toUrl());
     $this->assertSession()->pageTextContains('Newsletter 1');
     $this->assertSession()->pageTextContains('This is the introduction text.');
     $this->getSession()->getPage()->fillField('Your e-mail', 'mail@example.com');
@@ -126,12 +130,14 @@ class SubscriptionFieldTest extends BrowserTestBase {
     $this->assertSession()->pageTextContains('Thanks for Signing Up to the service: Test Newsletter Service');
 
     // Change a field type to display unsubscribe form.
+    $this->drupalLogin($user);
     $edit = [
       'fields[newsletter][type]' => 'oe_newsroom_newsletter_unsubscribe_form',
     ];
     $this->drupalGet('/admin/structure/types/manage/' . $node_type->id() . '/display');
     $this->submitForm($edit, 'Save');
     $this->assertSession()->fieldValueEquals('fields[newsletter][type]', 'oe_newsroom_newsletter_unsubscribe_form');
+    $this->drupalLogout();
 
     // Unsubscribe from the newsletter.
     $this->drupalGet($node->toUrl());
@@ -141,12 +147,15 @@ class SubscriptionFieldTest extends BrowserTestBase {
     $this->assertSession()->pageTextContains('Successfully unsubscribed!');
 
     // Disable newsletter subscriptions.
+    $this->drupalLogin($user);
     $this->drupalGet("node/" . $node->id() . "/edit");
     $this->getSession()->getPage()->uncheckField('Enable newsletter subscriptions');
     $this->getSession()->getPage()->pressButton('Save');
     $this->assertSession()->pageTextContains($node_type->id() . ' Newsletter 1 has been updated.');
+    $this->drupalLogout();
 
     // Unsubscribe form will not be displayed.
+    $this->drupalGet($node->toUrl());
     $this->assertSession()->pageTextContains('Newsletter 1');
     $this->assertSession()->pageTextNotContains('Your e-mail');
     $this->assertSession()->buttonNotExists('Unsubscribe');
