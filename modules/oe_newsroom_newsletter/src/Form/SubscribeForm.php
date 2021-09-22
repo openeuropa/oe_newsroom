@@ -156,7 +156,7 @@ class SubscribeForm extends FormBase {
     if (!empty($config->get('newsletters_language'))) {
       $options = array_intersect_key($options, array_flip($config->get('newsletters_language')));
     }
-    if (array_key_exists($selected_language, $options)) {
+    if (!array_key_exists($selected_language, $options)) {
       $selected_language = $config->get('newsletters_language_default');
     }
     if (count($options) > 1) {

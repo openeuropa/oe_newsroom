@@ -97,6 +97,22 @@ class NewsletterConfigurationLangTest extends BrowserTestBase {
     $this->drupalGet('newsletter/subscribe');
     $this->assertSession()->optionExists('Select the language of your received newsletter', 'English');
     $this->assertSession()->optionExists('Select the language of your received newsletter', 'German');
+
+    $this->drupalLogin($this->user);
+    $this->drupalGet('admin/config/system/newsroom-settings/newsletter');
+    $this->getSession()->getPage()->selectFieldOption('Select the selectable languages for newsletter', 'German');
+    $this->getSession()->getPage()->selectFieldOption('Select the default language for newsletter', 'German');
+    $this->getSession()->getPage()->pressButton('Save configuration');
+    $this->assertSession()->pageTextContains('The configuration options have been saved.');
+    $this->drupalLogout();
+
+    // @todo Fix form cache.
+    drupal_flush_all_caches();
+
+    // Check if German language is set on subscribe form.
+    $this->drupalGet('newsletter/subscribe');
+    $this->assertSession()->pageTextNotContains('Select the language of your received newsletter');
+    $this->assertSession()->hiddenFieldValueEquals('newsletters_language', 'de');
   }
 
 }
