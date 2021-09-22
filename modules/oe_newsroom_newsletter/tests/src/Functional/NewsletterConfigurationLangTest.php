@@ -45,9 +45,10 @@ class NewsletterConfigurationLangTest extends BrowserTestBase {
   protected function setUp(): void {
     parent::setUp();
 
+    $this->setApiPrivateKey();
     $this->enableMock();
     $this->configureNewsroom();
-    $this->configureNewsletter();
+    $this->configureMultipleNewsletters();
     $this->grantPermissions(Role::load(Role::ANONYMOUS_ID), ['manage own newsletter subscription']);
     $this->user = $this->createUser([
       'manage newsroom newsletter settings',
@@ -84,16 +85,17 @@ class NewsletterConfigurationLangTest extends BrowserTestBase {
 
     // Add German translation.
     $this->getSession()->getPage()->clickLink('Add');
-    $this->getSession()->getPage()->fillField('edit-translation-config-names-oe-newsroom-newslettersettings-distribution-list-0-name', 'distro1 DE');
+    $this->getSession()->getPage()->fillField('edit-translation-config-names-oe-newsroom-newslettersettings-distribution-list-0-name', 'Newsletter collection 1 DE');
+    $this->getSession()->getPage()->fillField('edit-translation-config-names-oe-newsroom-newslettersettings-distribution-list-1-name', 'Newsletter 2 DE');
     $this->getSession()->getPage()->fillField('edit-translation-config-names-oe-newsroom-newslettersettings-intro-text', 'This is the introduction text. DE');
-    $this->getSession()->getPage()->fillField('edit-translation-config-names-oe-newsroom-newslettersettings-privacy-uri', '/privacy-uri_de');
+    $this->getSession()->getPage()->fillField('edit-translation-config-names-oe-newsroom-newslettersettings-privacy-uri', '/de/privacy-uri');
     $this->getSession()->getPage()->fillField('edit-translation-config-names-oe-newsroom-newslettersettings-success-subscription-text', 'Success. Your email address have been subscribed to the newsletter. DE');
     $this->getSession()->getPage()->fillField('edit-translation-config-names-oe-newsroom-newslettersettings-already-registered-text', 'Failure. Your email address was already subscribed to the newsletter. DE');
     $this->getSession()->getPage()->pressButton('Save translation');
     $this->assertSession()->pageTextContains('Successfully saved German translation.');
     $this->drupalLogout();
 
-    // Check if both languages are displayed on subscribe form.
+    // Test if both languages are displayed on subscribe form.
     $this->drupalGet('newsletter/subscribe');
     $this->assertSession()->optionExists('Select the language of your received newsletter', 'English');
     $this->assertSession()->optionExists('Select the language of your received newsletter', 'German');
@@ -109,10 +111,30 @@ class NewsletterConfigurationLangTest extends BrowserTestBase {
     // @todo Fix form cache.
     drupal_flush_all_caches();
 
-    // Check if German language is set on subscribe form.
+    // Test if German language is set on subscribe form.
     $this->drupalGet('newsletter/subscribe');
     $this->assertSession()->pageTextNotContains('Select the language of your received newsletter');
     $this->assertSession()->hiddenFieldValueEquals('newsletters_language', 'de');
+
+    // Test German translations on subscribe form.
+    $this->drupalGet('de/newsletter/subscribe');
+    $this->assertSession()->pageTextContains('This is the introduction text. DE');
+    $this->getSession()->getPage()->checkField('Newsletter collection 1 DE');
+    $this->getSession()->getPage()->checkField('Newsletter 2 DE');
+    $this->getSession()->getPage()->hasLink('/de/privacy-uri');
+    $this->getSession()->getPage()->fillField('Your e-mail', 'de@example.com');
+    $this->getSession()->getPage()->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
+    $this->getSession()->getPage()->pressButton('Subscribe');
+    $this->assertSession()->pageTextContains('Success. Your email address have been subscribed to the newsletter. DE');
+    $this->drupalGet('de/newsletter/subscribe');
+    $this->getSession()->getPage()->checkField('Newsletter collection 1 DE');
+    $this->getSession()->getPage()->checkField('Newsletter 2 DE');
+    $this->getSession()->getPage()->hasLink('/de/privacy-uri');
+    $this->getSession()->getPage()->fillField('Your e-mail', 'de@example.com');
+    $this->getSession()->getPage()->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
+    $this->getSession()->getPage()->pressButton('Subscribe');
+    $this->assertSession()->pageTextContains('Failure. Your email address was already subscribed to the newsletter. DE');
+
   }
 
 }
