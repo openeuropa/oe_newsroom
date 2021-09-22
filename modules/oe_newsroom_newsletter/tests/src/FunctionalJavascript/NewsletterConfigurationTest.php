@@ -51,6 +51,7 @@ class NewsletterConfigurationTest extends WebDriverTestBase {
       'manage newsroom newsletter settings',
     ]);
     $this->drupalLogin($user);
+    // Configure newsletter.
     $this->drupalGet('admin/config/system/newsroom-settings/newsletter');
     $this->assertSession()->elementAttributeContains('css', 'textarea#edit-intro-text', 'required', 'required');
     $this->assertSession()->elementAttributeContains('css', 'input#edit-privacy-uri', 'required', 'required');
@@ -62,6 +63,7 @@ class NewsletterConfigurationTest extends WebDriverTestBase {
     $this->assertSession()->pageTextContains('The configuration options have been saved.');
 
     $this->drupalLogout();
+    // Test missing e-mail address and unchecked privacy statement.
     $this->drupalGet('newsletter/subscribe');
     $this->assertSession()->pageTextContains('Example introduction.');
     $this->assertSession()->linkByHrefExists('/privacy-uri');
@@ -72,15 +74,21 @@ class NewsletterConfigurationTest extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertSession()->pageTextContains('Your e-mail field is required.');
     $this->assertSession()->pageTextContains('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement field is required.');
+
+    // Test invalid e-mail address.
     $this->getSession()->getPage()->fillField('Your e-mail', '@example.com');
     $this->getSession()->getPage()->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
     $this->getSession()->getPage()->pressButton('Subscribe');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertSession()->pageTextContains('The email address @example.com is not valid.');
+
+    // Test missing private key.
     $this->getSession()->getPage()->fillField('Your e-mail', 'mail@example.com');
     $this->getSession()->getPage()->pressButton('Subscribe');
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertSession()->pageTextContains('The subscription service is not configured at the moment. Please try again later.');
+
+    // Test successful subscription doesn't show the fields.
     $this->setApiPrivateKey();
     $this->drupalGet('newsletter/subscribe');
     $this->getSession()->getPage()->fillField('Your e-mail', 'mail@example.com');
@@ -92,13 +100,7 @@ class NewsletterConfigurationTest extends WebDriverTestBase {
     $this->assertSession()->pageTextNotContains('Your e-mail');
     $this->assertSession()->pageTextNotContains('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
 
-    $this->drupalGet('newsletter/subscribe');
-    $this->getSession()->getPage()->fillField('Your e-mail', 'mail@example.com');
-    $this->getSession()->getPage()->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
-    $this->getSession()->getPage()->pressButton('Subscribe');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->pageTextContains('A subscription for this service is already registered for this email address');
-
+    // Set custom success/failure subscription messages.
     $this->drupalLogin($user);
     $this->drupalGet('admin/config/system/newsroom-settings/newsletter');
     $this->getSession()->getPage()->fillField('Message in case of successful subscription', 'Success. Your email address have been subscribed to the newsletter.');
@@ -107,7 +109,7 @@ class NewsletterConfigurationTest extends WebDriverTestBase {
     $this->assertSession()->pageTextContains('The configuration options have been saved.');
 
     $this->drupalLogout();
-    // Subscribe after setting custom success/failure messages.
+    // Display custom failure message.
     $this->drupalGet('newsletter/subscribe');
     $this->getSession()->getPage()->fillField('Your e-mail', 'mail@example.com');
     $this->getSession()->getPage()->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
@@ -115,14 +117,9 @@ class NewsletterConfigurationTest extends WebDriverTestBase {
     $this->assertSession()->assertWaitOnAjaxRequest();
     $this->assertSession()->pageTextContains('Failure. Your email address was already subscribed to the newsletter.');
 
-    $this->drupalGet('newsletter/unsubscribe');
-    $this->getSession()->getPage()->fillField('Your e-mail', 'mail@example.com');
-    $this->getSession()->getPage()->pressButton('Unsubscribe');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->pageTextContains('Successfully unsubscribed!');
-
+    // Display custom success message.
     $this->drupalGet('newsletter/subscribe');
-    $this->getSession()->getPage()->fillField('Your e-mail', 'mail@example.com');
+    $this->getSession()->getPage()->fillField('Your e-mail', 'mail2@example.com');
     $this->getSession()->getPage()->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
     $this->getSession()->getPage()->pressButton('Subscribe');
     $this->assertSession()->assertWaitOnAjaxRequest();
