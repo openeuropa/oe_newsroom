@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Drupal\oe_newsroom\Api;
+namespace Drupal\oe_newsroom_newsletter\Api;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Site\Settings;
@@ -16,6 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * This class using the configuration page to configure itself automatically.
  *
  * @package Drupal\oe_newsroom\Api
+ * @internal
  */
 class NewsroomMessenger extends NewsroomMessengerBase {
 

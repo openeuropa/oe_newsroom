@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Drupal\oe_newsroom\Api;
+namespace Drupal\oe_newsroom_newsletter\Api;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -21,6 +21,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @package Drupal\oe_newsroom\Api
  *
  * @SuppressWarnings(PHPMD.TooManyFields)
+ * @internal
  */
 class NewsroomMessengerBase implements NewsroomMessengerInterface {
 

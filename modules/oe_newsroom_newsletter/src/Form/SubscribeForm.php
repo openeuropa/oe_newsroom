@@ -11,23 +11,35 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Link;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\oe_newsroom\Exception\InvalidApiConfiguration;
-use Drupal\oe_newsroom\NewsroomMessengerFactoryInterface;
+use Drupal\oe_newsroom_newsletter\Api\NewsroomMessenger;
+use Drupal\oe_newsroom_newsletter\Api\NewsroomMessengerInterface;
 use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ServerException;
+use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Subscribe Form.
+ *
+ * Arguments:
+ *  - A distribution list array
+ *    ex. array(0 => array('sv_id' => 20, 'name' => 'XY Newsletter'))
+ *  - A selectable list array of languages
+ *    ex. array(0 => 'de', 1 => 'en')
+ *  - A default language string
+ *    ex. 'en'
  */
 class SubscribeForm extends FormBase {
 
   /**
    * API for newsroom calls.
    *
-   * @var \Drupal\oe_newsroom\Api\NewsroomMessengerInterface
+   * @var \Drupal\oe_newsroom_newsletter\Api\NewsroomMessengerInterface
    */
   protected $newsroomMessenger;
 
@@ -41,8 +53,8 @@ class SubscribeForm extends FormBase {
   /**
    * {@inheritDoc}
    */
-  public function __construct(NewsroomMessengerFactoryInterface $newsroomMessengerFactory, LanguageManagerInterface $languageManager) {
-    $this->newsroomMessenger = $newsroomMessengerFactory->get();
+  public function __construct(NewsroomMessengerInterface $newsroomMessenger, LanguageManagerInterface $languageManager) {
+    $this->newsroomMessenger = $newsroomMessenger;
     $this->languageManager = $languageManager;
   }
 
@@ -51,7 +63,7 @@ class SubscribeForm extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('oe_newsroom.messenger_factory'),
+      NewsroomMessenger::create($container),
       $container->get('language_manager')
     );
   }
@@ -64,9 +76,39 @@ class SubscribeForm extends FormBase {
   }
 
   /**
+   * Gives back whatever the user has access to the for or not.
+   *
+   * @param \Drupal\Core\Session\AccountInterface|null $account
+   *   A user to check, in case of null the current user will be checked.
+   *
+   * @return bool
+   *   True if user has access otherwise false.
+   */
+  public function access(AccountInterface $account = NULL): bool {
+    if ($account === NULL) {
+      $account = $this->currentUser();
+    }
+
+    return $account->hasPermission('subscribe to newsletter');
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    if (!$this->access()) {
+      throw new AccessDeniedHttpException();
+    }
+
+    // Read some values from the argument.
+    $distribution_list = $form_state->getBuildInfo()['args'][0] ?? [];
+    $newsletters_language = $form_state->getBuildInfo()['args'][1] ?? [];
+    $newsletters_language_default = $form_state->getBuildInfo()['args'][2] ?? '';
+
+    if (empty($distribution_list)) {
+      throw new InvalidArgumentException($this->t('No distribution list is selected')->render());
+    }
+
     $currentUser = $this->currentUser();
     $config = $this->config(OeNewsroomNewsletter::OE_NEWSLETTER_CONFIG_VAR_NAME);
 
@@ -79,7 +121,7 @@ class SubscribeForm extends FormBase {
 
     $path = str_replace('[lang_code]', str_replace('pt-pt', 'pt', $ui_language), $config->get('privacy_uri'));
     if (empty($path)) {
-      $this->messenger()->addWarning($this->t('Subscription form can by only used after privacy url is set.'));
+      $this->messenger()->addWarning($this->t('Subscription form can be only used after privacy url is set.'));
       return [
         '#markup' => '',
       ];
@@ -125,7 +167,7 @@ class SubscribeForm extends FormBase {
       '#default_value' => $currentUser->isAnonymous() ? '' : $currentUser->getEmail(),
       '#required' => TRUE,
     ];
-    $distribution_lists = $config->get('distribution_list');
+    $distribution_lists = $distribution_list;
     $distribution_list_options = [];
     foreach ($distribution_lists as $distribution_list) {
       $distribution_list_options[$distribution_list['sv_id']] = $distribution_list['name'];
@@ -153,11 +195,11 @@ class SubscribeForm extends FormBase {
     foreach ($languages as $language) {
       $options[$language->getId()] = $language->getName();
     }
-    if (!empty($config->get('newsletters_language'))) {
-      $options = array_intersect_key($options, array_flip($config->get('newsletters_language')));
+    if (!empty($newsletters_language)) {
+      $options = array_intersect_key($options, array_flip($newsletters_language));
     }
     if (array_key_exists($selected_language, $options)) {
-      $selected_language = $config->get('newsletters_language_default');
+      $selected_language = $newsletters_language_default;
     }
     if (count($options) > 1) {
       $form['newsletters_language'] = [
@@ -217,7 +259,7 @@ class SubscribeForm extends FormBase {
         $this->subscriptionMessage($response);
       }
     }
-    catch (\InvalidArgumentException $e) {
+    catch (InvalidArgumentException $e) {
       $this->messenger()->addError($e->getMessage());
     }
     catch (InvalidApiConfiguration $e) {

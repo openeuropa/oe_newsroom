@@ -36,41 +36,6 @@ class NewsroomSettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config(OeNewsroomNewsletter::OE_NEWSLETTER_CONFIG_VAR_NAME);
 
-    $form['newsletters_language'] = [
-      '#type' => 'language_select',
-      '#title' => $this->t('Select the selectable languages for newsletter'),
-      '#description' => $this->t('Empty = all possible languages. For unilingual distribution lists select the correct language. If one language is selected, this will remain hidden from the user on the (un)subscribe from. Only site languages can be chosen as the content is normally pulled from the site.'),
-      '#default_value' => $config->get('newsletters_language'),
-      '#multiple' => TRUE,
-    ];
-    $form['newsletters_language_default'] = [
-      '#type' => 'language_select',
-      '#title' => $this->t('Select the default language for newsletter'),
-      '#description' => $this->t("This language will be selected if the user's preferred language is not selectable."),
-      '#default_value' => $config->get('newsletters_language_default'),
-    ];
-    $form['distribution_list'] = [
-      '#type' => 'multivalue',
-      '#title' => $this->t('Newsletter distribution lists'),
-      '#description' => $this->t("If there's a single choice here, it will remain hidden on the (un)subscription form."),
-      '#cardinality' => MultiValue::CARDINALITY_UNLIMITED,
-      '#required' => TRUE,
-      'sv_id' => [
-        '#type' => 'textfield',
-        '#title' => $this->t('Sv IDs'),
-        '#description' => $this->t('ID(s) of the newsletter/distribution list'),
-        '#maxlength' => 128,
-        '#size' => 64,
-      ],
-      'name' => [
-        '#type' => 'textfield',
-        '#title' => $this->t('Name of the distribution list'),
-        '#description' => $this->t('This is used to help identify for the user which list it want to subscribe.'),
-        '#maxlength' => 128,
-        '#size' => 64,
-      ],
-      '#default_value' => $config->get('distribution_list'),
-    ];
     $form['intro_text'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Introduction text'),
@@ -134,8 +99,6 @@ class NewsroomSettingsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
-    // The language_select field is buggy, it doesn't give back empty value.
-    $user_input = $form_state->getUserInput();
 
     $this->config(OeNewsroomNewsletter::OE_NEWSLETTER_CONFIG_VAR_NAME)
       ->set('intro_text', $form_state->getValue('intro_text'))
@@ -143,9 +106,6 @@ class NewsroomSettingsForm extends ConfigFormBase {
       ->set('already_registered_text', $form_state->getValue('already_registered_text'))
       ->set('privacy_uri', $form_state->getValue('privacy_uri'))
       ->set('link_classes', $form_state->getValue('link_classes'))
-      ->set('newsletters_language', $user_input['newsletters_language'] ? $form_state->getValue('newsletters_language') : [])
-      ->set('newsletters_language_default', $form_state->getValue('newsletters_language_default'))
-      ->set('distribution_list', $form_state->getValue('distribution_list'))
       ->save();
   }
 

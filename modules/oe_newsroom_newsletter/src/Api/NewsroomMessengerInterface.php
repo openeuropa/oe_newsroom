@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Drupal\oe_newsroom\Api;
+namespace Drupal\oe_newsroom_newsletter\Api;
 
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 
@@ -10,6 +10,7 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
  * Interface for newsroom messenger api class.
  *
  * @package Drupal\oe_newsroom\Api
+ * @internal
  */
 interface NewsroomMessengerInterface extends ContainerInjectionInterface {
 

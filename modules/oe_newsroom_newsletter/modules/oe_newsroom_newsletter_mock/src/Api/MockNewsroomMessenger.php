@@ -2,11 +2,12 @@
 
 declare(strict_types = 1);
 
-namespace Drupal\oe_newsroom\Api;
+namespace Drupal\oe_newsroom_newsletter_mock\Api;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\State\StateInterface;
+use Drupal\oe_newsroom_newsletter\Api\NewsroomMessenger;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
