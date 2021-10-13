@@ -205,10 +205,10 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
       // Select the first to returned as the normal API class, but the
       // webservice marks all as subscribed, so let's mark it here too.
       if (empty($subscriptions[$universe][$svId][$email]['subscribed'])) {
-        $current_subs[] = $this->generateSubscriptionArray($universe, $email, $svId, $language, TRUE);
+        $current_subs[] = $this->generateSubscriptionArray($universe, $email, $svId, $language, FALSE);
       }
       else {
-        $current_subs[] = $this->generateSubscriptionArray($universe, $email, $svId, $language, FALSE);
+        $current_subs[] = $this->generateSubscriptionArray($universe, $email, $svId, $language, TRUE);
       }
 
       $subscriptions[$universe][$svId][$email] = [
