@@ -99,7 +99,7 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
    * @return array
    *   Generated subscription array, similar to newsrooms one.
    */
-  protected function generateSubscriptionArray(string $universe, string $email, string $sv_id, string $language_code, bool $isNewSubscription) {
+  protected function generateSubscriptionArray(string $universe, string $email, string $sv_id, string $language_code, bool $isNewSubscription): array {
     return [
       'responseType' => 'json',
       'email' => $email,
@@ -205,10 +205,10 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
       // Select the first to returned as the normal API class, but the
       // webservice marks all as subscribed, so let's mark it here too.
       if (empty($subscriptions[$universe][$svId][$email]['subscribed'])) {
-        $current_subs[] = $this->generateSubscriptionArray($universe, $email, $svId, $language, TRUE);
+        $current_subs[] = $this->generateSubscriptionArray($universe, $email, (string) $svId, $language, FALSE);
       }
       else {
-        $current_subs[] = $this->generateSubscriptionArray($universe, $email, $svId, $language, FALSE);
+        $current_subs[] = $this->generateSubscriptionArray($universe, $email, (string) $svId, $language, TRUE);
       }
 
       $subscriptions[$universe][$svId][$email] = [
