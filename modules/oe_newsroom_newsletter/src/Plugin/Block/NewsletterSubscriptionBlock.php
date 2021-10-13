@@ -4,10 +4,12 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_newsroom_newsletter\Plugin\Block;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\multivalue_form_element\Element\MultiValue;
 use Drupal\oe_newsroom_newsletter\Form\SubscribeForm;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -115,6 +117,13 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
    */
   public function build() {
     return $this->formBuilder->getForm(SubscribeForm::class, $this->configuration['distribution_list'], $this->configuration['newsletters_language'], $this->configuration['newsletters_language_default']);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  protected function blockAccess(AccountInterface $account) {
+    return AccessResult::allowedIfHasPermission($account, 'subscribe to newsletter');
   }
 
 }

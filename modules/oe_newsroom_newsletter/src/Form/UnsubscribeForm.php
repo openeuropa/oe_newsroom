@@ -13,11 +13,9 @@ use Drupal\oe_newsroom\Exception\InvalidApiConfiguration;
 use Drupal\oe_newsroom\NewsroomMessengerFactoryInterface;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomMessenger;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomMessengerInterface;
-use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ServerException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Subscribe Form.
@@ -80,7 +78,7 @@ class UnsubscribeForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     if (!$this->access()) {
-      throw new AccessDeniedHttpException();
+      return [];
     }
 
     // Read some values from the argument.

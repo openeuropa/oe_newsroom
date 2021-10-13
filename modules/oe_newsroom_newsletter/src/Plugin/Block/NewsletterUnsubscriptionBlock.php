@@ -4,10 +4,12 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_newsroom_newsletter\Plugin\Block;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\multivalue_form_element\Element\MultiValue;
 use Drupal\oe_newsroom_newsletter\Form\UnsubscribeForm;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -97,6 +99,13 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
    */
   public function build() {
     return $this->formBuilder->getForm(UnsubscribeForm::class, $this->configuration['distribution_list']);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  protected function blockAccess(AccountInterface $account) {
+    return AccessResult::allowedIfHasPermission($account, 'unsubscribe from newsletter');
   }
 
 }

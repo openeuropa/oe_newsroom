@@ -21,7 +21,6 @@ use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ServerException;
 use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Subscribe Form.
@@ -97,7 +96,7 @@ class SubscribeForm extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     if (!$this->access()) {
-      throw new AccessDeniedHttpException();
+      return [];
     }
 
     // Read some values from the argument.
