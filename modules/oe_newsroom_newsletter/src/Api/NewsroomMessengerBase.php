@@ -18,7 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * This class needs to be manually configured. It's a good choice when you need
  * to have a different setting then the configuration has.
  *
- * @package Drupal\oe_newsroom\Api
+ * @package Drupal\oe_newsroom_newsletter\Api
  *
  * @SuppressWarnings(PHPMD.TooManyFields)
  * @internal

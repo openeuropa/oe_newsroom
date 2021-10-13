@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * This class using the configuration page to configure itself automatically.
  *
- * @package Drupal\oe_newsroom\Api
+ * @package Drupal\oe_newsroom_newsletter\Api
  * @internal
  */
 class NewsroomMessenger extends NewsroomMessengerBase {

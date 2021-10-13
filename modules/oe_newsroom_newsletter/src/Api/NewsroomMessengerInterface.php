@@ -9,7 +9,7 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 /**
  * Interface for newsroom messenger api class.
  *
- * @package Drupal\oe_newsroom\Api
+ * @package Drupal\oe_newsroom_newsletter\Api
  * @internal
  */
 interface NewsroomMessengerInterface extends ContainerInjectionInterface {
