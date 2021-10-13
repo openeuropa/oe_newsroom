@@ -256,15 +256,14 @@ class NewsroomMessengerBase implements NewsroomMessengerInterface {
       // Send the request.
       $request = $this->httpClient->request('POST', $this->subscriptionSubscribeUrl, ['json' => $input]);
       if ($request->getStatusCode() === 200) {
-        $body = $request->getBody()->getContents();
-        $data = Json::decode($body);
+        $data = Json::decode($request->getBody()->getContents());
 
         if (empty($data)) {
           throw new BadResponseException($this->t('Empty response returned by Newsroom newsletter API.')->render(), NULL);
         }
 
         $response = NULL;
-        // @todo Support multiple distribution list.
+        // @todo Support multiple distribution list in a better way.
         foreach ($data as $subscription_item) {
           // This will fetch only the first item found.
           if (in_array($subscription_item['newsletterId'], $svIds, FALSE)) {
@@ -276,7 +275,7 @@ class NewsroomMessengerBase implements NewsroomMessengerInterface {
           return $response;
         }
 
-        throw new BadResponseException($this->t('Newsroom API returned a response with HTTP status %status', ['%status' => $request->getStatusCode()])->render(), NULL);
+        throw new BadResponseException($this->t('Newsroom API returned a response with HTTP status %status but subscription item not found in it.', ['%status' => $request->getStatusCode()])->render(), NULL);
       }
     }
     catch (ClientException $e) {
@@ -342,7 +341,7 @@ class NewsroomMessengerBase implements NewsroomMessengerInterface {
     try {
       $response = $this->httpClient->get($this->subscriptionDataUrl, $options);
       if ($response->getStatusCode() === 200) {
-        $subscriptions = Json::decode((string) $response->getBody()->getContents());
+        $subscriptions = Json::decode($response->getBody()->getContents());
         return !($subscriptions === NULL || count($subscriptions) === 0);
       }
     }
