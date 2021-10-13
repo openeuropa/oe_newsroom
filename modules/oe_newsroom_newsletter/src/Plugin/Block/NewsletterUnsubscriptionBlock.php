@@ -4,9 +4,13 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_newsroom_newsletter\Plugin\Block;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Form\FormBuilderInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\multivalue_form_element\Element\MultiValue;
 use Drupal\oe_newsroom_newsletter\Form\UnsubscribeForm;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -51,8 +55,57 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
   /**
    * {@inheritdoc}
    */
+  public function blockForm($form, FormStateInterface $form_state) {
+    $form = parent::blockForm($form, $form_state);
+
+    $config = $this->getConfiguration();
+
+    $form['distribution_list'] = [
+      '#type' => 'multivalue',
+      '#title' => $this->t('Newsletter distribution lists'),
+      '#description' => $this->t("If there's a single choice here, it will remain hidden on the (un)subscription form."),
+      '#cardinality' => MultiValue::CARDINALITY_UNLIMITED,
+      '#required' => TRUE,
+      'sv_id' => [
+        '#type' => 'textfield',
+        '#title' => $this->t('Sv IDs'),
+        '#description' => $this->t('ID(s) of the newsletter/distribution list'),
+        '#maxlength' => 128,
+        '#size' => 64,
+      ],
+      'name' => [
+        '#type' => 'textfield',
+        '#title' => $this->t('Name of the distribution list'),
+        '#description' => $this->t('This is used to help identify for the user which list it want to subscribe.'),
+        '#maxlength' => 128,
+        '#size' => 64,
+      ],
+      '#default_value' => $config['distribution_list'] ?? [],
+    ];
+
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function blockSubmit($form, FormStateInterface $form_state) {
+    parent::blockSubmit($form, $form_state);
+    $this->configuration['distribution_list'] = $form_state->getValue('distribution_list');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function build() {
-    return $this->formBuilder->getForm(UnsubscribeForm::class);
+    return $this->formBuilder->getForm(UnsubscribeForm::class, $this->configuration['distribution_list']);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  protected function blockAccess(AccountInterface $account) {
+    return AccessResult::allowedIfHasPermission($account, 'unsubscribe from newsletter');
   }
 
 }

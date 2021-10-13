@@ -8,30 +8,36 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\oe_newsroom\Exception\InvalidApiConfiguration;
 use Drupal\oe_newsroom\NewsroomMessengerFactoryInterface;
-use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
+use Drupal\oe_newsroom_newsletter\Api\NewsroomMessenger;
+use Drupal\oe_newsroom_newsletter\Api\NewsroomMessengerInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ServerException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Subscribe Form.
+ *
+ * Arguments:
+ *  - A distribution list array
+ *    ex. array(0 => array('sv_id' => 20, 'name' => 'XY Newsletter'))
  */
 class UnsubscribeForm extends FormBase {
 
   /**
    * API for newsroom calls.
    *
-   * @var \Drupal\oe_newsroom\Api\NewsroomMessengerInterface
+   * @var \Drupal\oe_newsroom_newsletter\Api\NewsroomMessengerInterface
    */
   protected $newsroomMessenger;
 
   /**
    * {@inheritDoc}
    */
-  public function __construct(NewsroomMessengerFactoryInterface $newsroomMessengerFactory) {
-    $this->newsroomMessenger = $newsroomMessengerFactory->get();
+  public function __construct(NewsroomMessengerInterface $newsroomMessenger) {
+    $this->newsroomMessenger = $newsroomMessenger;
   }
 
   /**
@@ -39,7 +45,7 @@ class UnsubscribeForm extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('oe_newsroom.messenger_factory')
+      NewsroomMessenger::create($container)
     );
   }
 
@@ -51,11 +57,38 @@ class UnsubscribeForm extends FormBase {
   }
 
   /**
+   * Gives back whatever the user has access to the for or not.
+   *
+   * @param \Drupal\Core\Session\AccountInterface|null $account
+   *   A user to check, in case of null the current user will be checked.
+   *
+   * @return bool
+   *   True if user has access otherwise false.
+   */
+  public function access(AccountInterface $account = NULL): bool {
+    if ($account === NULL) {
+      $account = $this->currentUser();
+    }
+
+    return $account->hasPermission('unsubscribe from newsletter');
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    if (!$this->access()) {
+      return [];
+    }
+
+    // Read some values from the argument.
+    $distribution_list = $form_state->getBuildInfo()['args'][0] ?? [];
+
+    if (empty($distribution_list)) {
+      throw new \InvalidArgumentException($this->t('No distribution list is selected')->render());
+    }
+
     $currentUser = $this->currentUser();
-    $config = $this->config(OeNewsroomNewsletter::CONFIG_NAME);
 
     // Add wrapper for ajax.
     // @todo I think this will break if somebody puts multiple unsubscription
@@ -72,7 +105,7 @@ class UnsubscribeForm extends FormBase {
       '#default_value' => $currentUser->isAnonymous() ? '' : $currentUser->getEmail(),
       '#required' => TRUE,
     ];
-    $distribution_lists = $config->get('distribution_list');
+    $distribution_lists = $distribution_list;
     $distribution_list_options = [];
     foreach ($distribution_lists as $distribution_list) {
       $distribution_list_options[$distribution_list['sv_id']] = $distribution_list['name'];

@@ -14,27 +14,3 @@ oe_newsroom_newsletter.settings_form_translate:
     _permission: 'manage newsroom newsletter settings'
   options:
     _admin_route: TRUE
-
-oe_newsroom_newsletter.subscribe_form:
-  path: '/newsletter/subscribe'
-  defaults:
-    _form: '\Drupal\oe_newsroom_newsletter\Form\SubscribeForm'
-    _title: 'Subscribe for newsletter'
-  requirements:
-    _permission: 'manage own newsletter subscription'
-
-oe_newsroom_newsletter.unsubscribe_form:
-  path: '/newsletter/unsubscribe'
-  defaults:
-    _form: '\Drupal\oe_newsroom_newsletter\Form\UnsubscribeForm'
-    _title: 'Unsubscribe from newsletter'
-  requirements:
-    _permission: 'manage own newsletter subscription'
-
-oe_newsroom_newsletter.edit_subscription:
-  path: '/newsletter/edit-subscription'
-  defaults:
-    _form: '\Drupal\oe_newsroom_newsletter\Form\SubscribeForm'
-    _title: 'Edit subscription'
-  requirements:
-    _permission: 'manage own newsletter subscription'
