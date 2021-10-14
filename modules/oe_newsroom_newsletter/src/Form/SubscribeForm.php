@@ -19,6 +19,7 @@ use Drupal\oe_newsroom_newsletter\Api\NewsroomMessengerInterface;
 use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ServerException;
+// @codingStandardsIgnoreLine
 use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -93,6 +94,9 @@ class SubscribeForm extends FormBase {
 
   /**
    * {@inheritdoc}
+   *
+   * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+   * @SuppressWarnings(PHPMD.NPathComplexity)
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     if (!$this->access()) {
@@ -197,7 +201,7 @@ class SubscribeForm extends FormBase {
     if (!empty($newsletters_language)) {
       $options = array_intersect_key($options, array_flip($newsletters_language));
     }
-    if (array_key_exists($selected_language, $options)) {
+    if (!array_key_exists($selected_language, $options)) {
       $selected_language = $newsletters_language_default;
     }
     if (count($options) > 1) {
