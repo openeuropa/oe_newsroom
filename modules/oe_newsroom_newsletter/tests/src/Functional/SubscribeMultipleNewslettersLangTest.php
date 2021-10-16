@@ -23,8 +23,8 @@ class SubscribeMultipleNewslettersLangTest extends BrowserTestBase {
    */
   protected static $modules = [
     'config_translation',
-    'oe_newsroom',
-    'oe_newsroom_newsletter',
+    'node',
+    'oe_newsroom_newsletter_mock',
   ];
 
   /**
@@ -39,15 +39,18 @@ class SubscribeMultipleNewslettersLangTest extends BrowserTestBase {
     parent::setUp();
 
     $this->setApiPrivateKey();
-    $this->enableMock();
     $this->configureNewsroom();
-    $this->configureMultipleNewsletters();
+    $this->configureNewsletter();
 
     // Add the language.
     $language = ConfigurableLanguage::createFromLangcode('de');
     $language->save();
 
-    $this->grantPermissions(Role::load(Role::ANONYMOUS_ID), ['manage own newsletter subscription']);
+    $this->grantPermissions(Role::load(Role::ANONYMOUS_ID), [
+      'subscribe to newsletter',
+      'unsubscribe from newsletter',
+    ]);
+    $this->createNewsletterPages(TRUE);
   }
 
   /**
@@ -56,8 +59,8 @@ class SubscribeMultipleNewslettersLangTest extends BrowserTestBase {
    * @group oe_newsroom_newsletter
    */
   public function testSubscribeMultipleNewslettersLang(): void {
-    $this->drupalGet('newsletter/subscribe');
-    $this->assertSession()->pageTextContains('Subscribe for newsletter');
+    $this->drupalGet($this->subscribePath);
+    $this->assertSession()->pageTextContains('Subscribe to newsletter');
     $this->assertSession()->pageTextContains('This is the introduction text.');
     $this->getSession()->getPage()->fillField('Your e-mail', 'mail@example.com');
     $this->assertSession()->pageTextContains('Newsletter lists');

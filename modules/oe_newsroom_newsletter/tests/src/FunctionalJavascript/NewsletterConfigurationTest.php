@@ -21,8 +21,8 @@ class NewsletterConfigurationTest extends WebDriverTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
-    'oe_newsroom',
-    'oe_newsroom_newsletter',
+    'node',
+    'oe_newsroom_newsletter_mock',
   ];
 
   /**
@@ -43,10 +43,13 @@ class NewsletterConfigurationTest extends WebDriverTestBase {
   protected function setUp(): void {
     parent::setUp();
 
-    $this->enableMock();
     $this->configureNewsroom();
-    $this->grantPermissions(Role::load(Role::ANONYMOUS_ID), ['manage own newsletter subscription']);
+    $this->grantPermissions(Role::load(Role::ANONYMOUS_ID), [
+      'subscribe to newsletter',
+      'unsubscribe from newsletter',
+    ]);
     $this->user = $this->createUser([
+      'administer blocks',
       'manage newsroom newsletter settings',
     ]);
     $this->drupalLogin($this->user);
@@ -58,120 +61,149 @@ class NewsletterConfigurationTest extends WebDriverTestBase {
    * @group oe_newsroom_newsletter
    */
   public function testNewsletterSettings(): void {
+    $assertSession = $this->assertSession();
+    $session = $this->getSession();
+    $page = $session->getPage();
+
     // Configure newsletter.
     $this->drupalGet('admin/config/system/newsroom-settings/newsletter');
-    $this->assertSession()->elementAttributeContains('css', 'textarea#edit-intro-text', 'required', 'required');
-    $this->assertSession()->elementAttributeContains('css', 'input#edit-privacy-uri', 'required', 'required');
-    $this->getSession()->getPage()->fillField('edit-distribution-list-0-sv-id', '678');
-    $this->getSession()->getPage()->fillField('edit-distribution-list-0-name', 'Example newsletter 1');
-    $this->getSession()->getPage()->fillField('Introduction text', 'Example introduction.');
-    $this->getSession()->getPage()->fillField('Privacy uri', '/privacy-uri');
-    $this->getSession()->getPage()->pressButton('Save configuration');
-    $this->assertSession()->pageTextContains('The configuration options have been saved.');
+    $assertSession->elementAttributeContains('css', 'textarea#edit-intro-text', 'required', 'required');
+    $assertSession->elementAttributeContains('css', 'input#edit-privacy-uri', 'required', 'required');
+    $page->fillField('Introduction text', 'This is the introduction text.');
+    $page->fillField('Privacy uri', '/privacy-uri');
+    $page->pressButton('Save configuration');
+    $assertSession->pageTextContains('The configuration options have been saved.');
 
     // Test with missing configuration translation module.
     $this->drupalGet('admin/config/system/newsroom-settings/newsletter');
-    $this->assertSession()->pageTextNotContains('Translate newsroom newsletter settings form');
+    $assertSession->pageTextNotContains('Translate newsroom newsletter settings form');
+
+    // Create pages through UI.
+    $default_theme = $this->config('system.theme')->get('default');
+    $this->drupalCreateContentType(['type' => 'page']);
+
+    // Create subscribe page.
+    $subscribe_page = $this->drupalCreateNode(['type' => 'page']);
+    $subscribe_path = 'node/' . $subscribe_page->id();
+
+    // Place subscribe block.
+    $block_name = 'oe_newsroom_newsletter_subscription_block';
+    $edit = [
+      'region' => 'content',
+    ];
+    $edit['settings[distribution_list][0][sv_id]'] = '123';
+    $edit['settings[distribution_list][0][name]'] = 'Example newsletter 1';
+    $edit['visibility[request_path][pages]'] = '/node/1';
+    $this->drupalGet('admin/structure/block/add/' . $block_name . '/' . $default_theme);
+    $page->clickLink('Pages');
+    $this->submitForm($edit, 'Save block');
+
+    // Create unsubscribe page.
+    $unsubscribe_page = $this->drupalCreateNode(['type' => 'page']);
+    $unsubscribe_path = 'node/' . $unsubscribe_page->id();
+
+    // Place unsubscribe block.
+    $block_name = 'oe_newsroom_newsletter_unsubscription_block';
+    $edit = [
+      'region' => 'content',
+    ];
+    $edit['settings[distribution_list][0][sv_id]'] = '123';
+    $edit['settings[distribution_list][0][name]'] = 'Example newsletter 1';
+    $edit['visibility[request_path][pages]'] = '/node/2';
+    $this->drupalGet('admin/structure/block/add/' . $block_name . '/' . $default_theme);
+    $page->clickLink('Pages');
+    $this->submitForm($edit, 'Save block');
 
     $this->drupalLogout();
-    // Test missing e-mail address and unchecked privacy statement.
-    $this->drupalGet('newsletter/subscribe');
-    $this->assertSession()->pageTextContains('Example introduction.');
-    $this->assertSession()->linkByHrefExists('/privacy-uri');
-    $this->assertSession()->linkExists('privacy statement');
-    $this->getSession()->getPage()->hasField('Your e-mail');
-    $this->getSession()->getPage()->hasUncheckedField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
-    $this->getSession()->getPage()->pressButton('Subscribe');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->pageTextContains('Your e-mail field is required.');
-    $this->assertSession()->pageTextContains('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement field is required.');
-
-    // Test invalid e-mail address.
-    $this->getSession()->getPage()->fillField('Your e-mail', '@example.com');
-    $this->getSession()->getPage()->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
-    $this->getSession()->getPage()->pressButton('Subscribe');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->pageTextContains('The email address @example.com is not valid.');
 
     // Test missing private key.
-    $this->getSession()->getPage()->fillField('Your e-mail', 'mail@example.com');
-    $this->getSession()->getPage()->pressButton('Subscribe');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->pageTextContains('The subscription service is not configured at the moment. Please try again later.');
+    $this->drupalGet($subscribe_path);
+    $page->fillField('Your e-mail', 'mail@example.com');
+    $page->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
+    $page->pressButton('Subscribe');
+    $assertSession->assertWaitOnAjaxRequest();
+    $assertSession->pageTextContains('The subscription service is not configured at the moment. Please try again later.');
 
     // Test successful subscription doesn't show the fields.
     $this->setApiPrivateKey();
-    $this->drupalGet('newsletter/subscribe');
-    $this->getSession()->getPage()->fillField('Your e-mail', 'mail@example.com');
-    $this->getSession()->getPage()->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
-    $this->getSession()->getPage()->pressButton('Subscribe');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->pageTextContains('Thanks for Signing Up to the service: Test Newsletter Service');
-    $this->assertSession()->pageTextNotContains('Example introduction.');
-    $this->assertSession()->pageTextNotContains('Your e-mail');
-    $this->assertSession()->pageTextNotContains('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
+    $this->drupalGet($subscribe_path);
+    $page->fillField('Your e-mail', 'mail@example.com');
+    $page->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
+    $page->pressButton('Subscribe');
+    $assertSession->assertWaitOnAjaxRequest();
+    $assertSession->pageTextContains('Thanks for Signing Up to the service: Test Newsletter Service');
+    $assertSession->pageTextNotContains('This is the introduction text.');
+    $assertSession->pageTextNotContains('Your e-mail');
+    $assertSession->pageTextNotContains('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
 
     // Set custom success/failure subscription messages.
     $this->drupalLogin($this->user);
     $this->drupalGet('admin/config/system/newsroom-settings/newsletter');
-    $this->getSession()->getPage()->fillField('Message in case of successful subscription', 'Success. Your email address have been subscribed to the newsletter.');
-    $this->getSession()->getPage()->fillField('Message in case if user is already registered', 'Failure. Your email address was already subscribed to the newsletter.');
-    $this->getSession()->getPage()->pressButton('Save configuration');
-    $this->assertSession()->pageTextContains('The configuration options have been saved.');
+    $page->fillField('Message in case of successful subscription', 'Success. Your email address have been subscribed to the newsletter.');
+    $page->fillField('Message in case if user is already registered', 'Failure. Your email address was already subscribed to the newsletter.');
+    $page->pressButton('Save configuration');
+    $assertSession->pageTextContains('The configuration options have been saved.');
 
     $this->drupalLogout();
     // Display custom failure message.
-    $this->drupalGet('newsletter/subscribe');
-    $this->getSession()->getPage()->fillField('Your e-mail', 'mail@example.com');
-    $this->getSession()->getPage()->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
-    $this->getSession()->getPage()->pressButton('Subscribe');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->pageTextContains('Failure. Your email address was already subscribed to the newsletter.');
+    $this->drupalGet($subscribe_path);
+    $page->fillField('Your e-mail', 'mail@example.com');
+    $page->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
+    $page->pressButton('Subscribe');
+    $assertSession->assertWaitOnAjaxRequest();
+    $assertSession->pageTextContains('Failure. Your email address was already subscribed to the newsletter.');
 
     // Test successful unsubscription doesn't show the field.
-    $this->drupalGet('newsletter/unsubscribe');
-    $this->getSession()->getPage()->fillField('Your e-mail', 'mail@example.com');
-    $this->getSession()->getPage()->pressButton('Unsubscribe');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->pageTextContains('Successfully unsubscribed!');
-    $this->assertSession()->pageTextNotContains('Your e-mail');
+    $this->drupalGet($unsubscribe_path);
+    $page->fillField('Your e-mail', 'mail@example.com');
+    $page->pressButton('Unsubscribe');
+    $assertSession->assertWaitOnAjaxRequest();
+    $assertSession->pageTextContains('Successfully unsubscribed!');
+    $assertSession->pageTextNotContains('Your e-mail');
 
     // Display custom success message.
-    $this->drupalGet('newsletter/subscribe');
-    $this->assertSession()->pageTextNotContains('Newsletter lists');
-    $this->assertSession()->pageTextNotContains('Please select which newsletter list interests you.');
-    $this->assertSession()->hiddenFieldValueEquals('distribution_list', '678');
-    $this->assertSession()->hiddenFieldValueEquals('newsletters_language', 'en');
-    $this->getSession()->getPage()->fillField('Your e-mail', 'mail@example.com');
-    $this->getSession()->getPage()->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
-    $this->getSession()->getPage()->pressButton('Subscribe');
-    $this->assertSession()->assertWaitOnAjaxRequest();
-    $this->assertSession()->pageTextContains('Success. Your email address have been subscribed to the newsletter.');
+    $this->drupalGet($subscribe_path);
+    $page->fillField('Your e-mail', 'mail@example.com');
+    $page->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
+    $page->pressButton('Subscribe');
+    $assertSession->assertWaitOnAjaxRequest();
+    $assertSession->pageTextContains('Success. Your email address have been subscribed to the newsletter.');
+
+    // Multiple newsletter information should not be shown.
+    $this->drupalGet($subscribe_path);
+    $assertSession->pageTextNotContains('Newsletter lists');
+    $assertSession->pageTextNotContains('Please select which newsletter list interests you.');
+    $assertSession->hiddenFieldValueEquals('distribution_list', '123');
+    $assertSession->hiddenFieldValueEquals('newsletters_language', 'en');
 
     // Configure multiple newsletters.
     $this->drupalLogin($this->user);
-    $this->drupalGet('admin/config/system/newsroom-settings/newsletter');
-    $this->getSession()->getPage()->fillField('edit-distribution-list-1-sv-id', '456');
-    $this->getSession()->getPage()->fillField('edit-distribution-list-1-name', 'Example newsletter 2');
-    $this->getSession()->getPage()->pressButton('Save configuration');
-    $this->assertSession()->pageTextContains('The configuration options have been saved.');
+    $this->drupalGet('admin/structure/block/manage/newslettersubscriptionblock');
+    $page->fillField('settings[distribution_list][1][sv_id]', '456');
+    $page->fillField('settings[distribution_list][1][name]', 'Example newsletter 2');
+    $page->pressButton('Save block');
+    $this->drupalGet('admin/structure/block/manage/newsletterunsubscriptionblock');
+    $page->fillField('settings[distribution_list][1][sv_id]', '456');
+    $page->fillField('settings[distribution_list][1][name]', 'Example newsletter 2');
+    $page->pressButton('Save block');
+    $assertSession->pageTextContains('The block configuration has been saved.');
     $this->drupalLogout();
 
     // @todo Fix form cache.
     drupal_flush_all_caches();
 
-    $this->drupalGet('newsletter/subscribe');
-    $this->assertSession()->pageTextContains('Newsletter lists');
-    $this->assertSession()->pageTextContains('Please select which newsletter list interests you.');
-    $this->getSession()->getPage()->hasUncheckedField('Example newsletter 1');
-    $this->getSession()->getPage()->hasUncheckedField('Example newsletter 2');
+    $this->drupalGet($subscribe_path);
+    $assertSession->pageTextContains('Newsletter lists');
+    $assertSession->pageTextContains('Please select which newsletter list interests you.');
+    $page->hasUncheckedField('Example newsletter 1');
+    $page->hasUncheckedField('Example newsletter 2');
 
     // Unsubscribe the newsletters.
-    $this->drupalGet('newsletter/unsubscribe');
-    $this->assertSession()->pageTextContains('Newsletter lists');
-    $this->assertSession()->pageTextContains('Please select which newsletter list interests you.');
-    $this->getSession()->getPage()->hasUncheckedField('Example newsletter 1');
-    $this->getSession()->getPage()->hasUncheckedField('Example newsletter 2');
+    $this->drupalGet($unsubscribe_path);
+    $assertSession->pageTextContains('Newsletter lists');
+    $assertSession->pageTextContains('Please select which newsletter list interests you.');
+    $page->hasUncheckedField('Example newsletter 1');
+    $page->hasUncheckedField('Example newsletter 2');
   }
 
 }

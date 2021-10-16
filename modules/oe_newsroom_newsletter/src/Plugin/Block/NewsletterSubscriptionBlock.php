@@ -104,11 +104,9 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
    */
   public function blockSubmit($form, FormStateInterface $form_state) {
     parent::blockSubmit($form, $form_state);
-    // The language_select field is buggy, it doesn't give back empty value.
-    $user_input = $form_state->getUserInput();
 
-    $this->configuration['newsletters_language'] = !isset($user_input['newsletters_language']) ? $form_state->getValue('newsletters_language') : [];
-    $this->configuration['newsletters_language_default'] = $form_state->getValue('newsletters_language_default');
+    $this->configuration['newsletters_language'] = $form_state->getValue('newsletters_language') ?? [];
+    $this->configuration['newsletters_language_default'] = $form_state->getValue('newsletters_language_default') ?: '';
     $this->configuration['distribution_list'] = $form_state->getValue('distribution_list');
   }
 
@@ -116,7 +114,9 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
    * {@inheritdoc}
    */
   public function build() {
-    return $this->formBuilder->getForm(SubscribeForm::class, $this->configuration['distribution_list'], $this->configuration['newsletters_language'], $this->configuration['newsletters_language_default']);
+    $newsletters_language = $this->configuration['newsletters_language'] ?? [];
+    $newsletters_language_default = $this->configuration['newsletters_language_default'] ?? '';
+    return $this->formBuilder->getForm(SubscribeForm::class, $this->configuration['distribution_list'], $newsletters_language, $newsletters_language_default);
   }
 
   /**

@@ -21,8 +21,8 @@ class SubscribeMultipleNewslettersTest extends BrowserTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
-    'oe_newsroom',
-    'oe_newsroom_newsletter',
+    'node',
+    'oe_newsroom_newsletter_mock',
   ];
 
   /**
@@ -37,10 +37,13 @@ class SubscribeMultipleNewslettersTest extends BrowserTestBase {
     parent::setUp();
 
     $this->setApiPrivateKey();
-    $this->enableMock();
     $this->configureNewsroom();
-    $this->configureMultipleNewsletters();
-    $this->grantPermissions(Role::load(Role::ANONYMOUS_ID), ['manage own newsletter subscription']);
+    $this->configureNewsletter();
+    $this->grantPermissions(Role::load(Role::ANONYMOUS_ID), [
+      'subscribe to newsletter',
+      'unsubscribe from newsletter',
+    ]);
+    $this->createNewsletterPages(TRUE);
   }
 
   /**
@@ -50,8 +53,8 @@ class SubscribeMultipleNewslettersTest extends BrowserTestBase {
    */
   public function testSubscribeMultipleNewsletters(): void {
     // Subscribe multiple Newsletters.
-    $this->drupalGet('newsletter/subscribe');
-    $this->assertSession()->pageTextContains('Subscribe for newsletter');
+    $this->drupalGet($this->subscribePath);
+    $this->assertSession()->pageTextContains('Subscribe to newsletter');
     $this->assertSession()->pageTextContains('This is the introduction text.');
     $this->getSession()->getPage()->fillField('Your e-mail', 'mail@example.com');
     $this->assertSession()->pageTextContains('Newsletter lists');
@@ -65,7 +68,7 @@ class SubscribeMultipleNewslettersTest extends BrowserTestBase {
     $this->assertSession()->pageTextContains('Thanks for Signing Up to the service: Test Newsletter Service');
 
     // Unsubscribe the newsletters.
-    $this->drupalGet('newsletter/unsubscribe');
+    $this->drupalGet($this->unsubscribePath);
     $this->assertSession()->pageTextContains('Unsubscribe from newsletter');
     $this->getSession()->getPage()->fillField('Your e-mail', 'mail@example.com');
     $this->assertSession()->pageTextContains('Newsletter lists');
@@ -84,7 +87,7 @@ class SubscribeMultipleNewslettersTest extends BrowserTestBase {
    */
   public function testSubscribeMultipleNewslettersTwice(): void {
     // Subscribe the Newsletter collection 1.
-    $this->drupalGet('newsletter/subscribe');
+    $this->drupalGet($this->subscribePath);
     $this->getSession()->getPage()->fillField('Your e-mail', 'mail@example.com');
     $this->getSession()->getPage()->checkField('Newsletter collection 1');
     $this->getSession()->getPage()->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
@@ -92,7 +95,7 @@ class SubscribeMultipleNewslettersTest extends BrowserTestBase {
     $this->assertSession()->pageTextContains('Thanks for Signing Up to the service: Test Newsletter Service');
 
     // Subscribe two newsletters.
-    $this->drupalGet('newsletter/subscribe');
+    $this->drupalGet($this->subscribePath);
     $this->getSession()->getPage()->fillField('Your e-mail', 'mail@example.com');
     $this->getSession()->getPage()->checkField('Newsletter collection 1');
     $this->getSession()->getPage()->checkField('Newsletter 2');
@@ -103,7 +106,7 @@ class SubscribeMultipleNewslettersTest extends BrowserTestBase {
     $this->assertSession()->pageTextContains('A subscription for this service is already registered for this email address');
 
     // Unsubscribe the newsletters.
-    $this->drupalGet('newsletter/unsubscribe');
+    $this->drupalGet($this->unsubscribePath);
     $this->getSession()->getPage()->fillField('Your e-mail', 'mail@example.com');
     $this->getSession()->getPage()->checkField('Newsletter collection 1');
     $this->getSession()->getPage()->checkField('Newsletter 2');
@@ -111,7 +114,7 @@ class SubscribeMultipleNewslettersTest extends BrowserTestBase {
     $this->assertSession()->pageTextContains('Successfully unsubscribed!');
 
     // Unsubscribe the newsletter while the email is already unsubscribed.
-    $this->drupalGet('newsletter/unsubscribe');
+    $this->drupalGet($this->unsubscribePath);
     $this->getSession()->getPage()->fillField('Your e-mail', 'mail@example.com');
     $this->getSession()->getPage()->checkField('Newsletter 2');
     $this->getSession()->getPage()->pressButton('Unsubscribe');

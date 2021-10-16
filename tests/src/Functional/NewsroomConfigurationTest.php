@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_newsroom\Functional;
 
+use Drupal\oe_newsroom\OeNewsroom;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -44,13 +45,12 @@ class NewsroomConfigurationTest extends BrowserTestBase {
     $this->getSession()->getPage()->pressButton('Save configuration');
     $this->assertSession()->pageTextContains('The configuration options have been saved.');
 
-    /** @var \Drupal\oe_newsroom\Api\NewsroomMessenger $newsroom_factory */
-    $newsroom_factory = \Drupal::service('oe_newsroom.messenger_factory')->get();
-    $newsroom_config = $newsroom_factory->getConfiguration();
-    $this->assertEquals('sha256', $newsroom_config['hashMethod']);
-    $this->assertEquals('1', $newsroom_config['normalized']);
-    $this->assertEquals('Site1', $newsroom_config['universe']);
-    $this->assertEquals('Site1_app', $newsroom_config['app']);
+    // Validate the saved values.
+    $config = $this->config(OeNewsroom::CONFIG_NAME);
+    $this->assertEquals('sha256', $config->get('hash_method'));
+    $this->assertEquals('1', $config->get('normalized'));
+    $this->assertEquals('Site1', $config->get('universe'));
+    $this->assertEquals('Site1_app', $config->get('app'));
   }
 
 }

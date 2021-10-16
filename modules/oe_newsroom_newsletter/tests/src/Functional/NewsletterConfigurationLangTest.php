@@ -23,8 +23,7 @@ class NewsletterConfigurationLangTest extends BrowserTestBase {
    */
   protected static $modules = [
     'config_translation',
-    'oe_newsroom',
-    'oe_newsroom_newsletter',
+    'oe_newsroom_newsletter_mock',
   ];
 
   /**
@@ -46,10 +45,12 @@ class NewsletterConfigurationLangTest extends BrowserTestBase {
     parent::setUp();
 
     $this->setApiPrivateKey();
-    $this->enableMock();
     $this->configureNewsroom();
-    $this->configureMultipleNewsletters();
-    $this->grantPermissions(Role::load(Role::ANONYMOUS_ID), ['manage own newsletter subscription']);
+    $this->createNewsletterPages();
+    $this->grantPermissions(Role::load(Role::ANONYMOUS_ID), [
+      'subscribe to newsletter',
+      'unsubscribe from newsletter',
+    ]);
     $this->user = $this->createUser([
       'manage newsroom newsletter settings',
       'translate configuration',
@@ -96,7 +97,7 @@ class NewsletterConfigurationLangTest extends BrowserTestBase {
     $this->drupalLogout();
 
     // Test if both languages are displayed on subscribe form.
-    $this->drupalGet('newsletter/subscribe');
+    $this->drupalGet($this->subscribePath);
     $this->assertSession()->optionExists('Select the language of your received newsletter', 'English');
     $this->assertSession()->optionExists('Select the language of your received newsletter', 'German');
 
@@ -112,12 +113,12 @@ class NewsletterConfigurationLangTest extends BrowserTestBase {
     drupal_flush_all_caches();
 
     // Test if German language is set on subscribe form.
-    $this->drupalGet('newsletter/subscribe');
+    $this->drupalGet($this->subscribePath);
     $this->assertSession()->pageTextNotContains('Select the language of your received newsletter');
     $this->assertSession()->hiddenFieldValueEquals('newsletters_language', 'de');
 
     // Test German translations on subscribe form.
-    $this->drupalGet('de/newsletter/subscribe');
+    $this->drupalGet('de/' . $this->subscribePath);
     $this->assertSession()->pageTextContains('This is the introduction text. DE');
     $this->getSession()->getPage()->checkField('Newsletter collection 1 DE');
     $this->getSession()->getPage()->checkField('Newsletter 2 DE');
@@ -126,7 +127,7 @@ class NewsletterConfigurationLangTest extends BrowserTestBase {
     $this->getSession()->getPage()->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
     $this->getSession()->getPage()->pressButton('Subscribe');
     $this->assertSession()->pageTextContains('Success. Your email address have been subscribed to the newsletter. DE');
-    $this->drupalGet('de/newsletter/subscribe');
+    $this->drupalGet('de/' . $this->subscribePath);
     $this->getSession()->getPage()->checkField('Newsletter collection 1 DE');
     $this->getSession()->getPage()->checkField('Newsletter 2 DE');
     $this->getSession()->getPage()->hasLink('/de/privacy-uri');
