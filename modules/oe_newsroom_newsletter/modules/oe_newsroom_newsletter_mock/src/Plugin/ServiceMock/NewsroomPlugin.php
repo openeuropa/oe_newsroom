@@ -28,7 +28,12 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
   /**
    * The key of the state entry that contains the mocked api subscriptions.
    */
-  public const STATE_KEY = 'oe_newsroom.mock_api_subscriptions';
+  public const STATE_KEY_SUBSCRIPTIONS = 'oe_newsroom.mock_api_subscriptions';
+
+  /**
+   * The key of the state entry that contains the mocked api universe.
+   */
+  public const STATE_KEY_UNIVERSE = 'oe_newsroom.mock_api_universe';
 
   /**
    * The state service.
@@ -159,7 +164,7 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
     $email = $data['subscription']['email'];
     $svIds = explode(',', $data['subscription']['sv_id']);
 
-    $subscriptions = $this->state->get(self::STATE_KEY, []);
+    $subscriptions = $this->state->get(self::STATE_KEY_SUBSCRIPTIONS, []);
     $current_subs = [];
     // If sv_id is present, then it used as a filter.
     if (count($svIds) > 0) {
@@ -193,13 +198,15 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
   protected function subscribe(RequestInterface $request): ResponseInterface {
     $data = Json::decode($request->getBody()->getContents());
     $universe = $data['subscription']['universeAcronym'];
+    $app = $data['subscription']['topicExtWebsite'];
     $email = $data['subscription']['email'];
     $svIds = explode(',', $data['subscription']['sv_id']);
     $relatedSvIds = isset($data['subscription']['relatedSv_Id']) ? explode(',', $data['subscription']['relatedSv_Id']) : [];
     $language = $data['subscription']['language'] ?? 'en';
     $topicExtId = isset($data['subscription']['topicExtId']) ? explode(',', $data['subscription']['topicExtId']) : [];
 
-    $subscriptions = $this->state->get(self::STATE_KEY, []);
+    $subscriptions = $this->state->get(self::STATE_KEY_SUBSCRIPTIONS, []);
+    $universes = $this->state->get(self::STATE_KEY_UNIVERSE, []);
     $current_subs = [];
     foreach (array_merge($svIds, $relatedSvIds) as $svId) {
       // Select the first to returned as the normal API class, but the
@@ -211,13 +218,16 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
         $current_subs[] = $this->generateSubscriptionArray($universe, $email, $svId, $language, FALSE);
       }
 
+      $universes[$app] = $universe;
+
       $subscriptions[$universe][$svId][$email] = [
         'subscribed' => TRUE,
         'language' => $language,
         'topicExtId' => $topicExtId,
       ];
     }
-    $this->state->set(self::STATE_KEY, $subscriptions);
+    $this->state->set(self::STATE_KEY_SUBSCRIPTIONS, $subscriptions);
+    $this->state->set(self::STATE_KEY_UNIVERSE, $universes);
 
     return new Response(200, [], Json::encode($current_subs));
   }
@@ -234,12 +244,13 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
   protected function unsubscribe(RequestInterface $request): ResponseInterface {
     parse_str($request->getUri()->getQuery(), $parameters);
 
-    $universe = $parameters['app'];
     $email = $parameters['user_email'];
     // The API does not support multiple sv_ids in a single call.
     $svId = $parameters['sv_id'];
 
-    $subscriptions = $this->state->get(self::STATE_KEY, []);
+    $subscriptions = $this->state->get(self::STATE_KEY_SUBSCRIPTIONS, []);
+    $universes = $this->state->get(self::STATE_KEY_UNIVERSE, []);
+    $universe = $universes[$parameters['app']];
 
     // When you try to unsubscribe a user that newsroom does not have at all,
     // you will get an internal error which will converted by our API to this.
@@ -255,7 +266,7 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
       'topicExtId' => NULL,
     ];
 
-    $this->state->set(self::STATE_KEY, $subscriptions);
+    $this->state->set(self::STATE_KEY_SUBSCRIPTIONS, $subscriptions);
 
     return new Response(200, [], 'User unsubscribed!');
   }
