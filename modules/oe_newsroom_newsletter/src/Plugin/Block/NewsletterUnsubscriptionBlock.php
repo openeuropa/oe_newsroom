@@ -6,12 +6,14 @@ namespace Drupal\oe_newsroom_newsletter\Plugin\Block;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Block\BlockBase;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\multivalue_form_element\Element\MultiValue;
 use Drupal\oe_newsroom_newsletter\Form\UnsubscribeForm;
+use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -106,6 +108,20 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
    */
   protected function blockAccess(AccountInterface $account) {
     return AccessResult::allowedIfHasPermission($account, 'unsubscribe from newsletter');
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function getCacheContexts() {
+    return Cache::mergeContexts(parent::getCacheContexts(), ['languages']);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function getCacheTags() {
+    return Cache::mergeTags(parent::getCacheTags(), ['config:' . OeNewsroomNewsletter::OE_NEWSLETTER_CONFIG_VAR_NAME]);
   }
 
 }
