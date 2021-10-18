@@ -139,7 +139,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
    * {@inheritDoc}
    */
   public function getCacheTags() {
-    return Cache::mergeTags(parent::getCacheTags(), ['config:' . OeNewsroomNewsletter::OE_NEWSLETTER_CONFIG_VAR_NAME]);
+    return Cache::mergeTags(parent::getCacheTags(), ['config:' . OeNewsroomNewsletter::CONFIG_NAME]);
   }
 
 }

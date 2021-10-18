@@ -82,9 +82,6 @@ class SubscribeNewsletterTest extends BrowserTestBase {
     // Try to subscribe the newsletter after setting newsletter configuration.
     $this->configureNewsletter();
 
-    // @todo Fix form cache.
-    drupal_flush_all_caches();
-
     $this->drupalGet($this->subscribePath);
     $assertSession->pageTextNotContains('Subscription form can be only used after privacy url is set.');
     $assertSession->pageTextContains('This is the introduction text.');

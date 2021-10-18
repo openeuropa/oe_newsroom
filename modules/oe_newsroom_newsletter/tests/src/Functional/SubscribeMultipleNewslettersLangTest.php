@@ -59,18 +59,22 @@ class SubscribeMultipleNewslettersLangTest extends BrowserTestBase {
    * @group oe_newsroom_newsletter
    */
   public function testSubscribeMultipleNewslettersLang(): void {
+    $assertSession = $this->assertSession();
+    $session = $this->getSession();
+    $page = $session->getPage();
+
     $this->drupalGet($this->subscribePath);
-    $this->assertSession()->pageTextContains('Subscribe to newsletter');
-    $this->assertSession()->pageTextContains('This is the introduction text.');
-    $this->getSession()->getPage()->fillField('Your e-mail', 'mail@example.com');
-    $this->assertSession()->pageTextContains('Newsletter lists');
-    $this->getSession()->getPage()->checkField('Newsletter collection 1');
-    $this->getSession()->getPage()->checkField('Newsletter 2');
-    $this->assertSession()->pageTextContains('Please select which newsletter list interests you.');
-    $this->getSession()->getPage()->selectFieldOption('Select the language of your received newsletter', 'German');
-    $this->getSession()->getPage()->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
-    $this->getSession()->getPage()->pressButton('Subscribe');
-    $this->assertSession()->pageTextContains('Thanks for Signing Up to the service: Test Newsletter Service');
+    $assertSession->pageTextContains('Subscribe to newsletter');
+    $assertSession->pageTextContains('This is the introduction text.');
+    $page->fillField('Your e-mail', 'mail@example.com');
+    $assertSession->pageTextContains('Newsletter lists');
+    $page->checkField('Newsletter collection 1');
+    $page->checkField('Newsletter 2');
+    $assertSession->pageTextContains('Please select which newsletter list interests you.');
+    $page->selectFieldOption('Select the language of your received newsletter', 'German');
+    $page->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
+    $page->pressButton('Subscribe');
+    $assertSession->pageTextContains('Thanks for Signing Up to the service: Test Newsletter Service');
   }
 
 }

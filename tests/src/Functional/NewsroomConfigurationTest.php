@@ -32,18 +32,22 @@ class NewsroomConfigurationTest extends BrowserTestBase {
    * @group oe_newsroom
    */
   public function testNewsroomConfiguration(): void {
+    $assertSession = $this->assertSession();
+    $session = $this->getSession();
+    $page = $session->getPage();
+
     $user = $this->createUser([
       'manage newsroom settings',
     ]);
     $this->drupalLogin($user);
     $this->drupalGet('admin/config/system/newsroom-settings');
-    $this->assertSession()->elementAttributeContains('css', 'input#edit-universe', 'required', 'required');
-    $this->assertSession()->elementAttributeContains('css', 'input#edit-app', 'required', 'required');
-    $this->getSession()->getPage()->fillField('Universe Acronym', 'Site1');
-    $this->getSession()->getPage()->fillField('App', 'Site1_app');
-    $this->getSession()->getPage()->hasCheckedField('Is normalized?');
-    $this->getSession()->getPage()->pressButton('Save configuration');
-    $this->assertSession()->pageTextContains('The configuration options have been saved.');
+    $assertSession->elementAttributeContains('css', 'input#edit-universe', 'required', 'required');
+    $assertSession->elementAttributeContains('css', 'input#edit-app', 'required', 'required');
+    $page->fillField('Universe Acronym', 'Site1');
+    $page->fillField('App', 'Site1_app');
+    $page->hasCheckedField('Is normalized?');
+    $page->pressButton('Save configuration');
+    $assertSession->pageTextContains('The configuration options have been saved.');
 
     // Validate the saved values.
     $config = $this->config(OeNewsroom::CONFIG_NAME);
