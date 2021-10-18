@@ -189,9 +189,6 @@ class NewsletterConfigurationTest extends WebDriverTestBase {
     $assertSession->pageTextContains('The block configuration has been saved.');
     $this->drupalLogout();
 
-    // @todo Fix form cache.
-    drupal_flush_all_caches();
-
     $this->drupalGet($subscribe_path);
     $assertSession->pageTextContains('Newsletter lists');
     $assertSession->pageTextContains('Please select which newsletter list interests you.');
