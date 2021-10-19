@@ -105,6 +105,62 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
    *   Generated subscription array, similar to newsrooms one.
    */
   protected function generateSubscriptionArray(string $universe, string $email, string $sv_id, string $language_code, bool $isNewSubscription) {
+    // These are here google translations, but it will do the job to simulate
+    // the original behaviour.
+    $new_subscription = [
+      'bg' => 'Благодарим ви, че сте се регистрирали за услугата: Услуга за бюлетини за тестове',
+      'cs' => 'Děkujeme, že jste se zaregistrovali do služby: Testovací služba zpravodaje',
+      'da' => 'Tak fordi du tilmeldte dig tjenesten: Test nyhedsbrevsservice',
+      'de' => 'Vielen Dank für Ihre Anmeldung zum Service: Test Newsletter Service',
+      'et' => 'Täname, et registreerusite teenusesse: testige uudiskirja teenust',
+      'el' => 'Ευχαριστούμε για την εγγραφή σας στην υπηρεσία: Δοκιμή υπηρεσίας ενημερωτικών δελτίων',
+      'en' => 'Thanks for Signing Up to the service: Test Newsletter Service',
+      'es' => 'Gracias por suscribirse al servicio: Test Newsletter Service',
+      'fr' => 'Merci de vous être inscrit au service : Testez le service de newsletter',
+      'ga' => 'Go raibh maith agat as Síniú leis an tseirbhís: Seirbhís Nuachtlitir Tástála',
+      'hr' => 'Hvala vam što ste se prijavili za uslugu: Test Newsletter Service',
+      'it' => 'Grazie per esserti iscritto al servizio: Test Newsletter Service',
+      'lv' => 'Paldies, ka reģistrējāties pakalpojumam: Pārbaudiet biļetenu pakalpojumu',
+      'lt' => 'Dėkojame, kad prisiregistravote prie paslaugos: išbandykite naujienlaiškio paslaugą',
+      'hu' => 'Köszönjük, hogy feliratkozott a szolgáltatásra: Teszt hírlevél szolgáltatás',
+      'mt' => 'Grazzi talli rreġistrajt għas-servizz: Test Newsletter Service',
+      'nl' => 'Bedankt voor het aanmelden voor de service: Test nieuwsbriefservice',
+      'pl' => 'Dziękujemy za zapisanie się do usługi: Testowa usługa Newsletter',
+      'pt' => 'Obrigado por se inscrever no serviço: Serviço de boletim informativo de teste',
+      'ro' => 'Vă mulțumim că v-ați înscris la serviciu: serviciul Newsletter Test',
+      'sk' => 'Ďakujeme, že ste sa zaregistrovali do služby: Služba testovania spravodajcov',
+      'sl' => 'Hvala za prijavo na storitev: Test Newsletter Service',
+      'fi' => 'Kiitos rekisteröitymisestä palveluun: Testaa uutiskirjepalvelu',
+      'sv' => 'Tack för att du anmäler dig till tjänsten: Testa nyhetsbrevstjänsten',
+    ];
+
+    $already_subscribed = [
+      'bg' => 'За този имейл адрес вече е регистриран абонамент за тази услуга',
+      'cs' => 'Pro tuto e -mailovou adresu je již zaregistrováno předplatné této služby',
+      'da' => 'Et abonnement på denne service er allerede registreret for denne e -mail -adresse',
+      'de' => 'Für diese E-Mail-Adresse ist bereits ein Abonnement für diesen Dienst registriert',
+      'et' => 'Selle e -posti aadressi jaoks on selle teenuse tellimus juba registreeritud',
+      'el' => 'Μια συνδρομή σε αυτήν την υπηρεσία έχει ήδη καταχωρηθεί για αυτήν τη διεύθυνση ηλεκτρονικού ταχυδρομείου',
+      'en' => 'A subscription for this service is already registered for this email address',
+      'es' => 'Ya se ha registrado una suscripción a este servicio para esta dirección de correo electrónico',
+      'fr' => 'Un abonnement à ce service est déjà enregistré pour cette adresse e-mail',
+      'ga' => 'Tá síntiús leis an tseirbhís seo cláraithe cheana féin don seoladh ríomhphoist seo',
+      'hr' => 'Pretplata na ovu uslugu već je registrirana za ovu adresu e -pošte',
+      'it' => 'Un abbonamento a questo servizio è già registrato per questo indirizzo email',
+      'lv' => 'Šim e -pasta adresei jau ir reģistrēts šī pakalpojuma abonements',
+      'lt' => 'Šiam el. Pašto adresui jau yra užregistruota šios paslaugos prenumerata',
+      'hu' => 'A szolgáltatás előfizetése már regisztrálva van erre az e -mail címre',
+      'mt' => 'Abbonament għal dan is-servizz huwa diġà rreġistrat għal dan l-indirizz elettroniku',
+      'nl' => 'Er is al een abonnement op deze service geregistreerd voor dit e-mailadres',
+      'pl' => 'Subskrypcja tej usługi jest już zarejestrowana dla tego adresu e-mail',
+      'pt' => 'Uma assinatura deste serviço já está registrada para este endereço de e-mail',
+      'ro' => 'Un abonament la acest serviciu este deja înregistrat pentru această adresă de e-mail',
+      'sk' => 'Na túto e -mailovú adresu je už zaregistrované predplatné tejto služby',
+      'sl' => 'Za ta e -poštni naslov je že registrirana naročnina na to storitev',
+      'fi' => 'Palvelun tilaus on jo rekisteröity tähän sähköpostiosoitteeseen',
+      'sv' => 'En prenumeration på denna tjänst är redan registrerad för denna e -postadress',
+    ];
+
     return [
       'responseType' => 'json',
       'email' => $email,
@@ -137,8 +193,7 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
       'hostBy' => "$universe Newsroom",
       'profileLink' => "https://ec.europa.eu/newsroom/$universe/user-profile/123456789",
       'isNewSubscription' => $isNewSubscription,
-      // Be careful, this is originally a translated text!
-      'feedbackMessage' => $isNewSubscription ? 'Thanks for Signing Up to the service: Test Newsletter Service' : 'A subscription for this service is already registered for this email address',
+      'feedbackMessage' => $isNewSubscription ? $new_subscription[$language_code] ?? $new_subscription['en'] : $already_subscribed[$language_code] ?? $already_subscribed['en'],
       'language' => $language_code,
       'frequency' => 'On demand',
       'defaultLanguage' => '0',
