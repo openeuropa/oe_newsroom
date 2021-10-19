@@ -74,7 +74,7 @@ class SubscribeMultipleNewslettersLangTest extends BrowserTestBase {
     $page->selectFieldOption('Select the language of your received newsletter', 'German');
     $page->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
     $page->pressButton('Subscribe');
-    $assertSession->pageTextContains('Thanks for Signing Up to the service: Test Newsletter Service');
+    $assertSession->pageTextContains('Vielen Dank für Ihre Anmeldung zum Service: Test Newsletter Service');
   }
 
 }
