@@ -121,7 +121,7 @@ class UnsubscribeForm extends FormBase {
       ];
     }
     else {
-      $id = array_keys($distribution_list_options)[0];
+      $id = array_keys($distribution_list_options)[0] ?? '';
       $form['distribution_list'] = [
         '#type' => 'hidden',
         '#value' => $id,

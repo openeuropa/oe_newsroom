@@ -19,6 +19,7 @@ use Drupal\oe_newsroom_newsletter\Api\NewsroomMessengerInterface;
 use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ServerException;
+// @codingStandardsIgnoreLine
 use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -93,6 +94,9 @@ class SubscribeForm extends FormBase {
 
   /**
    * {@inheritdoc}
+   *
+   * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+   * @SuppressWarnings(PHPMD.NPathComplexity)
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     if (!$this->access()) {
@@ -109,7 +113,7 @@ class SubscribeForm extends FormBase {
     }
 
     $currentUser = $this->currentUser();
-    $config = $this->config(OeNewsroomNewsletter::OE_NEWSLETTER_CONFIG_VAR_NAME);
+    $config = $this->config(OeNewsroomNewsletter::CONFIG_NAME);
 
     // Choose the proper language according to the user setting or interface
     // settings.
@@ -197,7 +201,7 @@ class SubscribeForm extends FormBase {
     if (!empty($newsletters_language)) {
       $options = array_intersect_key($options, array_flip($newsletters_language));
     }
-    if (array_key_exists($selected_language, $options)) {
+    if (!array_key_exists($selected_language, $options)) {
       $selected_language = $newsletters_language_default;
     }
     if (count($options) > 1) {
@@ -283,7 +287,7 @@ class SubscribeForm extends FormBase {
    * {@inheritDoc}
    */
   protected function subscriptionMessage(array $subscription): void {
-    $config = $this->config(OeNewsroomNewsletter::OE_NEWSLETTER_CONFIG_VAR_NAME);
+    $config = $this->config(OeNewsroomNewsletter::CONFIG_NAME);
 
     if ($subscription['isNewSubscription'] === TRUE) {
       $success_message = $config->get('success_subscription_text');

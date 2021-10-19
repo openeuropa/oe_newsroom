@@ -31,7 +31,7 @@ class NewsroomMessenger extends NewsroomMessengerBase {
    *   Http client to send requests to the API.
    */
   public function __construct(ConfigFactoryInterface $configFactory, Settings $settings, ClientInterface $httpClient) {
-    $config = $configFactory->get(OeNewsroom::OE_NEWSLETTER_CONFIG_VAR_NAME);
+    $config = $configFactory->get(OeNewsroom::CONFIG_NAME);
 
     $this->privateKey = $settings::get('newsroom_api_private_key');
     $this->hashMethod = $config->get('hash_method');

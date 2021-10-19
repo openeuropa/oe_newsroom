@@ -104,7 +104,7 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
    * @return array
    *   Generated subscription array, similar to newsrooms one.
    */
-  protected function generateSubscriptionArray(string $universe, string $email, string $sv_id, string $language_code, bool $isNewSubscription) {
+  protected function generateSubscriptionArray(string $universe, string $email, string $sv_id, string $language_code, bool $isNewSubscription): array {
     // These are here google translations, but it will do the job to simulate
     // the original behaviour.
     $new_subscription = [

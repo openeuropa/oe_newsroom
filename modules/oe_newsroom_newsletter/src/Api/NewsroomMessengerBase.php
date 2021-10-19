@@ -263,10 +263,12 @@ class NewsroomMessengerBase implements NewsroomMessengerInterface {
         }
 
         $response = NULL;
+        // This is necessary to split separately newsletters distribion lists.
+        $sv_ids_separated = explode(',', implode(',', $svIds));
         // @todo Support multiple distribution list in a better way.
         foreach ($data as $subscription_item) {
           // This will fetch only the first item found.
-          if (in_array($subscription_item['newsletterId'], $svIds, FALSE)) {
+          if (in_array($subscription_item['newsletterId'], $sv_ids_separated, FALSE)) {
             $response = $subscription_item;
             break;
           }
@@ -292,9 +294,12 @@ class NewsroomMessengerBase implements NewsroomMessengerInterface {
     $this->subscriptionServiceConfigured();
 
     try {
+      // This is necessary to split separately newsletters distribion lists.
+      $sv_ids_separated = explode(',', implode(',', $svIds));
+
       // The API does not support multiple unsubscription, so we need to call it
       // one by one.
-      foreach ($svIds as $svId) {
+      foreach ($sv_ids_separated as $svId) {
         $options = [
           'query' => [
             'user_email' => $this->normalized ? mb_strtolower($email) : $email,

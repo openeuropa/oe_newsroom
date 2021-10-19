@@ -19,7 +19,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
    */
   protected function getEditableConfigNames() {
     return [
-      OeNewsroomNewsletter::OE_NEWSLETTER_CONFIG_VAR_NAME,
+      OeNewsroomNewsletter::CONFIG_NAME,
     ];
   }
 
@@ -34,7 +34,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->config(OeNewsroomNewsletter::OE_NEWSLETTER_CONFIG_VAR_NAME);
+    $config = $this->config(OeNewsroomNewsletter::CONFIG_NAME);
 
     $form['intro_text'] = [
       '#type' => 'textarea',
@@ -100,7 +100,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
 
-    $this->config(OeNewsroomNewsletter::OE_NEWSLETTER_CONFIG_VAR_NAME)
+    $this->config(OeNewsroomNewsletter::CONFIG_NAME)
       ->set('intro_text', $form_state->getValue('intro_text'))
       ->set('success_subscription_text', $form_state->getValue('success_subscription_text'))
       ->set('already_registered_text', $form_state->getValue('already_registered_text'))
