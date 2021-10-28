@@ -1,0 +1,12 @@
+name: OpenEuropa Newsroom Newsletter Mock
+description: OpenEuropa Newsroom Newsletter module, provides integration to Newsroom's Newsletter mock service.
+package: OpenEuropa
+php: 7.3
+core_version_requirement: ^8 || ^9
+
+dependencies:
+  - drupal:oe_newsroom_newsletter
+  - drupal:http_request_mock
+
+type: module
+core: 8.x

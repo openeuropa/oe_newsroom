@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * @file
+ * OpenEuropa module.
+ */
+
+declare(strict_types = 1);
+
+/**
+ * Implements hook_local_tasks_alter().
+ */
+function oe_newsroom_newsletter_local_tasks_alter(&$local_tasks) {
+  // Redirect original configuration translation tab to second level, with this
+  // it will make more sense on the UI and fixing the tab display issue too.
+  if (!empty($local_tasks['config_translation.local_tasks:config_translation.item.overview.oe_newsroom_newsletter.settings_form'])) {
+    $local_tasks['config_translation.local_tasks:config_translation.item.overview.oe_newsroom_newsletter.settings_form']['parent_id'] = 'oe_newsroom_newsletter.settings_form_tab.collection';
+  }
+}

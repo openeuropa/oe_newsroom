@@ -1,0 +1,64 @@
+oe_newsroom_newsletter.settings:
+  type: config_object
+  label: 'Newsroom settings'
+  mapping:
+    intro_text:
+      type: label
+      label: 'Introduction text on the subscription page'
+    link_classes:
+      type: string
+      label: 'Extra link classes'
+    privacy_uri:
+      type: label
+      label: 'Privacy url'
+    success_subscription_text:
+      type: label
+      label: 'Message displayed if a subscriber successfully subscribed to the service'
+    already_registered_text:
+      type: label
+      label: 'Message displayed if a subscriber is already subscribed'
+
+block.settings.oe_newsroom_newsletter_subscription_block:
+  type: block_settings
+  label: 'Newsletter Subscription Block'
+  mapping:
+    newsletters_language:
+      type: sequence
+      label: 'Array of selectable languages for newsletter'
+      sequence:
+        type: string
+        label: 'Language code'
+    newsletters_language_default:
+      type: string
+      label: 'Default language for newsletter'
+    distribution_list:
+      type: sequence
+      label: 'Array of distribution list values'
+      sequence:
+        type: mapping
+        label: 'Distribution list values'
+        mapping:
+          sv_id:
+            type: string
+            label: 'SV ID from Newsroom'
+          name:
+            type: label
+            label: 'Name of the distribution list'
+
+block.settings.oe_newsroom_newsletter_unsubscription_block:
+  type: block_settings
+  label: 'Newsletter Unsubscription Block'
+  mapping:
+    distribution_list:
+      type: sequence
+      label: 'Array of distribution list values'
+      sequence:
+        type: mapping
+        label: 'Distribution list values'
+        mapping:
+          sv_id:
+            type: string
+            label: 'SV ID from Newsroom'
+          name:
+            type: label
+            label: 'Name of the distribution list'

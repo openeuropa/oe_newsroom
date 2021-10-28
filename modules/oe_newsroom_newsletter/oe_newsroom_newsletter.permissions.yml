@@ -1,0 +1,9 @@
+subscribe to newsletter:
+  title: 'Subscribe to newsletter'
+  description: 'Allows users to subscribe'
+unsubscribe from newsletter:
+  title: 'Unsubscribe from newsletter'
+  description: 'Allows users from unsubscribe'
+manage newsroom newsletter settings:
+  title: 'Manage newsroom newsletter settings'
+  description: 'Allows users to configure newsroom newsletter'

@@ -1,0 +1,16 @@
+oe_newsroom_newsletter.settings_form:
+  path: '/admin/config/system/newsroom-settings/newsletter'
+  defaults:
+    _form: '\Drupal\oe_newsroom_newsletter\Form\NewsroomSettingsForm'
+    _title: 'Newsroom Settings Form'
+  requirements:
+    _permission: 'manage newsroom newsletter settings'
+  options:
+    _admin_route: TRUE
+
+oe_newsroom_newsletter.settings_form_translate:
+  path: '/admin/config/system/newsroom-settings/newsletter/translate'
+  requirements:
+    _permission: 'manage newsroom newsletter settings'
+  options:
+    _admin_route: TRUE
