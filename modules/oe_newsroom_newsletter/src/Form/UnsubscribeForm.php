@@ -8,11 +8,9 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\oe_newsroom\Exception\InvalidApiConfiguration;
-use Drupal\oe_newsroom\NewsroomMessengerFactoryInterface;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomMessenger;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomMessengerInterface;
+use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
+use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ServerException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -21,7 +19,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Subscribe Form.
  *
  * Arguments:
- *  - A distribution list array
+ *  - A distribution lists array
  *    ex. array(0 => array('sv_id' => 20, 'name' => 'XY Newsletter'))
  */
 class UnsubscribeForm extends FormBase {
@@ -29,15 +27,15 @@ class UnsubscribeForm extends FormBase {
   /**
    * API for newsroom calls.
    *
-   * @var \Drupal\oe_newsroom_newsletter\Api\NewsroomMessengerInterface
+   * @var \Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface
    */
-  protected $newsroomMessenger;
+  protected $newsroomClient;
 
   /**
    * {@inheritDoc}
    */
-  public function __construct(NewsroomMessengerInterface $newsroomMessenger) {
-    $this->newsroomMessenger = $newsroomMessenger;
+  public function __construct(NewsroomClientInterface $newsroomClient) {
+    $this->newsroomClient = $newsroomClient;
   }
 
   /**
@@ -45,7 +43,7 @@ class UnsubscribeForm extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      NewsroomMessenger::create($container)
+      NewsroomClient::create($container)
     );
   }
 
@@ -57,37 +55,9 @@ class UnsubscribeForm extends FormBase {
   }
 
   /**
-   * Gives back whatever the user has access to the for or not.
-   *
-   * @param \Drupal\Core\Session\AccountInterface|null $account
-   *   A user to check, in case of null the current user will be checked.
-   *
-   * @return bool
-   *   True if user has access otherwise false.
-   */
-  public function access(AccountInterface $account = NULL): bool {
-    if ($account === NULL) {
-      $account = $this->currentUser();
-    }
-
-    return $account->hasPermission('unsubscribe from newsletter');
-  }
-
-  /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
-    if (!$this->access()) {
-      return [];
-    }
-
-    // Read some values from the argument.
-    $distribution_list = $form_state->getBuildInfo()['args'][0] ?? [];
-
-    if (empty($distribution_list)) {
-      throw new \InvalidArgumentException($this->t('No distribution list is selected')->render());
-    }
-
+  public function buildForm(array $form, FormStateInterface $form_state, array $distribution_lists = []) {
     $currentUser = $this->currentUser();
 
     // Add wrapper for ajax.
@@ -101,31 +71,24 @@ class UnsubscribeForm extends FormBase {
     $form['email'] = [
       '#type' => 'email',
       '#title' => $this->t('Your e-mail'),
-      '#weight' => '0',
       '#default_value' => $currentUser->isAnonymous() ? '' : $currentUser->getEmail(),
       '#required' => TRUE,
     ];
-    $distribution_lists = $distribution_list;
-    $distribution_list_options = [];
-    foreach ($distribution_lists as $distribution_list) {
-      $distribution_list_options[$distribution_list['sv_id']] = $distribution_list['name'];
-    }
-    if (count($distribution_list_options) > 1) {
-      $form['distribution_list'] = [
+    if (count($distribution_lists) > 1) {
+      $options = array_column($distribution_lists, 'name', 'sv_id');
+      $form['distribution_lists'] = [
         '#type' => 'checkboxes',
-        '#title' => $this->t('Newsletter lists'),
+        '#title' => $this->t('Newsletters'),
         '#description' => $this->t('Please select which newsletter list interests you.'),
-        '#options' => $distribution_list_options,
-        '#weight' => '0',
+        '#options' => $options,
         '#required' => TRUE,
       ];
     }
     else {
-      $id = array_keys($distribution_list_options)[0] ?? '';
-      $form['distribution_list'] = [
-        '#type' => 'hidden',
+      $id = $distribution_lists[0]['sv_id'];
+      $form['distribution_lists'] = [
+        '#type' => 'value',
         '#value' => $id,
-        '#default_value' => $id,
       ];
     }
     $form['actions'] = [
@@ -149,11 +112,11 @@ class UnsubscribeForm extends FormBase {
     // Get form values.
     $values = $form_state->getValues();
 
-    $distribution_list = is_array($values['distribution_list']) ? array_keys(array_filter($values['distribution_list'])) : [$values['distribution_list']];
+    $distribution_lists = is_array($values['distribution_lists']) ? array_keys(array_filter($values['distribution_lists'])) : [$values['distribution_lists']];
 
     try {
       // Let's call the subscription service.
-      if ($this->newsroomMessenger->unsubscribe($values['email'], $distribution_list)) {
+      if ($this->newsroomClient->unsubscribe($values['email'], $distribution_lists)) {
         $this->messenger()->addStatus($this->t('Successfully unsubscribed!'));
       }
       else {

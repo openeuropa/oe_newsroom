@@ -4,9 +4,10 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_newsroom_newsletter\Form;
 
+use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\multivalue_form_element\Element\MultiValue;
+use Drupal\Core\Url;
 use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 
 /**
@@ -36,61 +37,72 @@ class NewsroomSettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config(OeNewsroomNewsletter::CONFIG_NAME);
 
-    $form['intro_text'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Introduction text'),
-      '#description' => $this->t('Text which will show on top of the page'),
-      '#maxlength' => 128,
-      '#size' => 64,
-      '#default_value' => $config->get('intro_text'),
-      '#required' => TRUE,
-    ];
-    $form['success_subscription_text'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Message in case of successful subscription'),
-      '#description' => $this->t('Text which will shown if the user successfully subscribed to the newsletters, if not provided the newsrooms API message will be used.'),
-      '#maxlength' => 128,
-      '#size' => 64,
-      '#default_value' => $config->get('success_subscription_text'),
-    ];
-    $form['already_registered_text'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Message in case if user is already registered'),
-      '#description' => $this->t('Text which will shown if the user is already subscribed to the newsletters when he tries to subscribe, if not provided the newsrooms API message will be used.'),
-      '#maxlength' => 128,
-      '#size' => 64,
-      '#default_value' => $config->get('already_registered_text'),
-    ];
     $form['privacy_uri'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Privacy uri'),
-      '#description' => $this->t("Provide here a relative or absolute url for the privacy page.<br>
-       If it's an internal relative page use like: / for homepage, /node/2 for node page, /contact for aliases.<br>
-       If it's an external page use like: https://ec.europa.eu or http://ec.europa.eu .
-       Use [lang_code] as a language token. It will be replaced both in internal and external URLs. If you use internal which is not an alias URL, then it's not required to use the token to have language support.
-       Internal absolute url is not suggested, however it's possible like the external page usage."),
+      '#title' => $this->t('Privacy URL'),
+      '#description' => $this->t(
+        "URL to the privacy page. Enter an internal path such as %internal or an external URL such as %url. Enter %front to link to the front page. Use %lang_code as a language token.",
+        [
+          '%front' => '<front>',
+          '%internal' => '/node/2',
+          '%url' => 'https://ec.europa.eu',
+          '%lang_code' => '[lang_code]',
+        ]
+      ),
       '#maxlength' => 255,
-      '#size' => 64,
       '#default_value' => $config->get('privacy_uri'),
       '#required' => TRUE,
-    ];
-    $form['link_classes'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Link class'),
-      '#description' => $this->t("Custom classes for the privacy link."),
-      '#default_value' => $config->get('link_classes'),
     ];
     return parent::buildForm($form, $form_state);
   }
 
   /**
    * {@inheritdoc}
+   *
+   * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+   * @SuppressWarnings(PHPMD.NPathComplexity)
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    parent::validateForm($form, $form_state);
+    $uri = trim($form['privacy_uri']['#value']);
 
-    if (!empty($form_state->getValue('newsletters_language')) && !in_array($form_state->getValue('newsletters_language_default'), $form_state->getValue('newsletters_language'))) {
-      $form_state->setError($form['newsletters_language_default'], $this->t('The default language should be part of the possible newsletter languages.'));
+    if (parse_url($uri, PHP_URL_SCHEME) === NULL) {
+      if (strpos($uri, '<front>') !== FALSE && $uri !== '<front>') {
+        // Only support the <front> token if it's on its own.
+        $form_state->setError($form['privacy_uri'], t('The path %uri is invalid.', ['%uri' => $uri]));
+        return;
+      }
+
+      if (strpos($uri, '<front>') === 0) {
+        $uri = '/' . substr($uri, strlen('<front>'));
+      }
+      $uri = 'internal:' . $uri;
+    }
+
+    // @see \Drupal\link\Plugin\Field\FieldWidget\LinkWidget::validateUriElement()
+    if (
+      parse_url($uri, PHP_URL_SCHEME) === 'internal'
+      && !in_array($form['privacy_uri']['#value'][0], [
+        '/',
+        '?',
+        '#',
+      ], TRUE)
+      && substr($form['privacy_uri']['#value'], 0, strlen('<front>')) !== '<front>'
+    ) {
+      $form_state->setError($form['privacy_uri'], t('The specified target is invalid. Manually entered paths should start with one of the following characters: / ? #'));
+      return;
+    }
+
+    try {
+      $url = Url::fromUri($uri);
+      $url->toString(TRUE);
+    }
+    catch (\Exception $exception) {
+      // Mark the url as invalid if any kind of exception is being thrown by
+      // the Url class.
+      $url = FALSE;
+    }
+    if ($url === FALSE || ($url->isExternal() && !in_array(parse_url($url->getUri(), PHP_URL_SCHEME), UrlHelper::getAllowedProtocols()))) {
+      $form_state->setError($form['privacy_uri'], t('The path %uri is invalid.', ['%uri' => $uri]));
     }
   }
 
@@ -101,11 +113,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
     parent::submitForm($form, $form_state);
 
     $this->config(OeNewsroomNewsletter::CONFIG_NAME)
-      ->set('intro_text', $form_state->getValue('intro_text'))
-      ->set('success_subscription_text', $form_state->getValue('success_subscription_text'))
-      ->set('already_registered_text', $form_state->getValue('already_registered_text'))
       ->set('privacy_uri', $form_state->getValue('privacy_uri'))
-      ->set('link_classes', $form_state->getValue('link_classes'))
       ->save();
   }
 

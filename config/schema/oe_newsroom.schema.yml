@@ -4,21 +4,13 @@ oe_newsroom.settings:
   mapping:
     hash_method:
       type: string
-      label: 'Used hashing method'
+      label: 'Hashing method'
     normalized:
       type: boolean
-      label: 'E-mail address should be normalized?'
+      label: 'Normalize e-mail address'
     universe:
       type: string
-      label: 'Universe ID from Newsroom'
-    app:
+      label: 'Newsroom universe ID'
+    app_id:
       type: string
-      label: 'App ID from Newsroom'
-
-oe_newsroom.messenger:
-  type: config_object
-  label: 'Messenger config'
-  mapping:
-    class:
-      type: string
-      label: 'Messenger class'
+      label: 'Newsroom app ID'

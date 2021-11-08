@@ -4,18 +4,18 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_newsroom_newsletter\Form;
 
-use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Link;
-use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
 use Drupal\oe_newsroom\Exception\InvalidApiConfiguration;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomMessenger;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomMessengerInterface;
+use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
+use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ServerException;
@@ -27,21 +27,25 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Subscribe Form.
  *
  * Arguments:
- *  - A distribution list array
+ *  - A distribution lists array
  *    ex. array(0 => array('sv_id' => 20, 'name' => 'XY Newsletter'))
  *  - A selectable list array of languages
  *    ex. array(0 => 'de', 1 => 'en')
  *  - A default language string
  *    ex. 'en'
+ *  - An intro text string
+ *    ex. 'This is the introduction text.'
+ *  - A successful subscription message string
+ *    ex. 'Subscribed.'
  */
 class SubscribeForm extends FormBase {
 
   /**
    * API for newsroom calls.
    *
-   * @var \Drupal\oe_newsroom_newsletter\Api\NewsroomMessengerInterface
+   * @var \Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface
    */
-  protected $newsroomMessenger;
+  protected $newsroomClient;
 
   /**
    * Language manager.
@@ -51,11 +55,27 @@ class SubscribeForm extends FormBase {
   protected $languageManager;
 
   /**
+   * Successful subscription message.
+   *
+   * @var string
+   */
+  protected $successfulMessage;
+
+  /**
+   * Account proxy.
+   *
+   * @var \Drupal\Core\Session\AccountProxyInterface
+   */
+  private $accountProxy;
+
+  /**
    * {@inheritDoc}
    */
-  public function __construct(NewsroomMessengerInterface $newsroomMessenger, LanguageManagerInterface $languageManager) {
-    $this->newsroomMessenger = $newsroomMessenger;
+  public function __construct(NewsroomClientInterface $newsroomClient, LanguageManagerInterface $languageManager, AccountProxyInterface $accountProxy, MessengerInterface $messenger) {
+    $this->newsroomClient = $newsroomClient;
     $this->languageManager = $languageManager;
+    $this->accountProxy = $accountProxy;
+    $this->messenger = $messenger;
   }
 
   /**
@@ -63,8 +83,10 @@ class SubscribeForm extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      NewsroomMessenger::create($container),
-      $container->get('language_manager')
+      NewsroomClient::create($container),
+      $container->get('language_manager'),
+      $container->get('current_user'),
+      $container->get('messenger')
     );
   }
 
@@ -76,72 +98,33 @@ class SubscribeForm extends FormBase {
   }
 
   /**
-   * Gives back whatever the user has access to the for or not.
-   *
-   * @param \Drupal\Core\Session\AccountInterface|null $account
-   *   A user to check, in case of null the current user will be checked.
-   *
-   * @return bool
-   *   True if user has access otherwise false.
-   */
-  public function access(AccountInterface $account = NULL): bool {
-    if ($account === NULL) {
-      $account = $this->currentUser();
-    }
-
-    return $account->hasPermission('subscribe to newsletter');
-  }
-
-  /**
    * {@inheritdoc}
    *
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    * @SuppressWarnings(PHPMD.NPathComplexity)
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
-    if (!$this->access()) {
-      return [];
-    }
-
-    // Read some values from the argument.
-    $distribution_list = $form_state->getBuildInfo()['args'][0] ?? [];
-    $newsletters_language = $form_state->getBuildInfo()['args'][1] ?? [];
-    $newsletters_language_default = $form_state->getBuildInfo()['args'][2] ?? '';
-
-    if (empty($distribution_list)) {
-      throw new InvalidArgumentException($this->t('No distribution list is selected')->render());
-    }
-
-    $currentUser = $this->currentUser();
+  public function buildForm(array $form, FormStateInterface $form_state, array $distribution_lists = [], array $newsletters_language = [], string $newsletters_language_default = '', string $intro_text = '', string $successful_message = '') {
     $config = $this->config(OeNewsroomNewsletter::CONFIG_NAME);
+    $this->successfulMessage = $successful_message;
 
     // Choose the proper language according to the user setting or interface
     // settings.
     $selected_language = $ui_language = $this->languageManager->getCurrentLanguage()->getId();
-    if (!$currentUser->isAnonymous() && $currentUser->getPreferredLangcode(FALSE) !== '') {
-      $selected_language = $currentUser->getPreferredLangcode(FALSE);
+    if (!$this->accountProxy->isAnonymous() && $this->accountProxy->getPreferredLangcode(FALSE) !== '') {
+      $selected_language = $this->accountProxy->getPreferredLangcode(FALSE);
     }
 
-    $path = str_replace('[lang_code]', str_replace('pt-pt', 'pt', $ui_language), $config->get('privacy_uri'));
-    if (empty($path)) {
-      $this->messenger()->addWarning($this->t('Subscription form can be only used after privacy url is set.'));
-      return [
-        '#markup' => '',
-      ];
-    }
+    $attributes['attributes']['class'][] = 'oe-newsroom__privacy-url';
 
-    $attributes = [];
-    if (!empty($config->get('link_classes'))) {
-      $attributes['attributes'] = [
-        'class' => explode(' ', $config->get('link_classes')),
-      ];
+    $uri = $config->get('privacy_uri');
+    if (parse_url($uri, PHP_URL_SCHEME) === NULL) {
+      if (strpos($uri, '<front>') === 0) {
+        $uri = '/' . substr($uri, strlen('<front>'));
+      }
+      $uri = 'internal:' . $uri;
     }
-    if (UrlHelper::isExternal($path)) {
-      $privacy_uri = Url::fromUri($path, $attributes);
-    }
-    else {
-      $privacy_uri = Url::fromUserInput($path, $attributes);
-    }
+    // @todo Adapt to the common OE approach for pt-pt.
+    $uri = str_replace('[lang_code]', str_replace('pt-pt', 'pt', $ui_language), $uri);
 
     // Add wrapper for ajax.
     // @todo I think this will break if somebody puts multiple subscription form
@@ -153,53 +136,41 @@ class SubscribeForm extends FormBase {
     // Start building up form.
     $form['intro_text'] = [
       '#type' => 'container',
-      '#attributes' => [
-        'class' => [
-          'edit-intro-text',
-        ],
-      ],
     ];
-    $form['intro_text']['div_value'] = [
-      '#markup' => $config->get('intro_text'),
+    $form['intro_text']['content'] = [
+      '#markup' => $intro_text,
     ];
 
     $form['email'] = [
       '#type' => 'email',
       '#title' => $this->t('Your e-mail'),
-      '#weight' => '0',
-      '#default_value' => $currentUser->isAnonymous() ? '' : $currentUser->getEmail(),
+      '#default_value' => $this->accountProxy->isAnonymous() ? '' : $this->accountProxy->getEmail(),
       '#required' => TRUE,
     ];
-    $distribution_lists = $distribution_list;
-    $distribution_list_options = [];
-    foreach ($distribution_lists as $distribution_list) {
-      $distribution_list_options[$distribution_list['sv_id']] = $distribution_list['name'];
-    }
-    if (count($distribution_list_options) > 1) {
-      $form['distribution_list'] = [
+    if (count($distribution_lists) > 1) {
+      $options = array_column($distribution_lists, 'name', 'sv_id');
+      $form['distribution_lists'] = [
         '#type' => 'checkboxes',
-        '#title' => $this->t('Newsletter lists'),
+        '#title' => $this->t('Newsletters'),
         '#description' => $this->t('Please select which newsletter list interests you.'),
-        '#options' => $distribution_list_options,
-        '#weight' => '0',
+        '#options' => $options,
         '#required' => TRUE,
       ];
     }
     else {
-      $id = array_keys($distribution_list_options)[0];
-      $form['distribution_list'] = [
-        '#type' => 'hidden',
+      $id = $distribution_lists[0]['sv_id'];
+      $form['distribution_lists'] = [
+        '#type' => 'value',
         '#value' => $id,
-        '#default_value' => $id,
       ];
     }
     $languages = $this->languageManager->getLanguages();
+    if (!empty($newsletters_language)) {
+      $languages = array_intersect_key($languages, array_flip($newsletters_language));
+    }
     $options = [];
     foreach ($languages as $language) {
       $options[$language->getId()] = $language->getName();
-    }
-    if (!empty($newsletters_language)) {
-      $options = array_intersect_key($options, array_flip($newsletters_language));
     }
     if (!array_key_exists($selected_language, $options)) {
       $selected_language = $newsletters_language_default;
@@ -207,24 +178,22 @@ class SubscribeForm extends FormBase {
     if (count($options) > 1) {
       $form['newsletters_language'] = [
         '#type' => 'select',
-        '#title' => $this->t('Select the language of your received newsletter'),
+        '#title' => $this->t('Select the language in which you want to receive the newsletters'),
         '#options' => $options,
         '#default_value' => $selected_language,
-        '#weight' => '0',
       ];
     }
     else {
       $form['newsletters_language'] = [
-        '#type' => 'hidden',
+        '#type' => 'value',
         '#value' => $selected_language,
-        '#default_value' => $selected_language,
       ];
     }
     $form['agree_privacy_statement'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link', ['@privacy_link' => Link::fromTextAndUrl($this->t('privacy statement'), $privacy_uri)->toString()]),
-      '#weight' => '0',
-      '#required' => TRUE,
+      // @todo Confirm if it's the correct way of translating text with a link.
+      '#title' => $this->t('By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link', ['@privacy_link' => Link::fromTextAndUrl($this->t('privacy statement'), Url::fromUri($uri, $attributes))->toString()]),
+      '#element_validate' => ['::validatePrivacyElement'],
     ];
     $form['actions'] = [
       '#type' => 'actions',
@@ -242,6 +211,15 @@ class SubscribeForm extends FormBase {
 
   /**
    * {@inheritdoc}
+   */
+  public function validatePrivacyElement($element, FormStateInterface $form_state, $form) {
+    if (empty($element['#value'])) {
+      $form_state->setError($form['agree_privacy_statement'], t('You must agree with the privacy statement.'));
+    }
+  }
+
+  /**
+   * {@inheritdoc}
    *
    * @throws \GuzzleHttp\Exception\GuzzleException
    */
@@ -249,60 +227,48 @@ class SubscribeForm extends FormBase {
     // Get form values.
     $values = $form_state->getValues();
 
-    $distribution_list = is_array($values['distribution_list']) ? array_keys(array_filter($values['distribution_list'])) : [$values['distribution_list']];
+    $distribution_lists = is_array($values['distribution_lists']) ? array_keys(array_filter($values['distribution_lists'])) : [$values['distribution_lists']];
 
     try {
       // Let's call the subscription service.
-      $response = $this->newsroomMessenger->subscribe($values['email'], $distribution_list, [], $values['newsletters_language']);
+      $response = $this->newsroomClient->subscribe($values['email'], $distribution_lists, [], $values['newsletters_language']);
       // Set response (if there is) into form state, if somebody need it.
       if (is_array($response)) {
         $form_state->set('subscription', $response);
 
         // Set the correct message here.
-        $this->subscriptionMessage($response);
+        $this->subscriptionMessage($response, $this->successfulMessage);
       }
     }
     catch (InvalidArgumentException $e) {
-      $this->messenger()->addError($e->getMessage());
+      $this->messenger->addError($e->getMessage());
     }
     catch (InvalidApiConfiguration $e) {
-      $this->messenger()->addError($e->getMessage());
+      $this->messenger->addError($e->getMessage());
     }
     catch (ServerException $e) {
-      $this->logger('oe_newsroom_newsletter')->error('An error occurred with %code code and a %message message in the %file file %line line.\n\rTrace: %trace', [
+      $this->getLogger('oe_newsroom_newsletter')->error('Exception thrown while subscribing with %code code and a %message message in the %file file %line line.\n\rTrace: %trace', [
         '%code' => $e->getCode(),
         '%message' => $e->getMessage(),
         '%file' => $e->getFile(),
         '%line' => $e->getLine(),
         '%trace' => $e->getTraceAsString(),
       ]);
-      $this->messenger()->addError($this->t('An error happened in the communication. If this persist, connect with the site owner.'));
     }
     catch (BadResponseException $e) {
-      $this->messenger()->addError($e->getMessage());
+      $this->messenger->addError($e->getMessage());
     }
   }
 
   /**
    * {@inheritDoc}
    */
-  protected function subscriptionMessage(array $subscription): void {
+  protected function subscriptionMessage(array $subscription, string $success_message): void {
     $config = $this->config(OeNewsroomNewsletter::CONFIG_NAME);
 
-    if ($subscription['isNewSubscription'] === TRUE) {
-      $success_message = $config->get('success_subscription_text');
-      // Success message should be translatable and it can be set from the
-      // Newsroom Settings Form.
-      // @codingStandardsIgnoreLine
-      $this->messenger()->addStatus(empty($success_message) ? trim($subscription['feedbackMessage']) : $success_message);
-    }
-    else {
-      $already_reg_message = $config->get('already_registered_text');
-      // Already registered message should be translatable and it can be set
-      // from the Newsroom Settings Form.
-      // @codingStandardsIgnoreLine
-      $this->messenger()->addWarning(empty($already_reg_message) ? trim($subscription['feedbackMessage']) : $already_reg_message);
-    }
+    // Success message should be translatable and it can be set from the
+    // Newsroom Settings Form.
+    $this->messenger->addStatus(empty($success_message) ? trim($subscription['feedbackMessage']) : $success_message);
   }
 
   /**

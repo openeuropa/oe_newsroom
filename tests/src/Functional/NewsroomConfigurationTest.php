@@ -10,7 +10,7 @@ use Drupal\Tests\BrowserTestBase;
 /**
  * Test the Newsroom API configuration.
  *
- * @group oe_newsroom_newsletter
+ * @group oe_newsroom
  */
 class NewsroomConfigurationTest extends BrowserTestBase {
 
@@ -27,14 +27,22 @@ class NewsroomConfigurationTest extends BrowserTestBase {
   protected $defaultTheme = 'stark';
 
   /**
-   * Test if the Newsroom factory retrieves the correct configuration values.
-   *
-   * @group oe_newsroom
+   * Test the Newsroom configuration page.
    */
-  public function testNewsroomConfiguration(): void {
+  public function testNewsroomConfigurationPage(): void {
     $assertSession = $this->assertSession();
     $session = $this->getSession();
     $page = $session->getPage();
+
+    // Anonymous doesn't have access to the page.
+    $this->drupalGet('admin/config/system/newsroom-settings');
+    $this->assertSession()->statusCodeEquals(403);
+
+    // User without permission doesn't have access to the page.
+    $user = $this->createUser();
+    $this->drupalLogin($user);
+    $this->drupalGet('admin/config/system/newsroom-settings');
+    $this->assertSession()->statusCodeEquals(403);
 
     $user = $this->createUser([
       'manage newsroom settings',
@@ -42,9 +50,12 @@ class NewsroomConfigurationTest extends BrowserTestBase {
     $this->drupalLogin($user);
     $this->drupalGet('admin/config/system/newsroom-settings');
     $assertSession->elementAttributeContains('css', 'input#edit-universe', 'required', 'required');
-    $assertSession->elementAttributeContains('css', 'input#edit-app', 'required', 'required');
-    $page->fillField('Universe Acronym', 'Site1');
-    $page->fillField('App', 'Site1_app');
+    $assertSession->elementAttributeContains('css', 'input#edit-app-id', 'required', 'required');
+    $page->fillField('Universe acronym', 'Site1');
+    $page->fillField('App ID', 'Site1_app');
+    $page->hasSelect('Hash method');
+    $assertSession->optionExists('Hash method', 'SHA-256');
+    $assertSession->optionExists('Hash method', 'MD5');
     $page->hasCheckedField('Is normalized?');
     $page->pressButton('Save configuration');
     $assertSession->pageTextContains('The configuration options have been saved.');
@@ -52,9 +63,9 @@ class NewsroomConfigurationTest extends BrowserTestBase {
     // Validate the saved values.
     $config = $this->config(OeNewsroom::CONFIG_NAME);
     $this->assertEquals('sha256', $config->get('hash_method'));
-    $this->assertEquals('1', $config->get('normalized'));
+    $this->assertTrue($config->get('normalized'));
     $this->assertEquals('Site1', $config->get('universe'));
-    $this->assertEquals('Site1_app', $config->get('app'));
+    $this->assertEquals('Site1_app', $config->get('app_id'));
   }
 
 }

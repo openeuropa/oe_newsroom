@@ -2,7 +2,6 @@
 .gitattributes
 .idea
 .env
-behat.yml
 build
 composer.lock
 docker-compose.*.yml

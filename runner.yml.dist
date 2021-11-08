@@ -1,15 +1,15 @@
 drupal:
   root: "build"
-  base_url: ${env.DRUPAL_BASE_URL}
+  base_url: "http://web:8080/build"
   site:
     name: "OpenEuropa"
     profile: "minimal"
   database:
-    host: ${env.DRUPAL_DATABASE_HOST}
-    port: ${env.DRUPAL_DATABASE_PORT}
-    name: ${env.DRUPAL_DATABASE_NAME}
-    user: ${env.DRUPAL_DATABASE_USERNAME}
-    password: ''
+    host: "mysql"
+    port: "3306"
+    name: "oe_newsroom"
+    user: "root"
+    password: ""
   post_install:
     # Prepare the instance.
     - "./vendor/bin/drush en toolbar -y"
@@ -23,9 +23,6 @@ drupal:
     - "./vendor/bin/drush en oe_newsroom -y"
     - "./vendor/bin/drush en oe_newsroom_newsletter -y"
     - "./vendor/bin/drush cr"
-  additional_settings: |
-    $settings['file_private_path'] = getenv('DRUPAL_PRIVATE_FILE_SYSTEM');
-    $settings['newsroom_api_private_key'] = getenv('NEWSROOM_API_PRIVATE_KEY');
   settings:
     settings:
       file_scan_ignore_directories:
@@ -33,15 +30,13 @@ drupal:
         - "bower_components"
         - "vendor"
         - "${drupal.root}"
-
-behat:
-  drupal_base_url: ${env.DRUPAL_BEHAT_BASE_URL}
-  tags: ~@wip
+      oe_newsroom:
+        newsroom_api_key: ${env.NEWSROOM_API_PRIVATE_KEY}
 
 selenium:
-  host: ${env.SELENIUM_HOST}
-  port: ${env.SELENIUM_PORT}
-  browser: ${env.SELENIUM_BROWSER}
+  host: "http://selenium"
+  port: "4444"
+  browser: "chrome"
 
 commands:
   drupal:site-setup:
@@ -49,8 +44,5 @@ commands:
     - { task: "run", command: "drupal:drush-setup" }
     - { task: "run", command: "drupal:settings-setup" }
     - { task: "run", command: "setup:phpunit" }
-    - { task: "run", command: "setup:behat" }
   setup:phpunit:
     - { task: "process", source: "phpunit.xml.dist", destination: "phpunit.xml" }
-  setup:behat:
-    - { task: "process", source: "behat.yml.dist", destination: "behat.yml" }

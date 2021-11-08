@@ -11,17 +11,16 @@ use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\multivalue_form_element\Element\MultiValue;
 use Drupal\oe_newsroom_newsletter\Form\UnsubscribeForm;
 use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Provides a Newsletter Unsubscription Block.
+ * Provides a Newsletter unsubscription block.
  *
  * @Block(
  *   id = "oe_newsroom_newsletter_unsubscription_block",
- *   admin_label = @Translation("Newsletter Unsubscription Block"),
+ *   admin_label = @Translation("Newsletter unsubscription block"),
  *   category = @Translation("OE Newsroom Newsletter")
  * )
  */
@@ -62,27 +61,25 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
 
     $config = $this->getConfiguration();
 
-    $form['distribution_list'] = [
+    $form['distribution_lists'] = [
       '#type' => 'multivalue',
       '#title' => $this->t('Newsletter distribution lists'),
       '#description' => $this->t("If there's a single choice here, it will remain hidden on the (un)subscription form."),
-      '#cardinality' => MultiValue::CARDINALITY_UNLIMITED,
+      '#cardinality' => 5,
       '#required' => TRUE,
       'sv_id' => [
         '#type' => 'textfield',
         '#title' => $this->t('Sv IDs'),
-        '#description' => $this->t('ID(s) of the newsletter/distribution list'),
+        '#description' => $this->t('Comma-separated list of newsletter/distribution list IDs.'),
         '#maxlength' => 128,
-        '#size' => 64,
       ],
       'name' => [
         '#type' => 'textfield',
         '#title' => $this->t('Name of the distribution list'),
-        '#description' => $this->t('This is used to help identify for the user which list it want to subscribe.'),
+        '#description' => $this->t('This is used to help the user identify which list they want to unsubscribe from.'),
         '#maxlength' => 128,
-        '#size' => 64,
       ],
-      '#default_value' => $config['distribution_list'] ?? [],
+      '#default_value' => $config['distribution_lists'] ?? [],
     ];
 
     return $form;
@@ -93,21 +90,21 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
    */
   public function blockSubmit($form, FormStateInterface $form_state) {
     parent::blockSubmit($form, $form_state);
-    $this->configuration['distribution_list'] = $form_state->getValue('distribution_list');
+    $this->configuration['distribution_lists'] = $form_state->getValue('distribution_lists');
   }
 
   /**
    * {@inheritdoc}
    */
   public function build() {
-    return $this->formBuilder->getForm(UnsubscribeForm::class, $this->configuration['distribution_list']);
+    return $this->formBuilder->getForm(UnsubscribeForm::class, $this->configuration['distribution_lists']);
   }
 
   /**
    * {@inheritDoc}
    */
   protected function blockAccess(AccountInterface $account) {
-    return AccessResult::allowedIfHasPermission($account, 'unsubscribe from newsletter');
+    return AccessResult::allowedIfHasPermission($account, 'unsubscribe from newsroom newsletters');
   }
 
   /**

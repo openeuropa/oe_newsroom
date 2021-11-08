@@ -14,7 +14,7 @@ use Drupal\user\Entity\Role;
  *
  * @group oe_newsroom_newsletter
  */
-class SubscribeMultipleNewslettersLangTest extends BrowserTestBase {
+class SubscribeMultipleNewslettersLanguageTest extends BrowserTestBase {
 
   use OeNewsroomNewsletterTrait;
 
@@ -41,16 +41,16 @@ class SubscribeMultipleNewslettersLangTest extends BrowserTestBase {
     $this->setApiPrivateKey();
     $this->configureNewsroom();
     $this->configureNewsletter();
+    $this->placeNewsletterSubscriptionBlock([], TRUE);
 
     // Add the language.
     $language = ConfigurableLanguage::createFromLangcode('de');
     $language->save();
 
     $this->grantPermissions(Role::load(Role::ANONYMOUS_ID), [
-      'subscribe to newsletter',
-      'unsubscribe from newsletter',
+      'subscribe to newsroom newsletters',
+      'unsubscribe from newsroom newsletters',
     ]);
-    $this->createNewsletterPages(TRUE);
   }
 
   /**
@@ -63,15 +63,15 @@ class SubscribeMultipleNewslettersLangTest extends BrowserTestBase {
     $session = $this->getSession();
     $page = $session->getPage();
 
-    $this->drupalGet($this->subscribePath);
+    $this->drupalGet('<front>');
     $assertSession->pageTextContains('Subscribe to newsletter');
     $assertSession->pageTextContains('This is the introduction text.');
     $page->fillField('Your e-mail', 'mail@example.com');
-    $assertSession->pageTextContains('Newsletter lists');
-    $page->checkField('Newsletter collection 1');
-    $page->checkField('Newsletter 2');
+    $assertSession->pageTextContains('Newsletters');
+    $page->checkField('Newsletter 1');
+    $page->checkField('Newsletter collection');
     $assertSession->pageTextContains('Please select which newsletter list interests you.');
-    $page->selectFieldOption('Select the language of your received newsletter', 'German');
+    $page->selectFieldOption('Select the language in which you want to receive the newsletters', 'German');
     $page->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
     $page->pressButton('Subscribe');
     $assertSession->pageTextContains('Vielen Dank für Ihre Anmeldung zum Service: Test Newsletter Service');

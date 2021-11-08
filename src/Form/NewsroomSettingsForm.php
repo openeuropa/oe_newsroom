@@ -37,20 +37,17 @@ class NewsroomSettingsForm extends ConfigFormBase {
 
     $form['universe'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Universe Acronym'),
-      '#description' => $this->t('Universe Acronym which is usually the site&#039;s name acronym'),
+      '#title' => $this->t('Universe acronym'),
       '#maxlength' => 64,
-      '#size' => 64,
       '#default_value' => $config->get('universe'),
       '#required' => TRUE,
     ];
-    $form['app'] = [
+    $form['app_id'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('App'),
+      '#title' => $this->t('App ID'),
       '#description' => $this->t('App short name'),
       '#maxlength' => 64,
-      '#size' => 64,
-      '#default_value' => $config->get('app'),
+      '#default_value' => $config->get('app_id'),
       '#required' => TRUE,
     ];
     $form['hash_method'] = [
@@ -81,7 +78,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
 
     $this->config(OeNewsroom::CONFIG_NAME)
       ->set('universe', $form_state->getValue('universe'))
-      ->set('app', $form_state->getValue('app'))
+      ->set('app_id', $form_state->getValue('app_id'))
       ->set('hash_method', $form_state->getValue('hash_method'))
       ->set('normalized', $form_state->getValue('normalized'))
       ->save();

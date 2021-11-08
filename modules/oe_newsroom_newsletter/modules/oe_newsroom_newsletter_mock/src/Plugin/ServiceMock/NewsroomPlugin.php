@@ -99,7 +99,7 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
    * @param string $language_code
    *   Language where the subscription was made.
    * @param bool $isNewSubscription
-   *   Is it a new subscription?
+   *   Returns TRUE if it is a new subscription, FALSE otherwise.
    *
    * @return array
    *   Generated subscription array, similar to newsrooms one.
@@ -134,33 +134,6 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
       'sv' => 'Tack för att du anmäler dig till tjänsten: Testa nyhetsbrevstjänsten',
     ];
 
-    $already_subscribed = [
-      'bg' => 'За този имейл адрес вече е регистриран абонамент за тази услуга',
-      'cs' => 'Pro tuto e -mailovou adresu je již zaregistrováno předplatné této služby',
-      'da' => 'Et abonnement på denne service er allerede registreret for denne e -mail -adresse',
-      'de' => 'Für diese E-Mail-Adresse ist bereits ein Abonnement für diesen Dienst registriert',
-      'et' => 'Selle e -posti aadressi jaoks on selle teenuse tellimus juba registreeritud',
-      'el' => 'Μια συνδρομή σε αυτήν την υπηρεσία έχει ήδη καταχωρηθεί για αυτήν τη διεύθυνση ηλεκτρονικού ταχυδρομείου',
-      'en' => 'A subscription for this service is already registered for this email address',
-      'es' => 'Ya se ha registrado una suscripción a este servicio para esta dirección de correo electrónico',
-      'fr' => 'Un abonnement à ce service est déjà enregistré pour cette adresse e-mail',
-      'ga' => 'Tá síntiús leis an tseirbhís seo cláraithe cheana féin don seoladh ríomhphoist seo',
-      'hr' => 'Pretplata na ovu uslugu već je registrirana za ovu adresu e -pošte',
-      'it' => 'Un abbonamento a questo servizio è già registrato per questo indirizzo email',
-      'lv' => 'Šim e -pasta adresei jau ir reģistrēts šī pakalpojuma abonements',
-      'lt' => 'Šiam el. Pašto adresui jau yra užregistruota šios paslaugos prenumerata',
-      'hu' => 'A szolgáltatás előfizetése már regisztrálva van erre az e -mail címre',
-      'mt' => 'Abbonament għal dan is-servizz huwa diġà rreġistrat għal dan l-indirizz elettroniku',
-      'nl' => 'Er is al een abonnement op deze service geregistreerd voor dit e-mailadres',
-      'pl' => 'Subskrypcja tej usługi jest już zarejestrowana dla tego adresu e-mail',
-      'pt' => 'Uma assinatura deste serviço já está registrada para este endereço de e-mail',
-      'ro' => 'Un abonament la acest serviciu este deja înregistrat pentru această adresă de e-mail',
-      'sk' => 'Na túto e -mailovú adresu je už zaregistrované predplatné tejto služby',
-      'sl' => 'Za ta e -poštni naslov je že registrirana naročnina na to storitev',
-      'fi' => 'Palvelun tilaus on jo rekisteröity tähän sähköpostiosoitteeseen',
-      'sv' => 'En prenumeration på denna tjänst är redan registrerad för denna e -postadress',
-    ];
-
     return [
       'responseType' => 'json',
       'email' => $email,
@@ -193,7 +166,7 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
       'hostBy' => "$universe Newsroom",
       'profileLink' => "https://ec.europa.eu/newsroom/$universe/user-profile/123456789",
       'isNewSubscription' => $isNewSubscription,
-      'feedbackMessage' => $isNewSubscription ? $new_subscription[$language_code] ?? $new_subscription['en'] : $already_subscribed[$language_code] ?? $already_subscribed['en'],
+      'feedbackMessage' => $new_subscription[$language_code] ?? $new_subscription['en'],
       'language' => $language_code,
       'frequency' => 'On demand',
       'defaultLanguage' => '0',
@@ -217,23 +190,23 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
     $data = Json::decode($request->getBody()->getContents());
     $universe = $data['subscription']['universeAcronym'];
     $email = $data['subscription']['email'];
-    $svIds = explode(',', $data['subscription']['sv_id']);
+    $sv_ids = explode(',', $data['subscription']['sv_id']);
 
     $subscriptions = $this->state->get(self::STATE_KEY_SUBSCRIPTIONS, []);
     $current_subs = [];
     // If sv_id is present, then it used as a filter.
-    if (count($svIds) > 0) {
-      foreach ($svIds as $svId) {
-        if (isset($subscriptions[$universe][$svId][$email]) && $subscriptions[$universe][$svId][$email]['subscribed']) {
-          $current_subs[] = $this->generateSubscriptionArray($universe, $email, $svId, $subscriptions[$universe][$svId][$email]['language'], FALSE);
+    if (count($sv_ids) > 0) {
+      foreach ($sv_ids as $sv_id) {
+        if (isset($subscriptions[$universe][$sv_id][$email]) && $subscriptions[$universe][$sv_id][$email]['subscribed']) {
+          $current_subs[] = $this->generateSubscriptionArray($universe, $email, $sv_id, $subscriptions[$universe][$sv_id][$email]['language'], FALSE);
         }
       }
     }
     // If not present, then display all results.
     else {
-      foreach ($subscriptions[$universe] as $svId => $subscription) {
+      foreach ($subscriptions[$universe] as $sv_id => $subscription) {
         if (isset($subscription[$email]) && $subscription[$email]['subscribed']) {
-          $current_subs[] = $this->generateSubscriptionArray($universe, $email, $svId, $subscription[$email]['language'], FALSE);
+          $current_subs[] = $this->generateSubscriptionArray($universe, $email, $sv_id, $subscription[$email]['language'], FALSE);
         }
       }
     }
@@ -253,32 +226,28 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
   protected function subscribe(RequestInterface $request): ResponseInterface {
     $data = Json::decode($request->getBody()->getContents());
     $universe = $data['subscription']['universeAcronym'];
-    $app = $data['subscription']['topicExtWebsite'];
+    $app_id = $data['subscription']['topicExtWebsite'];
     $email = $data['subscription']['email'];
-    $svIds = explode(',', $data['subscription']['sv_id']);
-    $relatedSvIds = isset($data['subscription']['relatedSv_Id']) ? explode(',', $data['subscription']['relatedSv_Id']) : [];
+    $sv_ids = explode(',', $data['subscription']['sv_id']);
+    $related_sv_ids = isset($data['subscription']['relatedSv_Id']) ? explode(',', $data['subscription']['relatedSv_Id']) : [];
     $language = $data['subscription']['language'] ?? 'en';
-    $topicExtId = isset($data['subscription']['topicExtId']) ? explode(',', $data['subscription']['topicExtId']) : [];
+    $topic_ext_id = isset($data['subscription']['topicExtId']) ? explode(',', $data['subscription']['topicExtId']) : [];
 
     $subscriptions = $this->state->get(self::STATE_KEY_SUBSCRIPTIONS, []);
     $universes = $this->state->get(self::STATE_KEY_UNIVERSE, []);
     $current_subs = [];
-    foreach (array_merge($svIds, $relatedSvIds) as $svId) {
+    foreach (array_merge($sv_ids, $related_sv_ids) as $sv_id) {
       // Select the first to returned as the normal API class, but the
       // webservice marks all as subscribed, so let's mark it here too.
-      if (empty($subscriptions[$universe][$svId][$email]['subscribed'])) {
-        $current_subs[] = $this->generateSubscriptionArray($universe, $email, $svId, $language, TRUE);
-      }
-      else {
-        $current_subs[] = $this->generateSubscriptionArray($universe, $email, $svId, $language, FALSE);
-      }
+      $new_subscrition = empty($subscriptions[$universe][$sv_id][$email]['subscribed']);
+      $current_subs[] = $this->generateSubscriptionArray($universe, $email, $sv_id, $language, $new_subscrition);
 
-      $universes[$app] = $universe;
+      $universes[$app_id] = $universe;
 
-      $subscriptions[$universe][$svId][$email] = [
+      $subscriptions[$universe][$sv_id][$email] = [
         'subscribed' => TRUE,
         'language' => $language,
-        'topicExtId' => $topicExtId,
+        'topicExtId' => $topic_ext_id,
       ];
     }
     $this->state->set(self::STATE_KEY_SUBSCRIPTIONS, $subscriptions);
@@ -301,7 +270,7 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
 
     $email = $parameters['user_email'];
     // The API does not support multiple sv_ids in a single call.
-    $svId = $parameters['sv_id'];
+    $sv_id = $parameters['sv_id'];
 
     $subscriptions = $this->state->get(self::STATE_KEY_SUBSCRIPTIONS, []);
     $universes = $this->state->get(self::STATE_KEY_UNIVERSE, []);
@@ -309,13 +278,13 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
 
     // When you try to unsubscribe a user that newsroom does not have at all,
     // you will get an internal error which will converted by our API to this.
-    if (!isset($subscriptions[$universe][$svId][$email])) {
+    if (!isset($subscriptions[$universe][$sv_id][$email])) {
       return new Response(404, [], 'Not found');
     }
 
     // When the user e-mail exists in the e-mail it will return the same message
     // regardless if it's subscribed or not previously.
-    $subscriptions[$universe][$svId][$email] = [
+    $subscriptions[$universe][$sv_id][$email] = [
       'subscribed' => FALSE,
       'language' => NULL,
       'topicExtId' => NULL,

@@ -6,8 +6,6 @@ namespace Drupal\oe_newsroom;
 
 /**
  * Class for constants and general functions for newsroom.
- *
- * @package Drupal\oe_newsroom
  */
 class OeNewsroom {
 

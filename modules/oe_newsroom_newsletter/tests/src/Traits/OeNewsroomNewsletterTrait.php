@@ -11,24 +11,10 @@ use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 trait OeNewsroomNewsletterTrait {
 
   /**
-   * Path to subscribe page.
-   *
-   * @var string
-   */
-  protected $subscribePath = '';
-
-  /**
-   * Path to unsubscribe page.
-   *
-   * @var string
-   */
-  protected $unsubscribePath = '';
-
-  /**
    * Set the API private key.
    */
   public function setApiPrivateKey() {
-    $settings['settings']['newsroom_api_private_key'] = (object) [
+    $settings['settings']['oe_newsroom']['newsroom_api_key'] = (object) [
       'value' => 'phpunit-test-private-key',
       'required' => TRUE,
     ];
@@ -36,56 +22,53 @@ trait OeNewsroomNewsletterTrait {
   }
 
   /**
-   * Create pages with subscribe and unsubscribe blocks.
+   * Block default settings.
+   *
+   * @return string[]
+   *   Array of the block default settings.
    */
-  public function createNewsletterPages($multi_distro = FALSE): void {
-    $this->drupalCreateContentType(['type' => 'page']);
-    if (!$multi_distro) {
-      $distribution_list = [
-        ['sv_id' => '123', 'name' => 'Newsletter 1'],
-      ];
-    }
-    else {
-      $distribution_list = [
-        ['sv_id' => '123,321', 'name' => 'Newsletter collection 1'],
-        ['sv_id' => '234', 'name' => 'Newsletter 2'],
+  protected static function blockDefaultSettings(bool $multi_distro): array {
+    $distribution_lists = [
+      ['sv_id' => '111', 'name' => 'Newsletter 1'],
+    ];
+    if ($multi_distro) {
+      $distribution_lists[] = [
+        'sv_id' => '222,333',
+        'name' => 'Newsletter collection',
       ];
     }
 
-    // Create subscribe page.
-    $subscribe_page = $this->drupalCreateNode(['type' => 'page']);
-    $this->subscribePath = 'node/' . $subscribe_page->id();
+    return [
+      'distribution_lists' => $distribution_lists,
+      'region' => 'content',
+    ];
+  }
 
-    // Place subscribe block.
-    $settings = [
+  /**
+   * Place subscribe block.
+   */
+  public function placeNewsletterSubscriptionBlock(array $settings = [], $multi_distro = FALSE): void {
+    $settings_default = [
       'label' => 'Subscribe to newsletter',
-      'id' => 'subscribetonewsletter',
-      'region' => 'content',
-      'distribution_list' => $distribution_list,
-      'visibility' => [
-        'request_path' => [
-          'pages' => '/node/1',
-        ],
-      ],
+      'id' => 'subscribe',
+      'intro_text' => 'This is the introduction text.',
+      'successful_subscription_message' => '',
     ];
+    $settings_default += static::blockDefaultSettings($multi_distro);
+    $settings += array_merge($settings_default, $settings);
     $this->drupalPlaceBlock('oe_newsroom_newsletter_subscription_block', $settings);
+  }
 
-    // Create unsubscribe page.
-    $unsubscribe_page = $this->drupalCreateNode(['type' => 'page']);
-    $this->unsubscribePath = 'node/' . $unsubscribe_page->id();
-
-    // Place unsubscribe block.
-    $settings = [
+  /**
+   * Place unsubscribe block.
+   */
+  public function placeNewsletterUnsubscriptionBlock(array $settings = [], $multi_distro = FALSE): void {
+    $settings_default = [
       'label' => 'Unsubscribe from newsletter',
-      'id' => 'unsubscribefromnewsletter',
-      'region' => 'content',
-      'distribution_list' => $distribution_list,
-      'visibility' => [
-        'request_path' => [
-          'pages' => '/node/2',
-        ],
-      ],
+      'id' => 'unsubscribe',
     ];
+    $settings_default += static::blockDefaultSettings($multi_distro);
+    $settings += array_merge($settings_default, $settings);
     $this->drupalPlaceBlock('oe_newsroom_newsletter_unsubscription_block', $settings);
   }
 
@@ -96,7 +79,7 @@ trait OeNewsroomNewsletterTrait {
     $config = \Drupal::configFactory()
       ->getEditable(OeNewsroom::CONFIG_NAME)
       ->set('universe', 'example-universe')
-      ->set('app', 'example-app');
+      ->set('app_id', 'example-app');
     $config->save();
   }
 
@@ -106,7 +89,6 @@ trait OeNewsroomNewsletterTrait {
   public function configureNewsletter(): void {
     $config = \Drupal::configFactory()
       ->getEditable(OeNewsroomNewsletter::CONFIG_NAME)
-      ->set('intro_text', 'This is the introduction text.')
       ->set('privacy_uri', '/privacy-url');
     $config->save();
   }

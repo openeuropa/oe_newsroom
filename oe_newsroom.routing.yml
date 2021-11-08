@@ -5,5 +5,3 @@ oe_newsroom.settings_form:
     _title: 'Newsroom Settings Form'
   requirements:
     _permission: 'manage newsroom settings'
-  options:
-    _admin_route: TRUE

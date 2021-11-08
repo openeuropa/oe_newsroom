@@ -2,25 +2,13 @@ oe_newsroom_newsletter.settings:
   type: config_object
   label: 'Newsroom settings'
   mapping:
-    intro_text:
-      type: label
-      label: 'Introduction text on the subscription page'
-    link_classes:
-      type: string
-      label: 'Extra link classes'
     privacy_uri:
       type: label
-      label: 'Privacy url'
-    success_subscription_text:
-      type: label
-      label: 'Message displayed if a subscriber successfully subscribed to the service'
-    already_registered_text:
-      type: label
-      label: 'Message displayed if a subscriber is already subscribed'
+      label: 'Privacy URL'
 
 block.settings.oe_newsroom_newsletter_subscription_block:
   type: block_settings
-  label: 'Newsletter Subscription Block'
+  label: 'Newsletter subscription block'
   mapping:
     newsletters_language:
       type: sequence
@@ -30,8 +18,14 @@ block.settings.oe_newsroom_newsletter_subscription_block:
         label: 'Language code'
     newsletters_language_default:
       type: string
-      label: 'Default language for newsletter'
-    distribution_list:
+      label: 'Default newsletter language'
+    intro_text:
+      type: label
+      label: 'Introduction text'
+    successful_subscription_message:
+      type: label
+      label: 'Successful subscription message'
+    distribution_lists:
       type: sequence
       label: 'Array of distribution list values'
       sequence:
@@ -40,16 +34,16 @@ block.settings.oe_newsroom_newsletter_subscription_block:
         mapping:
           sv_id:
             type: string
-            label: 'SV ID from Newsroom'
+            label: 'Sv ID'
           name:
             type: label
             label: 'Name of the distribution list'
 
 block.settings.oe_newsroom_newsletter_unsubscription_block:
   type: block_settings
-  label: 'Newsletter Unsubscription Block'
+  label: 'Newsletter unsubscription block'
   mapping:
-    distribution_list:
+    distribution_lists:
       type: sequence
       label: 'Array of distribution list values'
       sequence:
@@ -58,7 +52,7 @@ block.settings.oe_newsroom_newsletter_unsubscription_block:
         mapping:
           sv_id:
             type: string
-            label: 'SV ID from Newsroom'
+            label: 'Sv ID'
           name:
             type: label
             label: 'Name of the distribution list'

@@ -1,9 +1,9 @@
-subscribe to newsletter:
-  title: 'Subscribe to newsletter'
-  description: 'Allows users to subscribe'
-unsubscribe from newsletter:
-  title: 'Unsubscribe from newsletter'
-  description: 'Allows users from unsubscribe'
-manage newsroom newsletter settings:
-  title: 'Manage newsroom newsletter settings'
+subscribe to newsroom newsletters:
+  title: 'Subscribe to newsroom newsletters'
+  description: 'Allows users to subscribe to newsroom newsletters'
+unsubscribe from newsroom newsletters:
+  title: 'Unsubscribe from newsroom newsletters'
+  description: 'Allows users to unsubscribe from newsroom newsletters'
+administer newsroom newsletter configuration:
+  title: 'Administer newsroom newsletter configuration'
   description: 'Allows users to configure newsroom newsletter'
