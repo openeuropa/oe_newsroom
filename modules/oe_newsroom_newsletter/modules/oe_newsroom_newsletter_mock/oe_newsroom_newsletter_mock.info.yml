@@ -1,5 +1,5 @@
-name: OpenEuropa Newsroom Newsletter Mock
-description: OpenEuropa Newsroom Newsletter module, provides integration to Newsroom's Newsletter mock service.
+name: OpenEuropa Newsroom newsletter mock
+description: OpenEuropa Newsroom newsletter module, provides integration to Newsroom's newsletter mock service.
 package: OpenEuropa
 core_version_requirement: ^8 || ^9
 

@@ -11,6 +11,8 @@ use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
+use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Form\SubscribeForm;
 use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -27,6 +29,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
   /**
+   * API for newsroom calls.
+   *
+   * @var \Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface
+   */
+  protected $newsroomClient;
+
+  /**
    * The form builder.
    *
    * @var \Drupal\Core\Form\FormBuilder
@@ -36,9 +45,10 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, FormBuilderInterface $form_builder) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, NewsroomClientInterface $newsroomClient, FormBuilderInterface $form_builder) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->formBuilder = $form_builder;
+    $this->newsroomClient = $newsroomClient;
   }
 
   /**
@@ -49,7 +59,8 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('form_builder')
+      NewsroomClient::create($container),
+      $container->get('form_builder'),
     );
   }
 
@@ -141,6 +152,15 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
    * {@inheritdoc}
    */
   public function build() {
+    if (!$this->newsroomClient->isConfigured()) {
+      return [];
+    }
+    if (empty($this->configuration['distribution_lists'])) {
+      return [];
+    }
+    if (empty(\Drupal::config(OeNewsroomNewsletter::CONFIG_NAME)->get('privacy_uri'))) {
+      return [];
+    }
     $newsletters_language = $this->configuration['newsletters_language'] ?? [];
     $newsletters_language_default = $this->configuration['newsletters_language_default'] ?? '';
     $intro_text = $this->configuration['intro_text'] ?? '';

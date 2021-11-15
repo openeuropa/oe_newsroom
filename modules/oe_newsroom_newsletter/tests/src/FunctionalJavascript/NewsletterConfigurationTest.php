@@ -107,15 +107,16 @@ class NewsletterConfigurationTest extends WebDriverTestBase {
 
     // Test missing private key.
     $this->drupalGet('<front>');
-    $subscribe_block = $assertSession->elementExists('css', '#block-subscribe');
-    $subscribe_block->fillField('Your e-mail', 'mail@example.com');
-    $page->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
-    $page->pressButton('Subscribe');
-    $assertSession->assertWaitOnAjaxRequest();
-    $assertSession->pageTextContains('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.');
+    $assertSession->elementNotExists('css', '#block-subscribe');
+    $assertSession->elementNotExists('css', '#block-unsubscribe');
+    $assertSession->fieldNotExists('Your e-mail');
+
+    $this->setApiPrivateKey();
+
+    // @todo Find better way.
+    drupal_flush_all_caches();
 
     // Test successful subscription doesn't show the fields.
-    $this->setApiPrivateKey();
     $this->drupalGet('<front>');
     $subscribe_block = $assertSession->elementExists('css', '#block-subscribe');
     $subscribe_block->fillField('Your e-mail', 'mail@example.com');

@@ -8,7 +8,6 @@ use Drupal\Component\Serialization\Json;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\oe_newsroom\Exception\InvalidApiConfiguration;
 use Drupal\oe_newsroom\OeNewsroom;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
@@ -108,25 +107,10 @@ final class NewsroomClient implements NewsroomClientInterface {
    * @return bool
    *   True if the class is functional.
    */
-  protected function isConfigured(): bool {
+  public function isConfigured(): bool {
     // These fields should be filled up and has no default value, without it
     // it's not possible to communicate with Newsroom.
     return !empty($this->privateKey) && !empty($this->universe) && !empty($this->appId);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public function subscriptionServiceConfigured(bool $throw_error = TRUE): bool {
-    if (!$throw_error) {
-      return $this->isConfigured();
-    }
-
-    if (!$this->isConfigured()) {
-      throw new InvalidApiConfiguration($this->t('The subscription service is not configured at the moment. Please try again later.')->render());
-    }
-
-    return TRUE;
   }
 
   /**
@@ -153,7 +137,6 @@ final class NewsroomClient implements NewsroomClientInterface {
    * @SuppressWarnings(PHPMD.NPathComplexity)
    */
   public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], string $language = NULL, array $topicExtId = []): ?array {
-    $this->subscriptionServiceConfigured();
 
     // Prepare the post.
     $payload = [
@@ -213,7 +196,6 @@ final class NewsroomClient implements NewsroomClientInterface {
    * {@inheritDoc}
    */
   public function unsubscribe(string $email, array $svIds = []): bool {
-    $this->subscriptionServiceConfigured();
 
     // This is necessary to split separately newsletters distribion lists.
     $sv_ids_separated = explode(',', implode(',', $svIds));

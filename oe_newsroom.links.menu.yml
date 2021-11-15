@@ -1,5 +1,5 @@
 oe_newsroom.settings_form:
-  title: 'Newsroom Settings'
+  title: 'Newsroom settings'
   route_name: oe_newsroom.settings_form
   description: 'Configure Newsroom integration'
   parent: system.admin_config_system

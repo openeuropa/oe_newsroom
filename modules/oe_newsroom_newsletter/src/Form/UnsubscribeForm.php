@@ -4,9 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_newsroom_newsletter\Form;
 
-use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\HtmlCommand;
-use Drupal\Core\Form\FormBase;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\oe_newsroom\Exception\InvalidApiConfiguration;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
@@ -22,7 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *  - A distribution lists array
  *    ex. array(0 => array('sv_id' => 20, 'name' => 'XY Newsletter'))
  */
-class UnsubscribeForm extends FormBase {
+class UnsubscribeForm extends NewsletterFormBase {
 
   /**
    * API for newsroom calls.
@@ -61,11 +59,15 @@ class UnsubscribeForm extends FormBase {
     $currentUser = $this->currentUser();
 
     // Add wrapper for ajax.
-    // @todo I think this will break if somebody puts multiple unsubscription
-    // form to the same page... However I can't find right now in the core a
-    // proper solution for this issue.
-    $form['#prefix'] = '<div id="newsroom-newsletter-unsubscription-form">';
+    $wrapper_id = Html::getUniqueId($this->getFormId());
+
+    $form['#prefix'] = '<div id="' . $wrapper_id . '">';
     $form['#suffix'] = '</div>';
+
+    $form['wrapper_id'] = [
+      '#type' => 'hidden',
+      '#value' => $wrapper_id,
+    ];
 
     // Start building the form itself.
     $form['email'] = [
@@ -144,33 +146,15 @@ class UnsubscribeForm extends FormBase {
       ]);
     }
     catch (BadResponseException $e) {
-      $this->messenger()->addError($e->getMessage());
+      $this->messenger->addError(t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
+      $this->getLogger('oe_newsroom_newsletter')->error('Exception thrown while unsubscribing with %code code and a %message message in the %file file %line line.\n\rTrace: %trace', [
+        '%code' => $e->getCode(),
+        '%message' => $e->getMessage(),
+        '%file' => $e->getFile(),
+        '%line' => $e->getLine(),
+        '%trace' => $e->getTraceAsString(),
+      ]);
     }
-  }
-
-  /**
-   * Ajax callback to update the unsubscription form after it is submitted.
-   *
-   * @return \Drupal\Core\Ajax\AjaxResponse
-   *   An ajax response object.
-   */
-  public function submitFormCallback(array &$form, FormStateInterface $form_state): AjaxResponse {
-    $response = new AjaxResponse();
-
-    if ($form_state->getErrors()) {
-      unset($form['#prefix'], $form['#suffix']);
-      $form['status_messages'] = [
-        '#type' => 'status_messages',
-        '#weight' => -10,
-      ];
-      $response->addCommand(new HtmlCommand('#newsroom-newsletter-unsubscription-form', $form));
-    }
-    else {
-      $messages = ['#type' => 'status_messages'];
-      $response->addCommand(new HtmlCommand('#newsroom-newsletter-unsubscription-form', $messages));
-    }
-
-    return $response;
   }
 
 }

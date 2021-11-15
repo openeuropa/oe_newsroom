@@ -1,6 +1,6 @@
 oe_newsroom_newsletter.settings:
-  title: 'Newsroom Newsletter Settings'
+  title: 'Newsroom newsletter settings'
   route_name: oe_newsroom_newsletter.settings
-  description: 'Configure Newsroom Newsletter integration'
+  description: 'Configure newsroom newsletter integration'
   parent: oe_newsroom.settings_form
   weight: 99

@@ -14,21 +14,6 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 interface NewsroomClientInterface extends ContainerInjectionInterface {
 
   /**
-   * Precheck for API usability.
-   *
-   * @param bool $throw_error
-   *   If it's true it will throw an InvalidApiConfiguration if there's a
-   *   problem. Otherwise, it will return true/false.
-   *
-   * @return bool
-   *   Returns true if every mandatory data is set to be able to use newsroom.
-   *
-   * @throws \Drupal\oe_newsroom\Exception\InvalidApiConfiguration
-   *   Thrown if $throw_error = true and there's a problem.
-   */
-  public function subscriptionServiceConfigured(bool $throw_error = TRUE): bool;
-
-  /**
    * Subscribe an email to the newsletters.
    *
    * @param string $email

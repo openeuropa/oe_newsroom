@@ -84,7 +84,7 @@ trait OeNewsroomNewsletterTrait {
   }
 
   /**
-   * Configure the Newsletter settings.
+   * Configure the newsletter settings.
    */
   public function configureNewsletter(): void {
     $config = \Drupal::configFactory()

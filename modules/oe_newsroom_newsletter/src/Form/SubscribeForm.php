@@ -4,9 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_newsroom_newsletter\Form;
 
-use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\HtmlCommand;
-use Drupal\Core\Form\FormBase;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Link;
@@ -20,7 +18,6 @@ use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ServerException;
 // @codingStandardsIgnoreLine
-use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -38,7 +35,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *  - A successful subscription message string
  *    ex. 'Subscribed.'
  */
-class SubscribeForm extends FormBase {
+class SubscribeForm extends NewsletterFormBase {
 
   /**
    * API for newsroom calls.
@@ -127,11 +124,15 @@ class SubscribeForm extends FormBase {
     $uri = str_replace('[lang_code]', str_replace('pt-pt', 'pt', $ui_language), $uri);
 
     // Add wrapper for ajax.
-    // @todo I think this will break if somebody puts multiple subscription form
-    // to the same page... However I can't find right now in the core a proper
-    // solution for this issue.
-    $form['#prefix'] = '<div id="newsroom-newsletter-subscription-form">';
+    $wrapper_id = Html::getUniqueId($this->getFormId());
+
+    $form['#prefix'] = '<div id="' . $wrapper_id . '">';
     $form['#suffix'] = '</div>';
+
+    $form['wrapper_id'] = [
+      '#type' => 'hidden',
+      '#value' => $wrapper_id,
+    ];
 
     // Start building up form.
     $form['intro_text'] = [
@@ -281,31 +282,6 @@ class SubscribeForm extends FormBase {
     // Success message should be translatable and it can be set from the
     // Newsroom Settings Form.
     $this->messenger->addStatus(empty($success_message) ? trim($subscription['feedbackMessage']) : $success_message);
-  }
-
-  /**
-   * Ajax callback to update the subscription form after it is submitted.
-   *
-   * @return \Drupal\Core\Ajax\AjaxResponse
-   *   An ajax response object.
-   */
-  public function submitFormCallback(array &$form, FormStateInterface $form_state): AjaxResponse {
-    $response = new AjaxResponse();
-
-    if ($form_state->getErrors()) {
-      unset($form['#prefix'], $form['#suffix']);
-      $form['status_messages'] = [
-        '#type' => 'status_messages',
-        '#weight' => -10,
-      ];
-      $response->addCommand(new HtmlCommand('#newsroom-newsletter-subscription-form', $form));
-    }
-    else {
-      $messages = ['#type' => 'status_messages'];
-      $response->addCommand(new HtmlCommand('#newsroom-newsletter-subscription-form', $messages));
-    }
-
-    return $response;
   }
 
 }
