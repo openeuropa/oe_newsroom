@@ -115,7 +115,7 @@ class UnsubscribeForm extends FormBase {
     $distribution_lists = is_array($values['distribution_lists']) ? array_keys(array_filter($values['distribution_lists'])) : [$values['distribution_lists']];
 
     try {
-      // Let's call the subscription service.
+      // Let's call the unsubscription service.
       if ($this->newsroomClient->unsubscribe($values['email'], $distribution_lists)) {
         $this->messenger()->addStatus($this->t('Successfully unsubscribed!'));
       }
@@ -124,17 +124,24 @@ class UnsubscribeForm extends FormBase {
       }
     }
     catch (InvalidApiConfiguration $e) {
-      $this->messenger()->addError($e->getMessage());
-    }
-    catch (ServerException $e) {
-      $this->logger('oe_newsroom_newsletter')->error('An error occurred with %code code and a %message message in the %file file %line line.\n\rTrace: %trace', [
+      $this->messenger->addError(t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
+      $this->getLogger('oe_newsroom_newsletter')->error('Exception thrown while unsubscribing with %code code and a %message message in the %file file %line line.\n\rTrace: %trace', [
         '%code' => $e->getCode(),
         '%message' => $e->getMessage(),
         '%file' => $e->getFile(),
         '%line' => $e->getLine(),
         '%trace' => $e->getTraceAsString(),
       ]);
-      $this->messenger()->addError($this->t('An error happened in the communication. If this persist, connect with the site owner.'));
+    }
+    catch (ServerException $e) {
+      $this->messenger->addError(t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
+      $this->getLogger('oe_newsroom_newsletter')->error('Exception thrown while unsubscribing with %code code and a %message message in the %file file %line line.\n\rTrace: %trace', [
+        '%code' => $e->getCode(),
+        '%message' => $e->getMessage(),
+        '%file' => $e->getFile(),
+        '%line' => $e->getLine(),
+        '%trace' => $e->getTraceAsString(),
+      ]);
     }
     catch (BadResponseException $e) {
       $this->messenger()->addError($e->getMessage());
@@ -142,7 +149,7 @@ class UnsubscribeForm extends FormBase {
   }
 
   /**
-   * Ajax callback to update the subscription form after it is submitted.
+   * Ajax callback to update the unsubscription form after it is submitted.
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
    *   An ajax response object.

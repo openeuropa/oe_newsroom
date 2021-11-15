@@ -112,7 +112,7 @@ class NewsletterConfigurationTest extends WebDriverTestBase {
     $page->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
     $page->pressButton('Subscribe');
     $assertSession->assertWaitOnAjaxRequest();
-    $assertSession->pageTextContains('The subscription service is not configured at the moment. Please try again later.');
+    $assertSession->pageTextContains('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.');
 
     // Test successful subscription doesn't show the fields.
     $this->setApiPrivateKey();

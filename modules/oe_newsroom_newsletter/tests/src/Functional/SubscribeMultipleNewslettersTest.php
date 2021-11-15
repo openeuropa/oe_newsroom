@@ -57,7 +57,7 @@ class SubscribeMultipleNewslettersTest extends BrowserTestBase {
     $session = $this->getSession();
     $page = $session->getPage();
 
-    // Subscribe multiple Newsletters.
+    // Subscribe to one of the multiple Newsletters.
     $this->drupalGet('<front>');
     $assertSession->pageTextContains('Subscribe to newsletter');
     $assertSession->pageTextContains('This is the introduction text.');
@@ -69,11 +69,10 @@ class SubscribeMultipleNewslettersTest extends BrowserTestBase {
     $page->pressButton('Subscribe');
     $assertSession->pageTextContains('Newsletters field is required.');
     $subscribe_block->checkField('Newsletter 1');
-    $subscribe_block->checkField('Newsletter collection');
     $page->pressButton('Subscribe');
     $assertSession->pageTextContains('Thanks for Signing Up to the service: Test Newsletter Service');
 
-    // Unsubscribe the newsletters.
+    // Unsubscribe from one of the newsletters.
     $this->drupalGet('<front>');
     $unsubscribe_block = $assertSession->elementExists('css', '#block-unsubscribe');
     $unsubscribe_block->fillField('Your e-mail', 'mail@example.com');
@@ -81,7 +80,6 @@ class SubscribeMultipleNewslettersTest extends BrowserTestBase {
     $page->pressButton('Unsubscribe');
     $assertSession->pageTextContains('Newsletters field is required.');
     $unsubscribe_block->checkField('Newsletter 1');
-    $unsubscribe_block->checkField('Newsletter collection');
     $page->pressButton('Unsubscribe');
     $assertSession->pageTextContains('Successfully unsubscribed!');
   }
@@ -113,8 +111,6 @@ class SubscribeMultipleNewslettersTest extends BrowserTestBase {
     $subscribe_block->checkField('Newsletter collection');
     $page->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
     $page->pressButton('Subscribe');
-    // Currently, this is the correct behaviour.
-    // For more information see: the NewsroomClient::subscribe.
     $assertSession->pageTextContains('Thanks for Signing Up to the service: Test Newsletter Service');
 
     // Unsubscribe the newsletters.
@@ -132,7 +128,6 @@ class SubscribeMultipleNewslettersTest extends BrowserTestBase {
     $unsubscribe_block->checkField('Newsletter 1');
     $unsubscribe_block->fillField('Your e-mail', 'mail@example.com');
     $page->pressButton('Unsubscribe');
-    // Currently, this is correct behaviour because of the API.
     $assertSession->pageTextContains('Successfully unsubscribed!');
   }
 

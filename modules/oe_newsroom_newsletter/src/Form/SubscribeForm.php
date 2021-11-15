@@ -240,13 +240,18 @@ class SubscribeForm extends FormBase {
         $this->subscriptionMessage($response, $this->successfulMessage);
       }
     }
-    catch (InvalidArgumentException $e) {
-      $this->messenger->addError($e->getMessage());
-    }
     catch (InvalidApiConfiguration $e) {
-      $this->messenger->addError($e->getMessage());
+      $this->messenger->addError(t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
+      $this->getLogger('oe_newsroom_newsletter')->error('Exception thrown while subscribing with %code code and a %message message in the %file file %line line.\n\rTrace: %trace', [
+        '%code' => $e->getCode(),
+        '%message' => $e->getMessage(),
+        '%file' => $e->getFile(),
+        '%line' => $e->getLine(),
+        '%trace' => $e->getTraceAsString(),
+      ]);
     }
     catch (ServerException $e) {
+      $this->messenger->addError(t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
       $this->getLogger('oe_newsroom_newsletter')->error('Exception thrown while subscribing with %code code and a %message message in the %file file %line line.\n\rTrace: %trace', [
         '%code' => $e->getCode(),
         '%message' => $e->getMessage(),
@@ -256,7 +261,14 @@ class SubscribeForm extends FormBase {
       ]);
     }
     catch (BadResponseException $e) {
-      $this->messenger->addError($e->getMessage());
+      $this->messenger->addError(t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
+      $this->getLogger('oe_newsroom_newsletter')->error('Exception thrown while subscribing with %code code and a %message message in the %file file %line line.\n\rTrace: %trace', [
+        '%code' => $e->getCode(),
+        '%message' => $e->getMessage(),
+        '%file' => $e->getFile(),
+        '%line' => $e->getLine(),
+        '%trace' => $e->getTraceAsString(),
+      ]);
     }
   }
 

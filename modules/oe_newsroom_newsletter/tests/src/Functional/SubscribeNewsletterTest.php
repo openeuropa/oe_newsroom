@@ -83,7 +83,7 @@ class SubscribeNewsletterTest extends BrowserTestBase {
     $assertSession->pageTextContains('This is the introduction text.');
     $subscribe_block = $assertSession->elementExists('css', '#block-subscribe');
     $subscribe_block->fillField('Your e-mail', 'mail@example.com');
-    $assertSession->pageTextNotContains('Newsletter lists');
+    $assertSession->pageTextNotContains('Newsletters');
     $assertSession->pageTextNotContains('Please select which newsletter list interests you.');
     $page->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
     $page->pressButton('Subscribe');
@@ -122,9 +122,6 @@ class SubscribeNewsletterTest extends BrowserTestBase {
     $session = $this->getSession();
     $page = $session->getPage();
 
-    $this->configureNewsletter();
-    $this->configureNewsroom();
-
     // Subscribe the newsletter.
     $this->drupalGet('<front>');
     $subscribe_block = $assertSession->elementExists('css', '#block-subscribe');
@@ -153,7 +150,6 @@ class SubscribeNewsletterTest extends BrowserTestBase {
     $unsubscribe_block = $assertSession->elementExists('css', '#block-unsubscribe');
     $unsubscribe_block->fillField('Your e-mail', 'mail@example.com');
     $page->pressButton('Unsubscribe');
-    // Currently, this is the correct behaviour because of the API.
     $assertSession->pageTextContains('Successfully unsubscribed!');
   }
 
