@@ -123,16 +123,7 @@ class SubscribeForm extends NewsletterFormBase {
     // @todo Adapt to the common OE approach for pt-pt.
     $uri = str_replace('[lang_code]', str_replace('pt-pt', 'pt', $ui_language), $uri);
 
-    // Add wrapper for ajax.
-    $wrapper_id = Html::getUniqueId($this->getFormId());
-
-    $form['#prefix'] = '<div id="' . $wrapper_id . '">';
-    $form['#suffix'] = '</div>';
-
-    $form['wrapper_id'] = [
-      '#type' => 'hidden',
-      '#value' => $wrapper_id,
-    ];
+    $form['#id'] = Html::getUniqueId($this->getFormId());
 
     // Start building up form.
     $form['intro_text'] = [
@@ -203,6 +194,7 @@ class SubscribeForm extends NewsletterFormBase {
         '#value' => $this->t('Subscribe'),
         '#ajax' => [
           'callback' => '::submitFormCallback',
+          'wrapper' => $form['#id'],
         ],
       ],
     ];

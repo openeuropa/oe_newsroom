@@ -58,16 +58,7 @@ class UnsubscribeForm extends NewsletterFormBase {
   public function buildForm(array $form, FormStateInterface $form_state, array $distribution_lists = []) {
     $currentUser = $this->currentUser();
 
-    // Add wrapper for ajax.
-    $wrapper_id = Html::getUniqueId($this->getFormId());
-
-    $form['#prefix'] = '<div id="' . $wrapper_id . '">';
-    $form['#suffix'] = '</div>';
-
-    $form['wrapper_id'] = [
-      '#type' => 'hidden',
-      '#value' => $wrapper_id,
-    ];
+    $form['#id'] = Html::getUniqueId($this->getFormId());
 
     // Start building the form itself.
     $form['email'] = [
@@ -100,6 +91,7 @@ class UnsubscribeForm extends NewsletterFormBase {
         '#value' => $this->t('Unsubscribe'),
         '#ajax' => [
           'callback' => '::submitFormCallback',
+          'wrapper' => $form['#id'],
         ],
       ],
     ];

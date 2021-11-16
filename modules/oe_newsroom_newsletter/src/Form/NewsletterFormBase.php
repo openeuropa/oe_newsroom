@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\oe_newsroom_newsletter\Form;
 
 use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\HtmlCommand;
+use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 
@@ -22,7 +22,6 @@ abstract class NewsletterFormBase extends FormBase {
    */
   public function submitFormCallback(array &$form, FormStateInterface $form_state): AjaxResponse {
     $response = new AjaxResponse();
-    $wrapper_id = $form_state->getUserInput()['wrapper_id'];
 
     if ($form_state->getErrors()) {
       unset($form['#prefix'], $form['#suffix']);
@@ -30,11 +29,11 @@ abstract class NewsletterFormBase extends FormBase {
         '#type' => 'status_messages',
         '#weight' => -10,
       ];
-      $response->addCommand(new HtmlCommand('#' . $wrapper_id, $form));
+      $response->addCommand(new ReplaceCommand(NULL, $form));
     }
     else {
       $messages = ['#type' => 'status_messages'];
-      $response->addCommand(new HtmlCommand('#' . $wrapper_id, $messages));
+      $response->addCommand(new ReplaceCommand(NULL, $messages));
     }
 
     return $response;
