@@ -184,7 +184,10 @@ class SubscribeForm extends NewsletterFormBase {
     $form['agree_privacy_statement'] = [
       '#type' => 'checkbox',
       // @todo Confirm if it's the correct way of translating text with a link.
-      '#title' => $this->t('By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link', ['@privacy_link' => Link::fromTextAndUrl($this->t('privacy statement'), Url::fromUri($uri, $attributes))->toString()]),
+      '#title' => $this->t('By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link', [
+        '@privacy_link' => Link::fromTextAndUrl($this->t('privacy statement'), Url::fromUri($uri, $attributes))
+          ->toString(),
+      ]),
       '#element_validate' => ['::validatePrivacyElement'],
     ];
     $form['actions'] = [
