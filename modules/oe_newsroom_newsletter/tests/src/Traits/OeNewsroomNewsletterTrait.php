@@ -11,6 +11,17 @@ use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 trait OeNewsroomNewsletterTrait {
 
   /**
+   * Unset the API private key.
+   */
+  public function unsetApiPrivateKey() {
+    $settings['settings']['oe_newsroom']['newsroom_api_key'] = (object) [
+      'value' => '',
+      'required' => TRUE,
+    ];
+    $this->writeSettings($settings);
+  }
+
+  /**
    * Set the API private key.
    */
   public function setApiPrivateKey() {

@@ -44,6 +44,7 @@ class NewsletterConfigurationTest extends WebDriverTestBase {
     parent::setUp();
 
     $this->configureNewsroom();
+    $this->unsetApiPrivateKey();
     $this->grantPermissions(Role::load(Role::ANONYMOUS_ID), [
       'subscribe to newsroom newsletters',
       'unsubscribe from newsroom newsletters',
