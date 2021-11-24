@@ -64,7 +64,7 @@ class SubscribeNewsletterTest extends BrowserTestBase {
     $assertSession->linkExists('privacy statement');
     $subscribe_block = $assertSession->elementExists('css', '#block-subscribe');
     $subscribe_block->hasField('Your e-mail');
-    $page->hasUncheckedField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
+    $assertSession->checkboxNotChecked('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
     $page->pressButton('Subscribe');
     $assertSession->pageTextContains('Your e-mail field is required.');
     $assertSession->pageTextContains('You must agree with the privacy statement.');

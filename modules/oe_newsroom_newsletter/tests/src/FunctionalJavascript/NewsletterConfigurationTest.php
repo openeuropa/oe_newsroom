@@ -177,15 +177,15 @@ class NewsletterConfigurationTest extends WebDriverTestBase {
     $this->drupalGet('<front>');
     $assertSession->pageTextContains('Newsletters');
     $assertSession->pageTextContains('Please select the newsletter lists you want to take an action on.');
-    $page->hasUncheckedField('Example newsletter 1');
-    $page->hasUncheckedField('Example newsletter 2');
+    $assertSession->checkboxNotChecked('Example newsletter 1');
+    $assertSession->checkboxNotChecked('Example newsletter 2');
 
     // Unsubscribe the newsletters.
     $this->drupalGet('<front>');
     $assertSession->pageTextContains('Newsletters');
     $assertSession->pageTextContains('Please select the newsletter lists you want to take an action on.');
-    $page->hasUncheckedField('Example newsletter 1');
-    $page->hasUncheckedField('Example newsletter 2');
+    $assertSession->checkboxNotChecked('Example newsletter 1');
+    $assertSession->checkboxNotChecked('Example newsletter 2');
   }
 
 }

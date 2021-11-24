@@ -53,12 +53,11 @@ class NewsroomConfigurationTest extends BrowserTestBase {
     $assertSession->elementAttributeContains('css', 'input#edit-app-id', 'required', 'required');
     $page->fillField('Universe acronym', 'Site1');
     $page->fillField('App ID', 'Site1_app');
-    $page->hasSelect('Hash method');
     $this->assertEquals([
       'sha256' => 'SHA-256',
       'md5' => 'MD5',
     ], $this->getOptions('Hash method'));
-    $page->hasCheckedField('Normalize before hashing');
+    $assertSession->checkboxChecked('Normalise before hashing');
     $page->pressButton('Save configuration');
     $assertSession->pageTextContains('The configuration options have been saved.');
 
