@@ -7,6 +7,7 @@ namespace Drupal\oe_newsroom_newsletter\Plugin\Block;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -29,6 +30,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
   /**
+   * Privacy Uri.
+   *
+   * @var array|mixed|null
+   */
+  protected $privacyUri;
+
+  /**
    * API for newsroom calls.
    *
    * @var \Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface
@@ -45,8 +53,9 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, NewsroomClientInterface $newsroomClient, FormBuilderInterface $form_builder) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, NewsroomClientInterface $newsroomClient, FormBuilderInterface $form_builder, ConfigFactoryInterface $configFactory) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->privacyUri = $configFactory->get(OeNewsroomNewsletter::CONFIG_NAME)->get('privacy_uri');
     $this->formBuilder = $form_builder;
     $this->newsroomClient = $newsroomClient;
   }
@@ -61,6 +70,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
       $plugin_definition,
       NewsroomClient::create($container),
       $container->get('form_builder'),
+      $container->get('config.factory'),
     );
   }
 
@@ -152,15 +162,6 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
    * {@inheritdoc}
    */
   public function build() {
-    if (!$this->newsroomClient->isConfigured()) {
-      return [];
-    }
-    if (empty($this->configuration['distribution_lists'])) {
-      return [];
-    }
-    if (empty(\Drupal::config(OeNewsroomNewsletter::CONFIG_NAME)->get('privacy_uri'))) {
-      return [];
-    }
     $newsletters_language = $this->configuration['newsletters_language'] ?? [];
     $newsletters_language_default = $this->configuration['newsletters_language_default'] ?? '';
     $intro_text = $this->configuration['intro_text'] ?? '';
@@ -172,6 +173,9 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
    * {@inheritDoc}
    */
   protected function blockAccess(AccountInterface $account) {
+    if (!$this->newsroomClient->isConfigured() || empty($this->configuration['distribution_lists']) || empty($this->privacyUri)) {
+      return AccessResult::forbidden();
+    }
     return AccessResult::allowedIfHasPermission($account, 'subscribe to newsroom newsletters');
   }
 

@@ -6,15 +6,14 @@ namespace Drupal\oe_newsroom_newsletter\Form;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\oe_newsroom\Exception\InvalidApiConfiguration;
+use Drupal\oe_newsroom\OeNewsroom;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ServerException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Subscribe Form.
+ * Subscribe form.
  *
  * Arguments:
  *  - A distribution lists array
@@ -23,25 +22,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class UnsubscribeForm extends NewsletterFormBase {
 
   /**
-   * API for newsroom calls.
-   *
-   * @var \Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface
-   */
-  protected $newsroomClient;
-
-  /**
-   * {@inheritDoc}
-   */
-  public function __construct(NewsroomClientInterface $newsroomClient) {
-    $this->newsroomClient = $newsroomClient;
-  }
-
-  /**
    * {@inheritDoc}
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      NewsroomClient::create($container)
+      NewsroomClient::create($container),
+      $container->get('current_user'),
+      $container->get('messenger'),
+      $container->get('logger.factory'),
     );
   }
 
@@ -56,34 +44,10 @@ class UnsubscribeForm extends NewsletterFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, array $distribution_lists = []) {
-    $currentUser = $this->currentUser();
+    $form = parent::buildForm($form, $form_state, $distribution_lists);
 
     $form['#id'] = Html::getUniqueId($this->getFormId());
 
-    // Start building the form itself.
-    $form['email'] = [
-      '#type' => 'email',
-      '#title' => $this->t('Your e-mail'),
-      '#default_value' => $currentUser->isAnonymous() ? '' : $currentUser->getEmail(),
-      '#required' => TRUE,
-    ];
-    if (count($distribution_lists) > 1) {
-      $options = array_column($distribution_lists, 'name', 'sv_id');
-      $form['distribution_lists'] = [
-        '#type' => 'checkboxes',
-        '#title' => $this->t('Newsletters'),
-        '#description' => $this->t('Please select which newsletter list interests you.'),
-        '#options' => $options,
-        '#required' => TRUE,
-      ];
-    }
-    else {
-      $id = $distribution_lists[0]['sv_id'];
-      $form['distribution_lists'] = [
-        '#type' => 'value',
-        '#value' => $id,
-      ];
-    }
     $form['actions'] = [
       '#type' => 'actions',
       'submit' => [
@@ -111,40 +75,20 @@ class UnsubscribeForm extends NewsletterFormBase {
     try {
       // Let's call the unsubscription service.
       if ($this->newsroomClient->unsubscribe($values['email'], $distribution_lists)) {
-        $this->messenger()->addStatus($this->t('Successfully unsubscribed!'));
+        $this->messenger->addStatus($this->t('Successfully unsubscribed!'));
       }
       else {
-        $this->messenger()->addError($this->t('There was a problem.'));
+        $this->messenger->addError($this->t('There was a problem.'));
       }
     }
-    catch (InvalidApiConfiguration $e) {
-      $this->messenger->addError(t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
-      $this->getLogger('oe_newsroom_newsletter')->error('Exception thrown while unsubscribing with %code code and a %message message in the %file file %line line.\n\rTrace: %trace', [
+    catch (ServerException | BadResponseException $e) {
+      $this->messenger->addError($this->t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
+      $this->logger->get('oe_newsroom_newsletter')->error('Exception thrown with code %code while subscribing email %email to the newsletter(s) with ID(s) %sv_ids and universe %universe: %exception', [
         '%code' => $e->getCode(),
-        '%message' => $e->getMessage(),
-        '%file' => $e->getFile(),
-        '%line' => $e->getLine(),
-        '%trace' => $e->getTraceAsString(),
-      ]);
-    }
-    catch (ServerException $e) {
-      $this->messenger->addError(t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
-      $this->getLogger('oe_newsroom_newsletter')->error('Exception thrown while unsubscribing with %code code and a %message message in the %file file %line line.\n\rTrace: %trace', [
-        '%code' => $e->getCode(),
-        '%message' => $e->getMessage(),
-        '%file' => $e->getFile(),
-        '%line' => $e->getLine(),
-        '%trace' => $e->getTraceAsString(),
-      ]);
-    }
-    catch (BadResponseException $e) {
-      $this->messenger->addError(t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
-      $this->getLogger('oe_newsroom_newsletter')->error('Exception thrown while unsubscribing with %code code and a %message message in the %file file %line line.\n\rTrace: %trace', [
-        '%code' => $e->getCode(),
-        '%message' => $e->getMessage(),
-        '%file' => $e->getFile(),
-        '%line' => $e->getLine(),
-        '%trace' => $e->getTraceAsString(),
+        '%email' => $values['email'],
+        '%universe' => $this->config(OeNewsroom::CONFIG_NAME)->get('universe'),
+        '%sv_ids' => implode(',', $distribution_lists),
+        '%exception' => $e->getMessage(),
       ]);
     }
   }

@@ -159,7 +159,7 @@ class NewsletterConfigurationTest extends WebDriverTestBase {
     // Multiple newsletter information should not be shown.
     $this->drupalGet('<front>');
     $assertSession->pageTextNotContains('Newsletters');
-    $assertSession->pageTextNotContains('Please select which newsletter list interests you.');
+    $assertSession->pageTextNotContains('Please select the newsletter lists you want to take an action on.');
 
     // Configure multiple newsletters.
     $this->drupalLogin($this->user);
@@ -176,14 +176,14 @@ class NewsletterConfigurationTest extends WebDriverTestBase {
 
     $this->drupalGet('<front>');
     $assertSession->pageTextContains('Newsletters');
-    $assertSession->pageTextContains('Please select which newsletter list interests you.');
+    $assertSession->pageTextContains('Please select the newsletter lists you want to take an action on.');
     $page->hasUncheckedField('Example newsletter 1');
     $page->hasUncheckedField('Example newsletter 2');
 
     // Unsubscribe the newsletters.
     $this->drupalGet('<front>');
     $assertSession->pageTextContains('Newsletters');
-    $assertSession->pageTextContains('Please select which newsletter list interests you.');
+    $assertSession->pageTextContains('Please select the newsletter lists you want to take an action on.');
     $page->hasUncheckedField('Example newsletter 1');
     $page->hasUncheckedField('Example newsletter 2');
   }

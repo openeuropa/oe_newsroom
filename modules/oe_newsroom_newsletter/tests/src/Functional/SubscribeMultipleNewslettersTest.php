@@ -64,7 +64,7 @@ class SubscribeMultipleNewslettersTest extends BrowserTestBase {
     $subscribe_block = $assertSession->elementExists('css', '#block-subscribe');
     $subscribe_block->fillField('Your e-mail', 'mail@example.com');
     $assertSession->pageTextContains('Newsletters');
-    $assertSession->pageTextContains('Please select which newsletter list interests you.');
+    $assertSession->pageTextContains('Please select the newsletter lists you want to take an action on.');
     $page->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
     $page->pressButton('Subscribe');
     $assertSession->pageTextContains('Newsletters field is required.');

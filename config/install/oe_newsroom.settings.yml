@@ -1,5 +1,5 @@
 hash_method: sha256
-normalized: true
+normalised: true
 universe: ''
 app_id: ''
 langcode: en

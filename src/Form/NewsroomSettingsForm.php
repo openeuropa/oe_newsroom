@@ -61,11 +61,11 @@ class NewsroomSettingsForm extends ConfigFormBase {
       '#size' => 1,
       '#default_value' => $config->get('hash_method'),
     ];
-    $form['normalized'] = [
+    $form['normalised'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Is normalized?'),
-      '#description' => $this->t('Newsroom has a normalized setting which determinates if the hashing was done on a normalized data (lowercased)'),
-      '#default_value' => $config->get('normalized'),
+      '#title' => $this->t('Normalise before hashing'),
+      '#description' => $this->t('Newsroom has a normalised setting which determinates if the hashing was done on a normalised data (lowercased)'),
+      '#default_value' => $config->get('normalised'),
     ];
     return parent::buildForm($form, $form_state);
   }
@@ -80,7 +80,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
       ->set('universe', $form_state->getValue('universe'))
       ->set('app_id', $form_state->getValue('app_id'))
       ->set('hash_method', $form_state->getValue('hash_method'))
-      ->set('normalized', $form_state->getValue('normalized'))
+      ->set('normalised', $form_state->getValue('normalised'))
       ->save();
   }
 

@@ -41,7 +41,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
       '#type' => 'textfield',
       '#title' => $this->t('Privacy URL'),
       '#description' => $this->t(
-        "URL to the privacy page. Enter an internal path such as %internal or an external URL such as %url. Enter %front to link to the front page. Use %lang_code as a language token.",
+        'URL to the privacy page. Enter an internal path such as %internal or an external URL such as %url. Enter %front to link to the front page. Use %lang_code as a language token.',
         [
           '%front' => '<front>',
           '%internal' => '/node/2',
@@ -68,7 +68,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
     if (parse_url($uri, PHP_URL_SCHEME) === NULL) {
       if (strpos($uri, '<front>') !== FALSE && $uri !== '<front>') {
         // Only support the <front> token if it's on its own.
-        $form_state->setError($form['privacy_uri'], t('The path %uri is invalid.', ['%uri' => $uri]));
+        $form_state->setError($form['privacy_uri'], $this->t('The path %uri is invalid.', ['%uri' => $uri]));
         return;
       }
 
@@ -88,7 +88,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
       ], TRUE)
       && substr($form['privacy_uri']['#value'], 0, strlen('<front>')) !== '<front>'
     ) {
-      $form_state->setError($form['privacy_uri'], t('The specified target is invalid. Manually entered paths should start with one of the following characters: / ? #'));
+      $form_state->setError($form['privacy_uri'], $this->t('The specified target is invalid. Manually entered paths should start with one of the following characters: / ? #'));
       return;
     }
 
@@ -102,7 +102,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
       $url = FALSE;
     }
     if ($url === FALSE || ($url->isExternal() && !in_array(parse_url($url->getUri(), PHP_URL_SCHEME), UrlHelper::getAllowedProtocols()))) {
-      $form_state->setError($form['privacy_uri'], t('The path %uri is invalid.', ['%uri' => $uri]));
+      $form_state->setError($form['privacy_uri'], $this->t('The path %uri is invalid.', ['%uri' => $uri]));
     }
   }
 

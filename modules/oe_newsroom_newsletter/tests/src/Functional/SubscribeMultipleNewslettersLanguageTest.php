@@ -70,7 +70,7 @@ class SubscribeMultipleNewslettersLanguageTest extends BrowserTestBase {
     $assertSession->pageTextContains('Newsletters');
     $page->checkField('Newsletter 1');
     $page->checkField('Newsletter collection');
-    $assertSession->pageTextContains('Please select which newsletter list interests you.');
+    $assertSession->pageTextContains('Please select the newsletter lists you want to take an action on.');
     $page->selectFieldOption('Select the language in which you want to receive the newsletters', 'German');
     $page->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
     $page->pressButton('Subscribe');

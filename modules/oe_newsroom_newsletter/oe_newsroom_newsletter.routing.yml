@@ -5,8 +5,3 @@ oe_newsroom_newsletter.settings:
     _title: 'Newsroom Settings Form'
   requirements:
     _permission: 'administer newsroom newsletter configuration'
-
-oe_newsroom_newsletter.settings_translate:
-  path: '/admin/config/system/newsroom-settings/newsletter/translate'
-  requirements:
-    _permission: 'administer newsroom newsletter configuration'

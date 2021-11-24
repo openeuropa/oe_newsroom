@@ -8,20 +8,20 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Link;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
-use Drupal\oe_newsroom\Exception\InvalidApiConfiguration;
+use Drupal\oe_newsroom\OeNewsroom;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ServerException;
-// @codingStandardsIgnoreLine
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Subscribe Form.
+ * Subscribe form.
  *
  * Arguments:
  *  - A distribution lists array
@@ -38,13 +38,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class SubscribeForm extends NewsletterFormBase {
 
   /**
-   * API for newsroom calls.
-   *
-   * @var \Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface
-   */
-  protected $newsroomClient;
-
-  /**
    * Language manager.
    *
    * @var \Drupal\Core\Language\LanguageManagerInterface
@@ -59,20 +52,11 @@ class SubscribeForm extends NewsletterFormBase {
   protected $successfulMessage;
 
   /**
-   * Account proxy.
-   *
-   * @var \Drupal\Core\Session\AccountProxyInterface
-   */
-  private $accountProxy;
-
-  /**
    * {@inheritDoc}
    */
-  public function __construct(NewsroomClientInterface $newsroomClient, LanguageManagerInterface $languageManager, AccountProxyInterface $accountProxy, MessengerInterface $messenger) {
-    $this->newsroomClient = $newsroomClient;
+  public function __construct(NewsroomClientInterface $newsroomClient, LanguageManagerInterface $languageManager, AccountProxyInterface $accountProxy, MessengerInterface $messenger, LoggerChannelFactoryInterface $logger) {
+    parent::__construct($newsroomClient, $accountProxy, $messenger, $logger);
     $this->languageManager = $languageManager;
-    $this->accountProxy = $accountProxy;
-    $this->messenger = $messenger;
   }
 
   /**
@@ -83,7 +67,8 @@ class SubscribeForm extends NewsletterFormBase {
       NewsroomClient::create($container),
       $container->get('language_manager'),
       $container->get('current_user'),
-      $container->get('messenger')
+      $container->get('messenger'),
+      $container->get('logger.factory'),
     );
   }
 
@@ -101,7 +86,6 @@ class SubscribeForm extends NewsletterFormBase {
    * @SuppressWarnings(PHPMD.NPathComplexity)
    */
   public function buildForm(array $form, FormStateInterface $form_state, array $distribution_lists = [], array $newsletters_language = [], string $newsletters_language_default = '', string $intro_text = '', string $successful_message = '') {
-    $config = $this->config(OeNewsroomNewsletter::CONFIG_NAME);
     $this->successfulMessage = $successful_message;
 
     // Choose the proper language according to the user setting or interface
@@ -110,18 +94,6 @@ class SubscribeForm extends NewsletterFormBase {
     if (!$this->accountProxy->isAnonymous() && $this->accountProxy->getPreferredLangcode(FALSE) !== '') {
       $selected_language = $this->accountProxy->getPreferredLangcode(FALSE);
     }
-
-    $attributes['attributes']['class'][] = 'oe-newsroom__privacy-url';
-
-    $uri = $config->get('privacy_uri');
-    if (parse_url($uri, PHP_URL_SCHEME) === NULL) {
-      if (strpos($uri, '<front>') === 0) {
-        $uri = '/' . substr($uri, strlen('<front>'));
-      }
-      $uri = 'internal:' . $uri;
-    }
-    // @todo Adapt to the common OE approach for pt-pt.
-    $uri = str_replace('[lang_code]', str_replace('pt-pt', 'pt', $ui_language), $uri);
 
     $form['#id'] = Html::getUniqueId($this->getFormId());
 
@@ -133,29 +105,8 @@ class SubscribeForm extends NewsletterFormBase {
       '#markup' => $intro_text,
     ];
 
-    $form['email'] = [
-      '#type' => 'email',
-      '#title' => $this->t('Your e-mail'),
-      '#default_value' => $this->accountProxy->isAnonymous() ? '' : $this->accountProxy->getEmail(),
-      '#required' => TRUE,
-    ];
-    if (count($distribution_lists) > 1) {
-      $options = array_column($distribution_lists, 'name', 'sv_id');
-      $form['distribution_lists'] = [
-        '#type' => 'checkboxes',
-        '#title' => $this->t('Newsletters'),
-        '#description' => $this->t('Please select which newsletter list interests you.'),
-        '#options' => $options,
-        '#required' => TRUE,
-      ];
-    }
-    else {
-      $id = $distribution_lists[0]['sv_id'];
-      $form['distribution_lists'] = [
-        '#type' => 'value',
-        '#value' => $id,
-      ];
-    }
+    $form = parent::buildForm($form, $form_state, $distribution_lists);
+
     $languages = $this->languageManager->getLanguages();
     if (!empty($newsletters_language)) {
       $languages = array_intersect_key($languages, array_flip($newsletters_language));
@@ -181,12 +132,16 @@ class SubscribeForm extends NewsletterFormBase {
         '#value' => $selected_language,
       ];
     }
+
+    $attributes['attributes']['class'][] = 'oe-newsroom__privacy-url';
     $form['agree_privacy_statement'] = [
       '#type' => 'checkbox',
       // @todo Confirm if it's the correct way of translating text with a link.
       '#title' => $this->t('By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link', [
-        '@privacy_link' => Link::fromTextAndUrl($this->t('privacy statement'), Url::fromUri($uri, $attributes))
-          ->toString(),
+        '@privacy_link' => Link::fromTextAndUrl(
+          $this->t('privacy statement'),
+          Url::fromUri($this->getPrivacyUri($ui_language), $attributes),
+        )->toString(),
       ]),
       '#element_validate' => ['::validatePrivacyElement'],
     ];
@@ -210,14 +165,12 @@ class SubscribeForm extends NewsletterFormBase {
    */
   public function validatePrivacyElement($element, FormStateInterface $form_state, $form) {
     if (empty($element['#value'])) {
-      $form_state->setError($form['agree_privacy_statement'], t('You must agree with the privacy statement.'));
+      $form_state->setError($form['agree_privacy_statement'], $this->t('You must agree with the privacy statement.'));
     }
   }
 
   /**
    * {@inheritdoc}
-   *
-   * @throws \GuzzleHttp\Exception\GuzzleException
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // Get form values.
@@ -236,34 +189,14 @@ class SubscribeForm extends NewsletterFormBase {
         $this->subscriptionMessage($response, $this->successfulMessage);
       }
     }
-    catch (InvalidApiConfiguration $e) {
-      $this->messenger->addError(t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
-      $this->getLogger('oe_newsroom_newsletter')->error('Exception thrown while subscribing with %code code and a %message message in the %file file %line line.\n\rTrace: %trace', [
+    catch (ServerException | BadResponseException $e) {
+      $this->messenger->addError($this->t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
+      $this->logger->get('oe_newsroom_newsletter')->error('Exception thrown with code %code while subscribing email %email to the newsletter(s) with ID(s) %sv_ids and universe %universe: %exception', [
         '%code' => $e->getCode(),
-        '%message' => $e->getMessage(),
-        '%file' => $e->getFile(),
-        '%line' => $e->getLine(),
-        '%trace' => $e->getTraceAsString(),
-      ]);
-    }
-    catch (ServerException $e) {
-      $this->messenger->addError(t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
-      $this->getLogger('oe_newsroom_newsletter')->error('Exception thrown while subscribing with %code code and a %message message in the %file file %line line.\n\rTrace: %trace', [
-        '%code' => $e->getCode(),
-        '%message' => $e->getMessage(),
-        '%file' => $e->getFile(),
-        '%line' => $e->getLine(),
-        '%trace' => $e->getTraceAsString(),
-      ]);
-    }
-    catch (BadResponseException $e) {
-      $this->messenger->addError(t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
-      $this->getLogger('oe_newsroom_newsletter')->error('Exception thrown while subscribing with %code code and a %message message in the %file file %line line.\n\rTrace: %trace', [
-        '%code' => $e->getCode(),
-        '%message' => $e->getMessage(),
-        '%file' => $e->getFile(),
-        '%line' => $e->getLine(),
-        '%trace' => $e->getTraceAsString(),
+        '%email' => $values['email'],
+        '%universe' => $this->config(OeNewsroom::CONFIG_NAME)->get('universe'),
+        '%sv_ids' => implode(',', $distribution_lists),
+        '%exception' => $e->getMessage(),
       ]);
     }
   }
@@ -272,11 +205,30 @@ class SubscribeForm extends NewsletterFormBase {
    * {@inheritDoc}
    */
   protected function subscriptionMessage(array $subscription, string $success_message): void {
-    $config = $this->config(OeNewsroomNewsletter::CONFIG_NAME);
-
     // Success message should be translatable and it can be set from the
     // Newsroom Settings Form.
     $this->messenger->addStatus(empty($success_message) ? trim($subscription['feedbackMessage']) : $success_message);
+  }
+
+  /**
+   * Gets the privacy URI.
+   *
+   * @param string $language
+   *   The language code.
+   *
+   * @return string
+   *   The privacy URI.
+   */
+  protected function getPrivacyUri(string $language) {
+    $uri = $this->config(OeNewsroomNewsletter::CONFIG_NAME)->get('privacy_uri');
+    if (parse_url($uri, PHP_URL_SCHEME) === NULL) {
+      if (strpos($uri, '<front>') === 0) {
+        $uri = '/' . substr($uri, strlen('<front>'));
+      }
+      $uri = 'internal:' . $uri;
+    }
+    // @todo Adapt to the common OE approach for pt-pt.
+    return str_replace('[lang_code]', str_replace('pt-pt', 'pt', $language), $uri);
   }
 
 }

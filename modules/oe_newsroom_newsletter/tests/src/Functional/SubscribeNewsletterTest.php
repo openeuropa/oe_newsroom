@@ -84,7 +84,7 @@ class SubscribeNewsletterTest extends BrowserTestBase {
     $subscribe_block = $assertSession->elementExists('css', '#block-subscribe');
     $subscribe_block->fillField('Your e-mail', 'mail@example.com');
     $assertSession->pageTextNotContains('Newsletters');
-    $assertSession->pageTextNotContains('Please select which newsletter list interests you.');
+    $assertSession->pageTextNotContains('Please select the newsletter lists you want to take an action on.');
     $page->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
     $page->pressButton('Subscribe');
     $assertSession->pageTextContains('Thanks for Signing Up to the service: Test Newsletter Service');

@@ -45,7 +45,7 @@ class NewsroomConfigurationTest extends BrowserTestBase {
     $this->assertSession()->statusCodeEquals(403);
 
     $user = $this->createUser([
-      'manage newsroom settings',
+      'administer newsroom configuration',
     ]);
     $this->drupalLogin($user);
     $this->drupalGet('admin/config/system/newsroom-settings');
@@ -54,16 +54,18 @@ class NewsroomConfigurationTest extends BrowserTestBase {
     $page->fillField('Universe acronym', 'Site1');
     $page->fillField('App ID', 'Site1_app');
     $page->hasSelect('Hash method');
-    $assertSession->optionExists('Hash method', 'SHA-256');
-    $assertSession->optionExists('Hash method', 'MD5');
-    $page->hasCheckedField('Is normalized?');
+    $this->assertEquals([
+      'sha256' => 'SHA-256',
+      'md5' => 'MD5',
+    ], $this->getOptions('Hash method'));
+    $page->hasCheckedField('Normalize before hashing');
     $page->pressButton('Save configuration');
     $assertSession->pageTextContains('The configuration options have been saved.');
 
     // Validate the saved values.
     $config = $this->config(OeNewsroom::CONFIG_NAME);
     $this->assertEquals('sha256', $config->get('hash_method'));
-    $this->assertTrue($config->get('normalized'));
+    $this->assertTrue($config->get('normalised'));
     $this->assertEquals('Site1', $config->get('universe'));
     $this->assertEquals('Site1_app', $config->get('app_id'));
   }

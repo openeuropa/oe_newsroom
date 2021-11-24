@@ -42,11 +42,11 @@ final class NewsroomClient implements NewsroomClientInterface {
   protected $hashMethod;
 
   /**
-   * Api waits for normalized data in hash or not.
+   * Api waits for normalised data in hash or not.
    *
    * @var bool
    */
-  protected $normalized;
+  protected $normalised;
 
   /**
    * Universe Acronym which is usually the site's name acronym.
@@ -84,7 +84,7 @@ final class NewsroomClient implements NewsroomClientInterface {
 
     $this->privateKey = $settings->get('oe_newsroom')['newsroom_api_key'];
     $this->hashMethod = $config->get('hash_method');
-    $this->normalized = $config->get('normalized');
+    $this->normalised = $config->get('normalised');
     $this->universe = $config->get('universe');
     $this->appId = $config->get('app_id');
     $this->httpClient = $httpClient;
@@ -108,7 +108,7 @@ final class NewsroomClient implements NewsroomClientInterface {
    *   True if the class is functional.
    */
   public function isConfigured(): bool {
-    // These fields should be filled up and has no default value, without it
+    // These fields should be filled up and has no default value, without them,
     // it's not possible to communicate with Newsroom.
     return !empty($this->privateKey) && !empty($this->universe) && !empty($this->appId);
   }
@@ -123,7 +123,7 @@ final class NewsroomClient implements NewsroomClientInterface {
    *   Generated communication key.
    */
   protected function generateKey(string $email): string {
-    if ($this->normalized) {
+    if ($this->normalised) {
       return hash($this->hashMethod, mb_strtolower($email) . $this->privateKey);
     }
 
@@ -137,7 +137,6 @@ final class NewsroomClient implements NewsroomClientInterface {
    * @SuppressWarnings(PHPMD.NPathComplexity)
    */
   public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], string $language = NULL, array $topicExtId = []): ?array {
-
     // Prepare the post.
     $payload = [
       'key' => $this->generateKey($email),
@@ -145,7 +144,7 @@ final class NewsroomClient implements NewsroomClientInterface {
         'universeAcronym' => $this->universe,
         'topicExtWebsite' => $this->appId,
         'sv_id' => implode(',', $svIds),
-        'email' => $this->normalized ? mb_strtolower($email) : $email,
+        'email' => $this->normalised ? mb_strtolower($email) : $email,
         'language' => $language,
       ],
     ];
@@ -162,50 +161,53 @@ final class NewsroomClient implements NewsroomClientInterface {
       $request = $this->httpClient->request('POST', 'https://ec.europa.eu/newsroom/api/v1/subscribe', ['json' => $payload]);
     }
     catch (ClientException $e) {
-      throw new BadResponseException($this->t('Invalid response returned by Newsroom API.')->render(), $e->getRequest(), $e->getResponse());
-    }
-    if ($request->getStatusCode() === 200) {
-      $data = Json::decode($request->getBody()->getContents());
-
-      if (empty($data)) {
-        throw new BadResponseException($this->t('Empty response returned by Newsroom newsletter API.')->render(), NULL);
-      }
-
-      $response = NULL;
-      // This is necessary to split separately newsletters distribution lists.
-      $sv_ids_separated = explode(',', implode(',', $svIds));
-      // @todo Support multiple distribution list in a better way.
-      foreach ($data as $subscription_item) {
-        // This will fetch only the first item found.
-        if (in_array($subscription_item['newsletterId'], $sv_ids_separated, FALSE)) {
-          $response = $subscription_item;
-          break;
-        }
-      }
-      if (isset($response)) {
-        return $response;
-      }
-
-      throw new BadResponseException($this->t('Newsroom API returned a response with HTTP status %status but subscription item not found in it.', ['%status' => $request->getStatusCode()])->render(), NULL);
+      throw new BadResponseException(
+        'Invalid response returned by Newsroom API.',
+        $e->getRequest(),
+        $e->getResponse(),
+      );
     }
 
-    throw new BadResponseException($this->t('The subscription service is not available at the moment. Please try again later.')->render(), NULL);
+    if ($request->getStatusCode() !== 200) {
+      throw new BadResponseException('Newsroom API returned a response with HTTP status ' . $request->getStatusCode() . ' but subscription item not found in it.', NULL);
+    }
+
+    $data = Json::decode($request->getBody()->getContents());
+    if (empty($data)) {
+      throw new BadResponseException('Empty response returned by Newsroom newsletter API.', NULL);
+    }
+
+    $response = NULL;
+    // This is necessary to split separately newsletters distribution lists.
+    $sv_ids_separated = explode(',', implode(',', $svIds));
+    // @todo Support multiple distribution list in a better way.
+    foreach ($data as $subscription_item) {
+      // This will fetch only the first item found.
+      if (in_array($subscription_item['newsletterId'], $sv_ids_separated, FALSE)) {
+        $response = $subscription_item;
+        break;
+      }
+    }
+    if (isset($response)) {
+      return $response;
+    }
+
+    throw new BadResponseException('The subscription service is not available at the moment. Please try again later.', NULL);
   }
 
   /**
    * {@inheritDoc}
    */
   public function unsubscribe(string $email, array $svIds = []): bool {
-
-    // This is necessary to split separately newsletters distribion lists.
+    // This is necessary to split separately newsletters distribution lists.
     $sv_ids_separated = explode(',', implode(',', $svIds));
 
     // The API does not support multiple unsubscription, so we need to call it
     // one by one.
     foreach ($sv_ids_separated as $sv_id) {
-      $options = [
+      $payload = [
         'query' => [
-          'user_email' => $this->normalized ? mb_strtolower($email) : $email,
+          'user_email' => $this->normalised ? mb_strtolower($email) : $email,
           'key' => $this->generateKey($email),
           'app' => $this->appId,
           'sv_id' => $sv_id,
@@ -214,12 +216,13 @@ final class NewsroomClient implements NewsroomClientInterface {
 
       try {
         // Send the request.
-        $response = $this->httpClient->get('https://ec.europa.eu/newsroom/api/v1/unsubscribe', $options);
+        $response = $this->httpClient->get('https://ec.europa.eu/newsroom/api/v1/unsubscribe', $payload);
       }
       catch (ClientException $e) {
         throw new BadResponseException(
-          $this->t('Invalid response returned by Newsroom API.')
-            ->render(), $e->getRequest(), $e->getResponse()
+          'Invalid response returned by Newsroom API.',
+          $e->getRequest(),
+          $e->getResponse(),
         );
       }
 

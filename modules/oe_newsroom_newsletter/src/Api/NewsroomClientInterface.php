@@ -36,8 +36,6 @@ interface NewsroomClientInterface extends ContainerInjectionInterface {
    *   If the HTTP requests fails or if the response is not proper.
    * @throws \GuzzleHttp\Exception\BadResponseException
    *   If response is not proper we throw this exception.
-   * @throws \Drupal\oe_newsroom\Exception\InvalidApiConfiguration
-   *   If the API is not configured then this Exception is thrown.
    *
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    */
@@ -61,8 +59,6 @@ interface NewsroomClientInterface extends ContainerInjectionInterface {
    *   If the HTTP requests fails or if the response is not proper.
    * @throws \GuzzleHttp\Exception\BadResponseException
    *   If response is not proper we throw this exception.
-   * @throws \Drupal\oe_newsroom\Exception\InvalidApiConfiguration
-   *   If the API is not configured then this Exception is thrown.
    */
   public function unsubscribe(string $email, array $svIds = []): bool;
 

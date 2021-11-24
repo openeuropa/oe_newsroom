@@ -4,4 +4,4 @@ oe_newsroom.settings_form:
     _form: '\Drupal\oe_newsroom\Form\NewsroomSettingsForm'
     _title: 'Newsroom Settings Form'
   requirements:
-    _permission: 'manage newsroom settings'
+    _permission: 'administer newsroom configuration'
