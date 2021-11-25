@@ -30,8 +30,6 @@ drupal:
         - "bower_components"
         - "vendor"
         - "${drupal.root}"
-      oe_newsroom:
-        newsroom_api_key: ${env.NEWSROOM_API_PRIVATE_KEY}
 
 selenium:
   host: "http://selenium"
@@ -44,5 +42,10 @@ commands:
     - { task: "run", command: "drupal:drush-setup" }
     - { task: "run", command: "drupal:settings-setup" }
     - { task: "run", command: "setup:phpunit" }
+    - task: "append"
+      file: "build/sites/default/settings.override.php"
+      text: |
+        // NEWSROOM settings.
+        $settings['oe_newsroom']['newsroom_api_key'] = getenv('NEWSROOM_API_PRIVATE_KEY');
   setup:phpunit:
     - { task: "process", source: "phpunit.xml.dist", destination: "phpunit.xml" }
