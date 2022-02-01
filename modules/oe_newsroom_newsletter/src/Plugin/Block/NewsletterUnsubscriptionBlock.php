@@ -38,7 +38,7 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
   /**
    * The form builder.
    *
-   * @var \Drupal\Core\Form\FormBuilder
+   * @var \Drupal\Core\Form\FormBuilderInterface
    */
   private $formBuilder;
 
@@ -67,7 +67,7 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
   /**
    * {@inheritdoc}
    */
-  public function blockForm($form, FormStateInterface $form_state) {
+  public function blockForm($form, FormStateInterface $form_state): array {
     $form = parent::blockForm($form, $form_state);
 
     $config = $this->getConfiguration();
@@ -99,7 +99,7 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
   /**
    * {@inheritdoc}
    */
-  public function blockSubmit($form, FormStateInterface $form_state) {
+  public function blockSubmit($form, FormStateInterface $form_state): void {
     parent::blockSubmit($form, $form_state);
     $this->configuration['distribution_lists'] = $form_state->getValue('distribution_lists');
   }
@@ -107,7 +107,7 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
   /**
    * {@inheritdoc}
    */
-  public function build() {
+  public function build(): array {
     if (!$this->newsroomClient->isConfigured()) {
       return [];
     }
@@ -127,14 +127,14 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
   /**
    * {@inheritDoc}
    */
-  public function getCacheContexts() {
+  public function getCacheContexts(): array {
     return Cache::mergeContexts(parent::getCacheContexts(), ['languages']);
   }
 
   /**
    * {@inheritDoc}
    */
-  public function getCacheTags() {
+  public function getCacheTags(): array {
     return Cache::mergeTags(parent::getCacheTags(), ['config:' . OeNewsroomNewsletter::CONFIG_NAME]);
   }
 

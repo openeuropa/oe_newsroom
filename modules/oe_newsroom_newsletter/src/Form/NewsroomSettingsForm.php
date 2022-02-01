@@ -18,7 +18,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  protected function getEditableConfigNames() {
+  protected function getEditableConfigNames(): array {
     return [
       OeNewsroomNewsletter::CONFIG_NAME,
     ];
@@ -27,14 +27,14 @@ class NewsroomSettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'oe_newsroom_newsletter_settings_form';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state): array {
     $config = $this->config(OeNewsroomNewsletter::CONFIG_NAME);
 
     $form['privacy_uri'] = [
@@ -62,17 +62,17 @@ class NewsroomSettingsForm extends ConfigFormBase {
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    * @SuppressWarnings(PHPMD.NPathComplexity)
    */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
     $uri = trim($form['privacy_uri']['#value']);
 
     if (parse_url($uri, PHP_URL_SCHEME) === NULL) {
-      if (strpos($uri, '<front>') !== FALSE && $uri !== '<front>') {
+      if ($uri !== '<front>' && str_contains($uri, '<front>')) {
         // Only support the <front> token if it's on its own.
         $form_state->setError($form['privacy_uri'], $this->t('The path %uri is invalid.', ['%uri' => $uri]));
         return;
       }
 
-      if (strpos($uri, '<front>') === 0) {
+      if (str_contains($uri, '<front>')) {
         $uri = '/' . substr($uri, strlen('<front>'));
       }
       $uri = 'internal:' . $uri;
@@ -86,7 +86,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
         '?',
         '#',
       ], TRUE)
-      && substr($form['privacy_uri']['#value'], 0, strlen('<front>')) !== '<front>'
+      && !str_contains($form['privacy_uri']['#value'], '<front>')
     ) {
       $form_state->setError($form['privacy_uri'], $this->t('The specified target is invalid. Manually entered paths should start with one of the following characters: / ? #'));
       return;
@@ -109,7 +109,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     parent::submitForm($form, $form_state);
 
     $this->config(OeNewsroomNewsletter::CONFIG_NAME)

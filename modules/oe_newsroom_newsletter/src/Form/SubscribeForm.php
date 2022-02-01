@@ -62,7 +62,7 @@ class SubscribeForm extends NewsletterFormBase {
   /**
    * {@inheritDoc}
    */
-  public static function create(ContainerInterface $container) {
+  public static function create(ContainerInterface $container): SubscribeForm {
     return new static(
       NewsroomClient::create($container),
       $container->get('language_manager'),
@@ -75,7 +75,7 @@ class SubscribeForm extends NewsletterFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'oe_newsroom_newsletter_subscribe_form';
   }
 
@@ -85,7 +85,7 @@ class SubscribeForm extends NewsletterFormBase {
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    * @SuppressWarnings(PHPMD.NPathComplexity)
    */
-  public function buildForm(array $form, FormStateInterface $form_state, array $distribution_lists = [], array $newsletters_language = [], string $newsletters_language_default = '', string $intro_text = '', string $successful_message = '') {
+  public function buildForm(array $form, FormStateInterface $form_state, array $distribution_lists = [], array $newsletters_language = [], string $newsletters_language_default = '', string $intro_text = '', string $successful_message = ''): array {
     $this->successfulMessage = $successful_message;
 
     // Choose the proper language according to the user setting or interface
@@ -163,7 +163,7 @@ class SubscribeForm extends NewsletterFormBase {
   /**
    * {@inheritdoc}
    */
-  public function validatePrivacyElement($element, FormStateInterface $form_state, $form) {
+  public function validatePrivacyElement($element, FormStateInterface $form_state, $form): void {
     if (empty($element['#value'])) {
       $form_state->setError($form['agree_privacy_statement'], $this->t('You must agree with the privacy statement.'));
     }
@@ -172,7 +172,7 @@ class SubscribeForm extends NewsletterFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     // Get form values.
     $values = $form_state->getValues();
 
@@ -219,10 +219,10 @@ class SubscribeForm extends NewsletterFormBase {
    * @return string
    *   The privacy URI.
    */
-  protected function getPrivacyUri(string $language) {
+  protected function getPrivacyUri(string $language): string {
     $uri = $this->config(OeNewsroomNewsletter::CONFIG_NAME)->get('privacy_uri');
     if (parse_url($uri, PHP_URL_SCHEME) === NULL) {
-      if (strpos($uri, '<front>') === 0) {
+      if (str_contains($uri, '<front>')) {
         $uri = '/' . substr($uri, strlen('<front>'));
       }
       $uri = 'internal:' . $uri;

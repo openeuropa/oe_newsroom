@@ -7,7 +7,7 @@ oe_newsroom.settings:
       label: 'Hashing method'
     normalised:
       type: boolean
-      label: 'Normalize e-mail address'
+      label: 'Normalise e-mail address'
     universe:
       type: string
       label: 'Newsroom universe ID'

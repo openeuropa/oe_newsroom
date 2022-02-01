@@ -13,7 +13,7 @@ trait OeNewsroomNewsletterTrait {
   /**
    * Unset the API private key.
    */
-  public function unsetApiPrivateKey() {
+  public function unsetApiPrivateKey(): void {
     $settings['settings']['oe_newsroom']['newsroom_api_key'] = (object) [
       'value' => '',
       'required' => TRUE,
@@ -24,7 +24,7 @@ trait OeNewsroomNewsletterTrait {
   /**
    * Set the API private key.
    */
-  public function setApiPrivateKey() {
+  public function setApiPrivateKey(): void {
     $settings['settings']['oe_newsroom']['newsroom_api_key'] = (object) [
       'value' => 'phpunit-test-private-key',
       'required' => TRUE,
@@ -35,7 +35,10 @@ trait OeNewsroomNewsletterTrait {
   /**
    * Block default settings.
    *
-   * @return string[]
+   * @param bool $multi_distro
+   *   TRUE if the block will have multiple distribution lists, FALSE otherwise.
+   *
+   * @return array
    *   Array of the block default settings.
    */
   protected static function blockDefaultSettings(bool $multi_distro): array {
@@ -57,8 +60,13 @@ trait OeNewsroomNewsletterTrait {
 
   /**
    * Place subscribe block.
+   *
+   * @param array $settings
+   *   Array of the block settings.
+   * @param bool $multi_distro
+   *   TRUE if the block will have multiple distribution lists, FALSE otherwise.
    */
-  public function placeNewsletterSubscriptionBlock(array $settings = [], $multi_distro = FALSE): void {
+  public function placeNewsletterSubscriptionBlock(array $settings = [], bool $multi_distro = FALSE): void {
     $settings_default = [
       'label' => 'Subscribe to newsletter',
       'id' => 'subscribe',
@@ -72,8 +80,13 @@ trait OeNewsroomNewsletterTrait {
 
   /**
    * Place unsubscribe block.
+   *
+   * @param array $settings
+   *   Array of the block settings.
+   * @param bool $multi_distro
+   *   TRUE if the block will have multiple distribution lists, FALSE otherwise.
    */
-  public function placeNewsletterUnsubscriptionBlock(array $settings = [], $multi_distro = FALSE): void {
+  public function placeNewsletterUnsubscriptionBlock(array $settings = [], bool $multi_distro = FALSE): void {
     $settings_default = [
       'label' => 'Unsubscribe from newsletter',
       'id' => 'unsubscribe',

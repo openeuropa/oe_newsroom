@@ -24,7 +24,7 @@ class UnsubscribeForm extends NewsletterFormBase {
   /**
    * {@inheritDoc}
    */
-  public static function create(ContainerInterface $container) {
+  public static function create(ContainerInterface $container): UnsubscribeForm {
     return new static(
       NewsroomClient::create($container),
       $container->get('current_user'),
@@ -36,14 +36,14 @@ class UnsubscribeForm extends NewsletterFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'oe_newsroom_newsletter_unsubscribe_form';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, array $distribution_lists = []) {
+  public function buildForm(array $form, FormStateInterface $form_state, array $distribution_lists = []): array {
     $form = parent::buildForm($form, $form_state, $distribution_lists);
 
     $form['#id'] = Html::getUniqueId($this->getFormId());
@@ -66,7 +66,7 @@ class UnsubscribeForm extends NewsletterFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     // Get form values.
     $values = $form_state->getValues();
 

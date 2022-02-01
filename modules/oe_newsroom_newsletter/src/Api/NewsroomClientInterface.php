@@ -14,6 +14,11 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 interface NewsroomClientInterface extends ContainerInjectionInterface {
 
   /**
+   * A URL of the API.
+   */
+  public const API_URL = 'https://ec.europa.eu/newsroom/api/v1';
+
+  /**
    * Subscribe an email to the newsletters.
    *
    * @param string $email

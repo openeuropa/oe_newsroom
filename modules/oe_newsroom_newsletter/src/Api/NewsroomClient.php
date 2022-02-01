@@ -93,7 +93,7 @@ final class NewsroomClient implements NewsroomClientInterface {
   /**
    * {@inheritDoc}
    */
-  public static function create(ContainerInterface $container) {
+  public static function create(ContainerInterface $container): NewsroomClient {
     return new static(
       $container->get('config.factory'),
       $container->get('settings'),
@@ -158,7 +158,7 @@ final class NewsroomClient implements NewsroomClientInterface {
 
     try {
       // Send the request.
-      $request = $this->httpClient->request('POST', 'https://ec.europa.eu/newsroom/api/v1/subscribe', ['json' => $payload]);
+      $request = $this->httpClient->request('POST', self::API_URL . '/subscribe', ['json' => $payload]);
     }
     catch (ClientException $e) {
       throw new BadResponseException(
@@ -216,7 +216,7 @@ final class NewsroomClient implements NewsroomClientInterface {
 
       try {
         // Send the request.
-        $response = $this->httpClient->get('https://ec.europa.eu/newsroom/api/v1/unsubscribe', $payload);
+        $response = $this->httpClient->get(self::API_URL . '/unsubscribe', $payload);
       }
       catch (ClientException $e) {
         throw new BadResponseException(

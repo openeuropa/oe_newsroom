@@ -46,7 +46,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
   /**
    * The form builder.
    *
-   * @var \Drupal\Core\Form\FormBuilder
+   * @var \Drupal\Core\Form\FormBuilderInterface
    */
   private $formBuilder;
 
@@ -77,7 +77,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
   /**
    * {@inheritdoc}
    */
-  public function blockForm($form, FormStateInterface $form_state) {
+  public function blockForm($form, FormStateInterface $form_state): array {
     $form = parent::blockForm($form, $form_state);
 
     $config = $this->getConfiguration();
@@ -137,7 +137,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
   /**
    * {@inheritdoc}
    */
-  public function blockValidate($form, FormStateInterface $form_state) {
+  public function blockValidate($form, FormStateInterface $form_state): void {
     parent::blockValidate($form, $form_state);
 
     if (!empty($form_state->getValue('newsletters_language')) && !in_array($form_state->getValue('newsletters_language_default'), $form_state->getValue('newsletters_language'))) {
@@ -148,7 +148,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
   /**
    * {@inheritdoc}
    */
-  public function blockSubmit($form, FormStateInterface $form_state) {
+  public function blockSubmit($form, FormStateInterface $form_state): void {
     parent::blockSubmit($form, $form_state);
 
     $this->configuration['newsletters_language'] = $form_state->getValue('newsletters_language') ?? [];
@@ -161,7 +161,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
   /**
    * {@inheritdoc}
    */
-  public function build() {
+  public function build(): array {
     $newsletters_language = $this->configuration['newsletters_language'] ?? [];
     $newsletters_language_default = $this->configuration['newsletters_language_default'] ?? '';
     $intro_text = $this->configuration['intro_text'] ?? '';
@@ -182,14 +182,14 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
   /**
    * {@inheritDoc}
    */
-  public function getCacheContexts() {
+  public function getCacheContexts(): array {
     return Cache::mergeContexts(parent::getCacheContexts(), ['languages']);
   }
 
   /**
    * {@inheritDoc}
    */
-  public function getCacheTags() {
+  public function getCacheTags(): array {
     return Cache::mergeTags(parent::getCacheTags(), ['config:' . OeNewsroomNewsletter::CONFIG_NAME]);
   }
 

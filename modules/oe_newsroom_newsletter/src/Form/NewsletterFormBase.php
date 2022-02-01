@@ -47,7 +47,7 @@ abstract class NewsletterFormBase extends FormBase {
   protected $logger;
 
   /**
-   * {@inheritDoc}
+   * Constructs a NewsletterFormBase object.
    */
   public function __construct(NewsroomClientInterface $newsroomClient, AccountProxyInterface $accountProxy, MessengerInterface $messenger, LoggerChannelFactoryInterface $logger) {
     $this->newsroomClient = $newsroomClient;
@@ -59,7 +59,7 @@ abstract class NewsletterFormBase extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, array $distribution_lists = []) {
+  public function buildForm(array $form, FormStateInterface $form_state, array $distribution_lists = []): array {
     $form['email'] = [
       '#type' => 'email',
       '#title' => $this->t('Your e-mail'),
