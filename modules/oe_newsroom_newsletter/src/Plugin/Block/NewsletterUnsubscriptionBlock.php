@@ -66,10 +66,17 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
   /**
    * {@inheritdoc}
    */
+  public function defaultConfiguration() {
+    return [
+      'distribution_lists' => [],
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function blockForm($form, FormStateInterface $form_state): array {
     $form = parent::blockForm($form, $form_state);
-
-    $config = $this->getConfiguration();
 
     $form['distribution_lists'] = [
       '#type' => 'multivalue',
@@ -89,7 +96,7 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
         '#description' => $this->t('This is used to help the user identify which list they want to unsubscribe from.'),
         '#maxlength' => 128,
       ],
-      '#default_value' => $config['distribution_lists'] ?? [],
+      '#default_value' => $this->configuration['distribution_lists'],
     ];
 
     return $form;

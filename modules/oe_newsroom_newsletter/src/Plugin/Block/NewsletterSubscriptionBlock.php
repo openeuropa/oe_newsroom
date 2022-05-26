@@ -78,30 +78,41 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
   /**
    * {@inheritdoc}
    */
+  public function defaultConfiguration() {
+    return [
+      'newsletters_language' => [],
+      'newsletters_language_default' => '',
+      'intro_text' => '',
+      'successful_subscription_message' => '',
+      'distribution_lists' => [],
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function blockForm($form, FormStateInterface $form_state): array {
     $form = parent::blockForm($form, $form_state);
-
-    $config = $this->getConfiguration();
 
     $form['newsletters_language'] = [
       '#type' => 'language_select',
       '#title' => $this->t('Newsletter languages'),
       '#description' => $this->t('Select the languages in which the newsletter is available. Leave empty to show all languages. Only the languages currently enabled in the site are available.'),
-      '#default_value' => $config['newsletters_language'] ?? [],
+      '#default_value' => $this->configuration['newsletters_language'],
       '#multiple' => TRUE,
     ];
     $form['newsletters_language_default'] = [
       '#type' => 'language_select',
       '#title' => $this->t('Default newsletter language'),
       '#description' => $this->t("This language will be set as default if the user's preferred language is not available."),
-      '#default_value' => $config['newsletters_language_default'] ?? [],
+      '#default_value' => $this->configuration['newsletters_language_default'],
     ];
     $form['intro_text'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Introduction text'),
       '#description' => $this->t('Text which will show on top of the form'),
       '#maxlength' => 128,
-      '#default_value' => $config['intro_text'] ?? '',
+      '#default_value' => $this->configuration['intro_text'],
       '#required' => TRUE,
     ];
     $form['successful_subscription_message'] = [
@@ -109,7 +120,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
       '#title' => $this->t('Successful subscription message'),
       '#description' => $this->t('Text which will shown if the user successfully subscribed to the newsletters. Leave empty to use the message returned by the Newsroom API.'),
       '#maxlength' => 128,
-      '#default_value' => $config['successful_subscription_message'] ?? '',
+      '#default_value' => $this->configuration['successful_subscription_message'],
     ];
     $form['distribution_lists'] = [
       '#type' => 'multivalue',
@@ -129,7 +140,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
         '#description' => $this->t('This is used to help the user identify which list they want to subscribe to.'),
         '#maxlength' => 128,
       ],
-      '#default_value' => $config['distribution_lists'] ?? [],
+      '#default_value' => $this->configuration['distribution_lists'],
     ];
 
     return $form;
@@ -163,12 +174,14 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
    * {@inheritdoc}
    */
   public function build(): array {
-    $newsletters_language = $this->configuration['newsletters_language'] ?? [];
-    $newsletters_language_default = $this->configuration['newsletters_language_default'] ?? '';
-    $intro_text = $this->configuration['intro_text'] ?? '';
-    $successful_message = $this->configuration['successful_subscription_message'] ?? '';
-
-    return $this->formBuilder->getForm(SubscribeForm::class, $this->configuration['distribution_lists'], $newsletters_language, $newsletters_language_default, $intro_text, $successful_message);
+    return $this->formBuilder->getForm(
+      SubscribeForm::class,
+      $this->configuration['distribution_lists'],
+      $this->configuration['newsletters_language'],
+      $this->configuration['newsletters_language_default'],
+      $this->configuration['intro_text'],
+      $this->configuration['successful_subscription_message']
+    );
   }
 
   /**
