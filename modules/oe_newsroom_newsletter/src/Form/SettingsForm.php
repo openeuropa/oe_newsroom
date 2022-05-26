@@ -11,9 +11,9 @@ use Drupal\Core\Url;
 use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 
 /**
- * Newsroom Settings Form.
+ * Newsletter settings form.
  */
-class NewsroomSettingsForm extends ConfigFormBase {
+class SettingsForm extends ConfigFormBase {
 
   /**
    * {@inheritdoc}
@@ -72,7 +72,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
         return;
       }
 
-      if (str_contains($uri, '<front>')) {
+      if (strpos($uri, '<front>') === 0) {
         $uri = '/' . substr($uri, strlen('<front>'));
       }
       $uri = 'internal:' . $uri;
@@ -81,12 +81,8 @@ class NewsroomSettingsForm extends ConfigFormBase {
     // @see \Drupal\link\Plugin\Field\FieldWidget\LinkWidget::validateUriElement()
     if (
       parse_url($uri, PHP_URL_SCHEME) === 'internal'
-      && !in_array($form['privacy_uri']['#value'][0], [
-        '/',
-        '?',
-        '#',
-      ], TRUE)
-      && !str_contains($form['privacy_uri']['#value'], '<front>')
+      && !in_array($form['privacy_uri']['#value'][0], ['/', '?', '#'], TRUE)
+      && substr($form['privacy_uri']['#value'], 0, strlen('<front>')) !== '<front>'
     ) {
       $form_state->setError($form['privacy_uri'], $this->t('The specified target is invalid. Manually entered paths should start with one of the following characters: / ? #'));
       return;
