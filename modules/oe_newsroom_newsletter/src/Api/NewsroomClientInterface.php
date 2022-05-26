@@ -32,15 +32,15 @@ interface NewsroomClientInterface {
    * @param array $topicExtId
    *   An array of Topic IDs, only used for notifications.
    *
-   * @return array|null
-   *   Returns api response as an array.
+   * @return array
+   *   Returns API response as an array.
    *
    * @throws \GuzzleHttp\Exception\ServerException
    *   If the HTTP requests fails or if the response is not proper.
    * @throws \GuzzleHttp\Exception\BadResponseException
    *   If response is not proper we throw this exception.
    */
-  public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], string $language = NULL, array $topicExtId = []): ?array;
+  public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], string $language = NULL, array $topicExtId = []): array;
 
   /**
    * Unsubscribe an email from the newsletters.

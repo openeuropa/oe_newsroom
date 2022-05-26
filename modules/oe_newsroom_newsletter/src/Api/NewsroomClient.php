@@ -16,7 +16,7 @@ use GuzzleHttp\Exception\ClientException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * This connects to the Newsroom API and makes the requests to it no conf.
+ * Client to access the Newsroom newsletter subscription API.
  *
  * @internal This class is marked as final and internal as it will be later moved to a
  *   dedicated library. Please note that this class may change at any time and
@@ -137,7 +137,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    * @SuppressWarnings(PHPMD.NPathComplexity)
    */
-  public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], string $language = NULL, array $topicExtId = []): ?array {
+  public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], string $language = NULL, array $topicExtId = []): array {
     // Prepare the post.
     $payload = [
       'key' => $this->generateKey($email),
