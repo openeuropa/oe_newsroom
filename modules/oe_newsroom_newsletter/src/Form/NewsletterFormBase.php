@@ -11,7 +11,9 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Newsletter Form Base.
@@ -54,6 +56,18 @@ abstract class NewsletterFormBase extends FormBase {
     $this->accountProxy = $accountProxy;
     $this->messenger = $messenger;
     $this->logger = $logger;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      NewsroomClient::create($container),
+      $container->get('current_user'),
+      $container->get('messenger'),
+      $container->get('logger.factory'),
+    );
   }
 
   /**

@@ -6,6 +6,7 @@ namespace Drupal\oe_newsroom_newsletter\Api;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\oe_newsroom\OeNewsroom;
@@ -23,7 +24,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @SuppressWarnings(PHPMD.TooManyFields)
  * @internal
  */
-final class NewsroomClient implements NewsroomClientInterface {
+final class NewsroomClient implements NewsroomClientInterface, ContainerInjectionInterface {
 
   use StringTranslationTrait;
 

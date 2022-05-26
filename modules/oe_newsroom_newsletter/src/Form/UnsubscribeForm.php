@@ -7,10 +7,8 @@ namespace Drupal\oe_newsroom_newsletter\Form;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\oe_newsroom\OeNewsroom;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ServerException;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Subscribe form.
@@ -20,18 +18,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *    ex. array(0 => array('sv_id' => 20, 'name' => 'XY Newsletter'))
  */
 class UnsubscribeForm extends NewsletterFormBase {
-
-  /**
-   * {@inheritDoc}
-   */
-  public static function create(ContainerInterface $container): UnsubscribeForm {
-    return new static(
-      NewsroomClient::create($container),
-      $container->get('current_user'),
-      $container->get('messenger'),
-      $container->get('logger.factory'),
-    );
-  }
 
   /**
    * {@inheritdoc}

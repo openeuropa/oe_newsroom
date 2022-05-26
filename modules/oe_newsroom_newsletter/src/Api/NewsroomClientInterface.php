@@ -4,14 +4,12 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_newsroom_newsletter\Api;
 
-use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-
 /**
  * Interface for newsroom client api class.
  *
  * @internal
  */
-interface NewsroomClientInterface extends ContainerInjectionInterface {
+interface NewsroomClientInterface {
 
   /**
    * A URL of the API.
@@ -41,8 +39,6 @@ interface NewsroomClientInterface extends ContainerInjectionInterface {
    *   If the HTTP requests fails or if the response is not proper.
    * @throws \GuzzleHttp\Exception\BadResponseException
    *   If response is not proper we throw this exception.
-   *
-   * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    */
   public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], string $language = NULL, array $topicExtId = []): ?array;
 
