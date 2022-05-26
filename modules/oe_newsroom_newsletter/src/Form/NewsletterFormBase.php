@@ -86,7 +86,7 @@ abstract class NewsletterFormBase extends FormBase {
       $form['distribution_lists'] = [
         '#type' => 'checkboxes',
         '#title' => $this->t('Newsletters'),
-        '#description' => $this->t('Please select the newsletter lists you want to take an action on.'),
+        '#description' => $this->getDistributionListsFieldDescription(),
         '#options' => $options,
         '#required' => TRUE,
       ];
@@ -126,5 +126,13 @@ abstract class NewsletterFormBase extends FormBase {
 
     return $response;
   }
+
+  /**
+   * Returns the description to show under the description list field.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   The field description translatable string.
+   */
+  abstract protected function getDistributionListsFieldDescription(): TranslatableMarkup;
 
 }

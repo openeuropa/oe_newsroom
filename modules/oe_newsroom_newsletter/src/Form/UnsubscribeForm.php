@@ -6,6 +6,7 @@ namespace Drupal\oe_newsroom_newsletter\Form;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\oe_newsroom\OeNewsroom;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ServerException;
@@ -76,6 +77,13 @@ class UnsubscribeForm extends NewsletterFormBase {
     }
 
     $this->messenger->addError($this->t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  protected function getDistributionListsFieldDescription(): TranslatableMarkup {
+    return $this->t('Please select the newsletter lists you want to unsubscribe from.');
   }
 
 }

@@ -11,6 +11,7 @@ use Drupal\Core\Link;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\oe_newsroom\OeNewsroom;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
@@ -232,6 +233,13 @@ class SubscribeForm extends NewsletterFormBase {
     }
     // @todo Adapt to the common OE approach for pt-pt.
     return str_replace('[lang_code]', str_replace('pt-pt', 'pt', $language), $uri);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  protected function getDistributionListsFieldDescription(): TranslatableMarkup {
+    return $this->t('Please select the newsletter lists you want to subscribe to.');
   }
 
 }
