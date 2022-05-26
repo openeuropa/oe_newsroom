@@ -12,7 +12,6 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\oe_newsroom\OeNewsroom;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
-use GuzzleHttp\Exception\ClientException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -92,7 +91,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public static function create(ContainerInterface $container): NewsroomClient {
     return new static(
@@ -132,7 +131,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    *
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    * @SuppressWarnings(PHPMD.NPathComplexity)
@@ -187,7 +186,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function unsubscribe(string $email, array $svIds = []): bool {
     // This is necessary to split separately newsletters distribution lists.

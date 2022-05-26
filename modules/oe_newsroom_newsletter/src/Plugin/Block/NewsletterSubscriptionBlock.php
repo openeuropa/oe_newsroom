@@ -38,7 +38,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
   protected $privacyUri;
 
   /**
-   * API for newsroom calls.
+   * API for Newsroom calls.
    *
    * @var \Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface
    */
@@ -172,7 +172,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   protected function blockAccess(AccountInterface $account) {
     if (!$this->newsroomClient->isConfigured() || empty($this->configuration['distribution_lists']) || empty($this->privacyUri)) {
@@ -182,14 +182,14 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getCacheContexts(): array {
     return Cache::mergeContexts(parent::getCacheContexts(), ['languages']);
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getCacheTags(): array {
     return Cache::mergeTags(parent::getCacheTags(), ['config:' . OeNewsroomNewsletter::CONFIG_NAME]);

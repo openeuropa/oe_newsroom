@@ -60,7 +60,7 @@ abstract class NewsletterFormBase extends FormBase {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
     return new static(

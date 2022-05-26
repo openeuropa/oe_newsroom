@@ -52,7 +52,7 @@ class SubscribeForm extends NewsletterFormBase {
   protected $successfulMessage;
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function __construct(NewsroomClientInterface $newsroomClient, AccountProxyInterface $accountProxy, MessengerInterface $messenger, LoggerChannelFactoryInterface $logger, LanguageManagerInterface $languageManager) {
     parent::__construct($newsroomClient, $accountProxy, $messenger, $logger);
@@ -60,7 +60,7 @@ class SubscribeForm extends NewsletterFormBase {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
     return new static(
@@ -223,7 +223,7 @@ class SubscribeForm extends NewsletterFormBase {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   protected function getDistributionListsFieldDescription(): TranslatableMarkup {
     return $this->t('Please select the newsletter lists you want to subscribe to.');

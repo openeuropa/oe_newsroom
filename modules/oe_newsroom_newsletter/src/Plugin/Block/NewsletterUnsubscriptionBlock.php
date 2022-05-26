@@ -111,7 +111,7 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   protected function blockAccess(AccountInterface $account) {
     if (!$this->newsroomClient->isConfigured() || empty($this->configuration['distribution_lists'])) {

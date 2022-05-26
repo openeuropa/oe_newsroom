@@ -79,7 +79,7 @@ class UnsubscribeForm extends NewsletterFormBase {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   protected function getDistributionListsFieldDescription(): TranslatableMarkup {
     return $this->t('Please select the newsletter lists you want to unsubscribe from.');
