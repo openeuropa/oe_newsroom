@@ -49,8 +49,8 @@ class NewsroomConfigurationTest extends BrowserTestBase {
     ]);
     $this->drupalLogin($user);
     $this->drupalGet('admin/config/system/newsroom-settings');
-    $assertSession->elementAttributeContains('css', 'input#edit-universe', 'required', 'required');
-    $assertSession->elementAttributeContains('css', 'input#edit-app-id', 'required', 'required');
+    $assertSession->elementAttributeContains('css', '#edit-universe', 'required', 'required');
+    $assertSession->elementAttributeContains('css', '#edit-app-id', 'required', 'required');
     $page->fillField('Universe acronym', 'Site1');
     $page->fillField('App ID', 'Site1_app');
     $this->assertEquals([
