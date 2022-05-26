@@ -54,7 +54,7 @@ class SubscribeForm extends NewsletterFormBase {
   /**
    * {@inheritDoc}
    */
-  public function __construct(NewsroomClientInterface $newsroomClient, LanguageManagerInterface $languageManager, AccountProxyInterface $accountProxy, MessengerInterface $messenger, LoggerChannelFactoryInterface $logger) {
+  public function __construct(NewsroomClientInterface $newsroomClient, AccountProxyInterface $accountProxy, MessengerInterface $messenger, LoggerChannelFactoryInterface $logger, LanguageManagerInterface $languageManager) {
     parent::__construct($newsroomClient, $accountProxy, $messenger, $logger);
     $this->languageManager = $languageManager;
   }
@@ -65,10 +65,10 @@ class SubscribeForm extends NewsletterFormBase {
   public static function create(ContainerInterface $container): SubscribeForm {
     return new static(
       NewsroomClient::create($container),
-      $container->get('language_manager'),
       $container->get('current_user'),
       $container->get('messenger'),
       $container->get('logger.factory'),
+      $container->get('language_manager')
     );
   }
 
