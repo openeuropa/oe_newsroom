@@ -156,17 +156,8 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
       $payload['subscription']['topicExtId'] = implode(',', $topicExtId);
     }
 
-    try {
-      // Send the request.
-      $request = $this->httpClient->request('POST', self::API_URL . '/subscribe', ['json' => $payload]);
-    }
-    catch (ClientException $e) {
-      throw new BadResponseException(
-        'Invalid response returned by Newsroom API.',
-        $e->getRequest(),
-        $e->getResponse(),
-      );
-    }
+    // Send the request.
+    $request = $this->httpClient->request('POST', self::API_URL . '/subscribe', ['json' => $payload]);
 
     if ($request->getStatusCode() !== 200) {
       throw new BadResponseException('Newsroom API returned a response with HTTP status ' . $request->getStatusCode() . ' but subscription item not found in it.', NULL);
@@ -214,17 +205,8 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
         ],
       ];
 
-      try {
-        // Send the request.
-        $response = $this->httpClient->get(self::API_URL . '/unsubscribe', $payload);
-      }
-      catch (ClientException $e) {
-        throw new BadResponseException(
-          'Invalid response returned by Newsroom API.',
-          $e->getRequest(),
-          $e->getResponse(),
-        );
-      }
+      // Send the request.
+      $response = $this->httpClient->get(self::API_URL . '/unsubscribe', $payload);
 
       // If the unsubscription was success the API returns HTTP code 200.
       // And a text message in the HTTP message body that we don't need now.

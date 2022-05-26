@@ -35,7 +35,7 @@ interface NewsroomClientInterface {
    * @return array
    *   Returns API response as an array.
    *
-   * @throws \GuzzleHttp\Exception\ServerException
+   * @throws \GuzzleHttp\Exception\GuzzleException
    *   If the HTTP requests fails or if the response is not proper.
    * @throws \GuzzleHttp\Exception\BadResponseException
    *   If response is not proper we throw this exception.
