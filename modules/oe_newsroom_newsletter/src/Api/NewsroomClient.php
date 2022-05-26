@@ -158,8 +158,10 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
     // Send the request.
     $request = $this->httpClient->request('POST', self::API_URL . '/subscribe', ['json' => $payload]);
 
+    // @todo The HTTP client should already thrown exceptions for any response
+    //   code other than 200.
     if ($request->getStatusCode() !== 200) {
-      throw new InvalidResponseException('Newsroom API returned a response with HTTP status ' . $request->getStatusCode() . ' but subscription item not found in it.');
+      throw new InvalidResponseException('Newsroom API returned a response with HTTP status ' . $request->getStatusCode() . ' instead of expected 200.');
     }
 
     $data = Json::decode($request->getBody()->getContents());
@@ -182,7 +184,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
       return $response;
     }
 
-    throw new InvalidResponseException('The subscription service is not available at the moment. Please try again later.');
+    throw new InvalidResponseException('Newsroom API returned a 200 response but subscription items were found in it.');
   }
 
   /**
