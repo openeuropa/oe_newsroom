@@ -11,12 +11,13 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Newsletter Form Base.
+ * Base form for subscription and unsubscription operations.
  */
 abstract class NewsletterFormBase extends FormBase {
 

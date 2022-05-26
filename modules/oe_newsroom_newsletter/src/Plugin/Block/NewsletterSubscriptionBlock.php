@@ -166,6 +166,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
     $newsletters_language_default = $this->configuration['newsletters_language_default'] ?? '';
     $intro_text = $this->configuration['intro_text'] ?? '';
     $successful_message = $this->configuration['successful_subscription_message'] ?? '';
+
     return $this->formBuilder->getForm(SubscribeForm::class, $this->configuration['distribution_lists'], $newsletters_language, $newsletters_language_default, $intro_text, $successful_message);
   }
 

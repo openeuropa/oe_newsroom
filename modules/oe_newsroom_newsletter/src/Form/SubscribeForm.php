@@ -161,7 +161,10 @@ class SubscribeForm extends NewsletterFormBase {
   }
 
   /**
-   * {@inheritdoc}
+   * Validate callback for the privacy element.
+   *
+   * This allows to show a custom message instead of the standard
+   * "field is required" one.
    */
   public function validatePrivacyElement($element, FormStateInterface $form_state, $form): void {
     if (empty($element['#value'])) {

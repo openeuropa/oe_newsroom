@@ -138,7 +138,6 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
    * @SuppressWarnings(PHPMD.NPathComplexity)
    */
   public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], string $language = NULL, array $topicExtId = []): array {
-    // Prepare the post.
     $payload = [
       'key' => $this->generateKey($email),
       'subscription' => [
