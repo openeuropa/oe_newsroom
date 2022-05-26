@@ -1,8 +1,0 @@
-<?php
-
-/**
- * @file
- * Hook implementations for the OpenEuropa Newsroom module.
- */
-
-declare(strict_types = 1);
