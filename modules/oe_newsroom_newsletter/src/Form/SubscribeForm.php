@@ -186,12 +186,9 @@ class SubscribeForm extends NewsletterFormBase {
       // Let's call the subscription service.
       $response = $this->newsroomClient->subscribe($values['email'], $distribution_lists, [], $values['newsletters_language']);
       // Set response (if there is) into form state, if somebody need it.
-      if (is_array($response)) {
-        $form_state->set('subscription', $response);
+      $form_state->set('subscription', $response);
 
-        // Set the correct message here.
-        $this->subscriptionMessage($response, $this->successfulMessage);
-      }
+      $this->messenger->addStatus($this->successfulMessage ?: $response['feedbackMessage'] ?: $this->t('You have been successfully subscribed.'));
     }
     catch (ServerException | BadResponseException $e) {
       $this->messenger->addError($this->t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
@@ -203,15 +200,6 @@ class SubscribeForm extends NewsletterFormBase {
         '%exception' => $e->getMessage(),
       ]);
     }
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  protected function subscriptionMessage(array $subscription, string $success_message): void {
-    // Success message should be translatable and it can be set from the
-    // Newsroom Settings Form.
-    $this->messenger->addStatus(empty($success_message) ? trim($subscription['feedbackMessage']) : $success_message);
   }
 
   /**
