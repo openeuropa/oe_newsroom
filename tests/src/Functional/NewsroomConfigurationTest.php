@@ -63,10 +63,10 @@ class NewsroomConfigurationTest extends BrowserTestBase {
 
     // Validate the saved values.
     $config = $this->config(OeNewsroom::CONFIG_NAME);
-    $this->assertEquals('sha256', $config->get('hash_method'));
+    $this->assertSame('sha256', $config->get('hash_method'));
     $this->assertTrue($config->get('normalised'));
-    $this->assertEquals('Site1', $config->get('universe'));
-    $this->assertEquals('Site1_app', $config->get('app_id'));
+    $this->assertSame('Site1', $config->get('universe'));
+    $this->assertSame('Site1_app', $config->get('app_id'));
   }
 
 }
