@@ -8,6 +8,7 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\oe_newsroom\OeNewsroom;
+use Drupal\oe_newsroom_newsletter\Exception\InvalidResponseException;
 use GuzzleHttp\Exception\GuzzleException;
 
 /**
@@ -65,7 +66,7 @@ class UnsubscribeForm extends NewsletterFormBase {
         return;
       }
     }
-    catch (GuzzleException $e) {
+    catch (GuzzleException | InvalidResponseException $e) {
       $this->logger->get('oe_newsroom_newsletter')->error('Exception thrown with code %code while unsubscribing email %email to the newsletter(s) with ID(s) %sv_ids and universe %universe: %exception', [
         '%code' => $e->getCode(),
         '%email' => $values['email'],

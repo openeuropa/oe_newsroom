@@ -10,8 +10,8 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\oe_newsroom\OeNewsroom;
+use Drupal\oe_newsroom_newsletter\Exception\InvalidResponseException;
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\BadResponseException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -159,12 +159,12 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
     $request = $this->httpClient->request('POST', self::API_URL . '/subscribe', ['json' => $payload]);
 
     if ($request->getStatusCode() !== 200) {
-      throw new BadResponseException('Newsroom API returned a response with HTTP status ' . $request->getStatusCode() . ' but subscription item not found in it.', NULL);
+      throw new InvalidResponseException('Newsroom API returned a response with HTTP status ' . $request->getStatusCode() . ' but subscription item not found in it.');
     }
 
     $data = Json::decode($request->getBody()->getContents());
     if (empty($data)) {
-      throw new BadResponseException('Empty response returned by Newsroom newsletter API.', NULL);
+      throw new InvalidResponseException('Empty response returned by Newsroom newsletter API.');
     }
 
     $response = NULL;
@@ -182,7 +182,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
       return $response;
     }
 
-    throw new BadResponseException('The subscription service is not available at the moment. Please try again later.', NULL);
+    throw new InvalidResponseException('The subscription service is not available at the moment. Please try again later.');
   }
 
   /**

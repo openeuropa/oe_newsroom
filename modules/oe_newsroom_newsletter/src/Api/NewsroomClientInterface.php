@@ -36,9 +36,9 @@ interface NewsroomClientInterface {
    *   Returns API response as an array.
    *
    * @throws \GuzzleHttp\Exception\GuzzleException
-   *   If the HTTP requests fails or if the response is not proper.
-   * @throws \GuzzleHttp\Exception\BadResponseException
-   *   If response is not proper we throw this exception.
+   *   Thrown by the Guzzle client.
+   * @throws \Drupal\oe_newsroom_newsletter\Exception\InvalidResponseException
+   *   Thrown when the response is not valid.
    */
   public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], string $language = NULL, array $topicExtId = []): array;
 
@@ -57,9 +57,7 @@ interface NewsroomClientInterface {
    *   true.
    *
    * @throws \GuzzleHttp\Exception\ServerException
-   *   If the HTTP requests fails or if the response is not proper.
-   * @throws \GuzzleHttp\Exception\BadResponseException
-   *   If response is not proper we throw this exception.
+   *   Thrown by the Guzzle client.
    */
   public function unsubscribe(string $email, array $svIds = []): bool;
 

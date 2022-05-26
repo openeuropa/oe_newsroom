@@ -16,6 +16,7 @@ use Drupal\Core\Url;
 use Drupal\oe_newsroom\OeNewsroom;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
+use Drupal\oe_newsroom_newsletter\Exception\InvalidResponseException;
 use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -189,7 +190,7 @@ class SubscribeForm extends NewsletterFormBase {
 
       $this->messenger->addStatus($this->successfulMessage ?: $response['feedbackMessage'] ?: $this->t('You have been successfully subscribed.'));
     }
-    catch (GuzzleException $e) {
+    catch (GuzzleException | InvalidResponseException $e) {
       $this->messenger->addError($this->t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
       $this->logger->get('oe_newsroom_newsletter')->error('Exception thrown with code %code while subscribing email %email to the newsletter(s) with ID(s) %sv_ids and universe %universe: %exception', [
         '%code' => $e->getCode(),
