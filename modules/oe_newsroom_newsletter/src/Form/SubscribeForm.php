@@ -62,7 +62,7 @@ class SubscribeForm extends NewsletterFormBase {
   /**
    * {@inheritDoc}
    */
-  public static function create(ContainerInterface $container): SubscribeForm {
+  public static function create(ContainerInterface $container) {
     return new static(
       NewsroomClient::create($container),
       $container->get('current_user'),
