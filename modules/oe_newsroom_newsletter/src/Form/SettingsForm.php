@@ -72,9 +72,7 @@ class SettingsForm extends ConfigFormBase {
         return;
       }
 
-      if (strpos($uri, '<front>') === 0) {
-        $uri = '/' . substr($uri, strlen('<front>'));
-      }
+      $uri = '/' . substr($uri, strlen('<front>'));
       $uri = 'internal:' . $uri;
     }
 
