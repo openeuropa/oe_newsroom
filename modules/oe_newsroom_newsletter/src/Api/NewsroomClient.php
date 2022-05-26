@@ -18,11 +18,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * This connects to the Newsroom API and makes the requests to it no conf.
  *
- * This class needs to be manually configured. It's a good choice when you need
- * to have a different setting then the configuration has.
+ * @internal This class is marked as final and internal as it will be later moved to a
+ *   dedicated library. Please note that this class may change at any time and
+ *   this will break any dependencies on it.
  *
  * @SuppressWarnings(PHPMD.TooManyFields)
- * @internal
  */
 final class NewsroomClient implements NewsroomClientInterface, ContainerInjectionInterface {
 
