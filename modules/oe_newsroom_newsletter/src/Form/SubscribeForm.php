@@ -222,7 +222,7 @@ class SubscribeForm extends NewsletterFormBase {
   protected function getPrivacyUri(string $language): string {
     $uri = $this->config(OeNewsroomNewsletter::CONFIG_NAME)->get('privacy_uri');
     if (parse_url($uri, PHP_URL_SCHEME) === NULL) {
-      if (str_contains($uri, '<front>')) {
+      if (strpos($uri, '<front>') === 0) {
         $uri = '/' . substr($uri, strlen('<front>'));
       }
       $uri = 'internal:' . $uri;

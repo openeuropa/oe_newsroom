@@ -62,13 +62,10 @@ class UnsubscribeForm extends NewsletterFormBase {
       // Let's call the unsubscription service.
       if ($this->newsroomClient->unsubscribe($values['email'], $distribution_lists)) {
         $this->messenger->addStatus($this->t('Successfully unsubscribed!'));
-      }
-      else {
-        $this->messenger->addError($this->t('There was a problem.'));
+        return;
       }
     }
     catch (ServerException | BadResponseException $e) {
-      $this->messenger->addError($this->t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
       $this->logger->get('oe_newsroom_newsletter')->error('Exception thrown with code %code while subscribing email %email to the newsletter(s) with ID(s) %sv_ids and universe %universe: %exception', [
         '%code' => $e->getCode(),
         '%email' => $values['email'],
@@ -77,6 +74,8 @@ class UnsubscribeForm extends NewsletterFormBase {
         '%exception' => $e->getMessage(),
       ]);
     }
+
+    $this->messenger->addError($this->t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
   }
 
 }
