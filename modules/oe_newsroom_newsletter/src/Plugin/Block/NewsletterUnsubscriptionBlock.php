@@ -11,6 +11,7 @@ use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\oe_newsroom\OeNewsroom;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Form\UnsubscribeForm;
@@ -108,12 +109,6 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
    * {@inheritdoc}
    */
   public function build(): array {
-    if (!$this->newsroomClient->isConfigured()) {
-      return [];
-    }
-    if (empty($this->configuration['distribution_lists'])) {
-      return [];
-    }
     return $this->formBuilder->getForm(UnsubscribeForm::class, $this->configuration['distribution_lists']);
   }
 
@@ -121,6 +116,10 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
    * {@inheritDoc}
    */
   protected function blockAccess(AccountInterface $account) {
+    if (!$this->newsroomClient->isConfigured() || empty($this->configuration['distribution_lists'])) {
+      return AccessResult::forbidden()->addCacheTags(['config:' . OeNewsroom::CONFIG_NAME]);
+    }
+
     return AccessResult::allowedIfHasPermission($account, 'unsubscribe from newsroom newsletters');
   }
 
