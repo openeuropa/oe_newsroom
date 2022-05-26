@@ -8,8 +8,7 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\oe_newsroom\OeNewsroom;
-use GuzzleHttp\Exception\BadResponseException;
-use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\Exception\GuzzleException;
 
 /**
  * Subscribe form.
@@ -66,8 +65,8 @@ class UnsubscribeForm extends NewsletterFormBase {
         return;
       }
     }
-    catch (ServerException | BadResponseException $e) {
-      $this->logger->get('oe_newsroom_newsletter')->error('Exception thrown with code %code while subscribing email %email to the newsletter(s) with ID(s) %sv_ids and universe %universe: %exception', [
+    catch (GuzzleException $e) {
+      $this->logger->get('oe_newsroom_newsletter')->error('Exception thrown with code %code while unsubscribing email %email to the newsletter(s) with ID(s) %sv_ids and universe %universe: %exception', [
         '%code' => $e->getCode(),
         '%email' => $values['email'],
         '%universe' => $this->config(OeNewsroom::CONFIG_NAME)->get('universe'),
