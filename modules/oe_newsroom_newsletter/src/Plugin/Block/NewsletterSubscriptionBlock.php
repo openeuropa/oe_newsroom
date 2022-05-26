@@ -12,6 +12,7 @@ use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\oe_newsroom\OeNewsroom;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Form\SubscribeForm;
@@ -175,7 +176,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
    */
   protected function blockAccess(AccountInterface $account) {
     if (!$this->newsroomClient->isConfigured() || empty($this->configuration['distribution_lists']) || empty($this->privacyUri)) {
-      return AccessResult::forbidden();
+      return AccessResult::forbidden()->addCacheTags(['config:' . OeNewsroom::CONFIG_NAME]);
     }
     return AccessResult::allowedIfHasPermission($account, 'subscribe to newsroom newsletters');
   }
