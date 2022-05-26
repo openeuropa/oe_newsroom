@@ -9,7 +9,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\oe_newsroom\OeNewsroom;
 
 /**
- * Newsroom Settings Form.
+ * Newsroom settings form.
  */
 class NewsroomSettingsForm extends ConfigFormBase {
 
@@ -64,7 +64,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
     $form['normalised'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Normalise before hashing'),
-      '#description' => $this->t('Newsroom has a normalised setting which determinates if the hashing was done on a normalised data (lowercased)'),
+      '#description' => $this->t('Newsroom has a normalised setting which indicates if the hashing was done on a normalised data (lowercase)'),
       '#default_value' => $config->get('normalised'),
     ];
     return parent::buildForm($form, $form_state);

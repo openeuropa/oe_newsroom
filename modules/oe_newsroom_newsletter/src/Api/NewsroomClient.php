@@ -109,7 +109,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
    *   True if the class is functional.
    */
   public function isConfigured(): bool {
-    // These fields should be filled up and has no default value, without them,
+    // These fields should be filled up and have no default value. Without them,
     // it's not possible to communicate with Newsroom.
     return !empty($this->privateKey) && !empty($this->universe) && !empty($this->appId);
   }

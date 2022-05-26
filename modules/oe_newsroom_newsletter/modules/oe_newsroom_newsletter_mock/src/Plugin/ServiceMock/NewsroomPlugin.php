@@ -239,8 +239,8 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
     foreach (array_merge($sv_ids, $related_sv_ids) as $sv_id) {
       // Select the first to returned as the normal API class, but the
       // webservice marks all as subscribed, so let's mark it here too.
-      $new_subscrition = empty($subscriptions[$universe][$sv_id][$email]['subscribed']);
-      $current_subs[] = $this->generateSubscriptionArray($universe, $email, $sv_id, $language, $new_subscrition);
+      $new_subscription = empty($subscriptions[$universe][$sv_id][$email]['subscribed']);
+      $current_subs[] = $this->generateSubscriptionArray($universe, $email, $sv_id, $language, $new_subscription);
 
       $universes[$app_id] = $universe;
 
