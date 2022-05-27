@@ -1,8 +1,8 @@
-oe_newsroom_newsletter.settings_tab.collection:
+oe_newsroom_newsletter.settings.primary:
   title: 'Newsroom newsletter settings'
   base_route: oe_newsroom.settings_form
   route_name: oe_newsroom_newsletter.settings
-oe_newsroom_newsletter.settings_tab.sub:
+oe_newsroom_newsletter.settings.secondary:
   title: 'Newsroom newsletter settings'
   route_name: oe_newsroom_newsletter.settings
-  parent_id: oe_newsroom_newsletter.settings_tab.collection
+  parent_id: oe_newsroom_newsletter.settings.primary
