@@ -39,19 +39,16 @@ class SettingsFormTest extends BrowserTestBase {
     $this->assertSession()->statusCodeEquals(403);
 
     // User without permission doesn't have access to the page.
-    $user = $this->createUser();
-    $this->drupalLogin($user);
+    $this->drupalLogin($this->createUser());
     $this->drupalGet('admin/config/system/newsroom-settings/newsletter');
     $this->assertSession()->statusCodeEquals(403);
 
     // Users with the parent module administer permission shouldn't have access.
-    $user = $this->createUser(['administer newsroom configuration']);
-    $this->drupalLogin($user);
+    $this->drupalLogin($this->createUser(['administer newsroom configuration']));
     $this->drupalGet('admin/config/system/newsroom-settings/newsletter');
     $this->assertSession()->statusCodeEquals(403);
 
-    $user = $this->createUser(['administer newsroom newsletter configuration']);
-    $this->drupalLogin($user);
+    $this->drupalLogin($this->createUser(['administer newsroom newsletter configuration']));
     $this->drupalGet('admin/config/system/newsroom-settings/newsletter');
 
     $page->pressButton('Save configuration');
