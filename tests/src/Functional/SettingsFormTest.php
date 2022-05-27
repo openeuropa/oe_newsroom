@@ -8,11 +8,11 @@ use Drupal\oe_newsroom\OeNewsroom;
 use Drupal\Tests\BrowserTestBase;
 
 /**
- * Test the Newsroom API configuration.
+ * Test the Newsroom configuration form.
  *
  * @group oe_newsroom
  */
-class NewsroomConfigurationTest extends BrowserTestBase {
+class SettingsFormTest extends BrowserTestBase {
 
   /**
    * {@inheritdoc}
@@ -27,12 +27,11 @@ class NewsroomConfigurationTest extends BrowserTestBase {
   protected $defaultTheme = 'stark';
 
   /**
-   * Test the Newsroom configuration page.
+   * Test the Newsroom settings form.
    */
-  public function testNewsroomConfigurationPage(): void {
-    $assertSession = $this->assertSession();
-    $session = $this->getSession();
-    $page = $session->getPage();
+  public function testSettingsForm(): void {
+    $assert_session = $this->assertSession();
+    $page = $this->getSession()->getPage();
 
     // Anonymous doesn't have access to the page.
     $this->drupalGet('admin/config/system/newsroom-settings');
@@ -49,17 +48,17 @@ class NewsroomConfigurationTest extends BrowserTestBase {
     ]);
     $this->drupalLogin($user);
     $this->drupalGet('admin/config/system/newsroom-settings');
-    $assertSession->elementAttributeContains('css', '#edit-universe', 'required', 'required');
-    $assertSession->elementAttributeContains('css', '#edit-app-id', 'required', 'required');
+    $assert_session->elementAttributeContains('css', '#edit-universe', 'required', 'required');
+    $assert_session->elementAttributeContains('css', '#edit-app-id', 'required', 'required');
     $page->fillField('Universe acronym', 'Site1');
     $page->fillField('App ID', 'Site1_app');
     $this->assertEquals([
       'sha256' => 'SHA-256',
       'md5' => 'MD5',
     ], $this->getOptions('Hash method'));
-    $assertSession->checkboxChecked('Normalise before hashing');
+    $assert_session->checkboxChecked('Normalise before hashing');
     $page->pressButton('Save configuration');
-    $assertSession->pageTextContains('The configuration options have been saved.');
+    $assert_session->pageTextContains('The configuration options have been saved.');
 
     // Validate the saved values.
     $config = $this->config(OeNewsroom::CONFIG_NAME);
