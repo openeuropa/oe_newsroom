@@ -65,6 +65,12 @@ class SettingsForm extends ConfigFormBase {
   public function validateForm(array &$form, FormStateInterface $form_state): void {
     $uri = trim($form['privacy_uri']['#value']);
 
+    // Bail out if no value is present. The field is required so the default
+    // form validation message will be presented.
+    if ($uri === '') {
+      return;
+    }
+
     if (parse_url($uri, PHP_URL_SCHEME) === NULL) {
       if ($uri !== '<front>' && str_contains($uri, '<front>')) {
         // Only support the <front> token if it's on its own.
