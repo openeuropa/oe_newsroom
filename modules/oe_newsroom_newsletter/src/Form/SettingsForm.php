@@ -86,7 +86,7 @@ class SettingsForm extends ConfigFormBase {
     if (
       parse_url($uri, PHP_URL_SCHEME) === 'internal'
       && !in_array($form['privacy_uri']['#value'][0], ['/', '?', '#'], TRUE)
-      && substr($form['privacy_uri']['#value'], 0, strlen('<front>')) !== '<front>'
+      && substr($form['privacy_uri']['#value'], 0, 7) !== '<front>'
     ) {
       $form_state->setError($form['privacy_uri'], $this->t('The specified target is invalid. Manually entered paths should start with one of the following characters: / ? #'));
       return;
