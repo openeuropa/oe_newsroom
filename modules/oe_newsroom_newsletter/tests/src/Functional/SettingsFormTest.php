@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\Tests\oe_newsroom_newsletter\Functional;
 
 use Behat\Mink\Exception\ResponseTextException;
+use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 use Drupal\Tests\BrowserTestBase;
 
@@ -91,6 +92,39 @@ class SettingsFormTest extends BrowserTestBase {
     // Validate the saved value.
     $config = $this->config(OeNewsroomNewsletter::CONFIG_NAME);
     $this->assertSame('https://www.example.com/privacy_[lang_code]', $config->get('privacy_uri'));
+  }
+
+  /**
+   * Tests that the privacy URL is translatable.
+   */
+  public function testSettingsTranslation(): void {
+    // To not pollute the other test method, we enable these modules only in
+    // this scenario.
+    \Drupal::service('module_installer')->install([
+      'block',
+      'config_translation',
+    ]);
+
+    $this->drupalPlaceBlock('local_tasks_block');
+    $language = ConfigurableLanguage::createFromLangcode('it');
+    $language->save();
+
+    $this->drupalLogin($this->createUser([
+      'administer newsroom newsletter configuration',
+      'translate configuration',
+    ]));
+    $this->drupalGet('admin/config/system/newsroom-settings/newsletter');
+    $this->clickLink('Translate newsroom newsletter settings form');
+    $this->assertSession()->addressEquals('/admin/config/system/newsroom-settings/newsletter/translate');
+
+    $assert_session = $this->assertSession();
+    $assert_session->elementExists('xpath', '//table/tbody/tr[./td[1][.="English (original)"]]');
+    $it_row = $assert_session->elementExists('xpath', '//table/tbody/tr[./td[1][.="Italian"]]');
+    $it_row->clickLink('Add');
+    // Checking that the field is present in the page is enough. The
+    // configuration translation capability comes from core, we just care that
+    // our field is marked as translatable.
+    $assert_session->fieldExists('Privacy URL');
   }
 
 }
