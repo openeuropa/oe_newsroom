@@ -113,7 +113,6 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
       '#description' => $this->t('Text which will show on top of the form'),
       '#maxlength' => 128,
       '#default_value' => $this->configuration['intro_text'],
-      '#required' => TRUE,
     ];
     $form['successful_subscription_message'] = [
       '#type' => 'textarea',
