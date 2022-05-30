@@ -13,7 +13,7 @@ use Drupal\user\Entity\Role;
  *
  * @group oe_newsroom_newsletter
  */
-class SubscribeMultipleNewslettersTest extends BrowserTestBase {
+class SubscribeMultipleNewslettersTestOLD extends BrowserTestBase {
 
   use OeNewsroomNewsletterTrait;
 

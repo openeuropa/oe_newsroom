@@ -14,7 +14,7 @@ use Drupal\user\Entity\Role;
  *
  * @group oe_newsroom_newsletter
  */
-class SubscribeMultipleNewslettersLanguageTest extends BrowserTestBase {
+class SubscribeMultipleNewslettersLanguageTestOLD extends BrowserTestBase {
 
   use OeNewsroomNewsletterTrait;
 
