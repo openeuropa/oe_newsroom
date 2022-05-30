@@ -82,7 +82,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
   protected function __construct(ConfigFactoryInterface $configFactory, Settings $settings, ClientInterface $httpClient) {
     $config = $configFactory->get(OeNewsroom::CONFIG_NAME);
 
-    $this->privateKey = $settings->get('oe_newsroom')['newsroom_api_key'];
+    $this->privateKey = $settings->get('oe_newsroom')['newsroom_api_key'] ?? NULL;
     $this->hashMethod = $config->get('hash_method');
     $this->normalised = $config->get('normalised');
     $this->universe = $config->get('universe');
