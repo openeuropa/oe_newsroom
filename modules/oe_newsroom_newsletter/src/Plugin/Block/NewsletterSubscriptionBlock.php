@@ -173,6 +173,10 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
    * {@inheritdoc}
    */
   public function build(): array {
+    if (!$this->newsroomClient->isConfigured() || empty($this->configuration['distribution_lists']) || empty($this->privacyUri)) {
+      return [];
+    }
+
     return $this->formBuilder->getForm(
       SubscribeForm::class,
       $this->configuration['distribution_lists'],
@@ -187,9 +191,6 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
    * {@inheritdoc}
    */
   protected function blockAccess(AccountInterface $account) {
-    if (!$this->newsroomClient->isConfigured() || empty($this->configuration['distribution_lists']) || empty($this->privacyUri)) {
-      return AccessResult::forbidden()->addCacheTags(['config:' . OeNewsroom::CONFIG_NAME]);
-    }
     return AccessResult::allowedIfHasPermission($account, 'subscribe to newsroom newsletters');
   }
 
@@ -204,7 +205,10 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
    * {@inheritdoc}
    */
   public function getCacheTags(): array {
-    return Cache::mergeTags(parent::getCacheTags(), ['config:' . OeNewsroomNewsletter::CONFIG_NAME]);
+    return Cache::mergeTags(parent::getCacheTags(), [
+      'config:' . OeNewsroom::CONFIG_NAME,
+      'config:' . OeNewsroomNewsletter::CONFIG_NAME,
+    ]);
   }
 
 }
