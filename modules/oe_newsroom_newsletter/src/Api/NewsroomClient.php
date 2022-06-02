@@ -164,7 +164,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
       throw new InvalidResponseException('Newsroom API returned a response with HTTP status ' . $request->getStatusCode() . ' instead of expected 200.');
     }
 
-    $data = Json::decode($request->getBody()->getContents());
+    $data = Json::decode((string) $request->getBody());
     if (empty($data)) {
       throw new InvalidResponseException('Empty response returned by Newsroom newsletter API.');
     }

@@ -187,7 +187,7 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
    *   Http response.
    */
   protected function subscriptions(RequestInterface $request): ResponseInterface {
-    $data = Json::decode($request->getBody()->getContents());
+    $data = Json::decode((string) $request->getBody());
     $universe = $data['subscription']['universeAcronym'];
     $email = $data['subscription']['email'];
     $sv_ids = explode(',', $data['subscription']['sv_id']);
@@ -224,7 +224,7 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
    *   Http response.
    */
   protected function subscribe(RequestInterface $request): ResponseInterface {
-    $data = Json::decode($request->getBody()->getContents());
+    $data = Json::decode((string) $request->getBody());
     $universe = $data['subscription']['universeAcronym'];
     $app_id = $data['subscription']['topicExtWebsite'];
     $email = $data['subscription']['email'];
