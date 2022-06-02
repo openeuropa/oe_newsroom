@@ -103,7 +103,7 @@ class SubscribeForm extends NewsletterFormBase {
       '#type' => 'container',
     ];
     $form['intro_text']['content'] = [
-      '#markup' => $intro_text,
+      '#plain_text' => $intro_text,
     ];
 
     $form = parent::buildForm($form, $form_state, $distribution_lists);
