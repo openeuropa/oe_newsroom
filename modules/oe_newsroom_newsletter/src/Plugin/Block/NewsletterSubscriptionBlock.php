@@ -110,15 +110,14 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
     $form['intro_text'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Introduction text'),
-      '#description' => $this->t('Text which will show on top of the form'),
-      '#maxlength' => 128,
+      '#description' => $this->t('Text which will show on top of the form.'),
       '#default_value' => $this->configuration['intro_text'],
     ];
     $form['successful_subscription_message'] = [
-      '#type' => 'textarea',
+      '#type' => 'textfield',
       '#title' => $this->t('Successful subscription message'),
       '#description' => $this->t('Text which will shown if the user successfully subscribed to the newsletters. Leave empty to use the message returned by the Newsroom API.'),
-      '#maxlength' => 128,
+      '#maxlength' => 255,
       '#default_value' => $this->configuration['successful_subscription_message'],
     ];
     $form['distribution_lists'] = [
