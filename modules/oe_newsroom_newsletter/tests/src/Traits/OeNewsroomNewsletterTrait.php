@@ -43,7 +43,7 @@ trait OeNewsroomNewsletterTrait {
    * @return array
    *   Array of the block default settings.
    */
-  protected static function blockDefaultSettings(bool $multiple_distributions): array {
+  protected static function blockCommonSettings(bool $multiple_distributions): array {
     $distribution_lists = [
       ['sv_id' => '111', 'name' => 'Newsletter 1'],
     ];
@@ -69,14 +69,14 @@ trait OeNewsroomNewsletterTrait {
    *   TRUE if the block will have multiple distribution lists, FALSE otherwise.
    */
   protected function placeNewsletterSubscriptionBlock(array $settings = [], bool $multiple_distributions = FALSE): void {
-    $settings_default = [
+    $defaults = [
       'label' => 'Subscribe to newsletter',
       'id' => 'subscribe',
       'intro_text' => 'This is the introduction text.',
       'successful_subscription_message' => '',
     ];
-    $settings_default += static::blockDefaultSettings($multiple_distributions);
-    $settings += array_merge($settings_default, $settings);
+    $defaults += static::blockCommonSettings($multiple_distributions);
+    $settings += $defaults;
     $this->drupalPlaceBlock('oe_newsroom_newsletter_subscription_block', $settings);
   }
 
@@ -89,33 +89,45 @@ trait OeNewsroomNewsletterTrait {
    *   TRUE if the block will have multiple distribution lists, FALSE otherwise.
    */
   protected function placeNewsletterUnsubscriptionBlock(array $settings = [], bool $multiple_distributions = FALSE): void {
-    $settings_default = [
+    $defaults = [
       'label' => 'Unsubscribe from newsletter',
       'id' => 'unsubscribe',
     ];
-    $settings_default += static::blockDefaultSettings($multiple_distributions);
-    $settings += array_merge($settings_default, $settings);
+    $defaults += static::blockCommonSettings($multiple_distributions);
+    $settings += $defaults;
     $this->drupalPlaceBlock('oe_newsroom_newsletter_unsubscription_block', $settings);
   }
 
   /**
    * Sets default values for the oe_newsroom module configuration.
+   *
+   * @param array $values
+   *   The values to use for the configuration. Default values are provided if
+   *   missing.
    */
-  protected function configureNewsroom(): void {
+  protected function configureNewsroom(array $values = []): void {
+    $values += [
+      'universe' => 'example-universe',
+      'app_id' => 'example-app',
+    ];
+
     $config = \Drupal::configFactory()
       ->getEditable(OeNewsroom::CONFIG_NAME)
-      ->set('universe', 'example-universe')
-      ->set('app_id', 'example-app');
+      ->set('universe', $values['universe'])
+      ->set('app_id', $values['app_id']);
     $config->save();
   }
 
   /**
    * Sets default values for the oe_newsroom_newsletter configuration.
+   *
+   * @param string $privacy_url
+   *   The value of the privacy url. If left empty, a default is provided.
    */
-  protected function configureNewsletter(): void {
+  protected function configureNewsletter(string $privacy_url = '/privacy-url'): void {
     $config = \Drupal::configFactory()
       ->getEditable(OeNewsroomNewsletter::CONFIG_NAME)
-      ->set('privacy_uri', '/privacy-url');
+      ->set('privacy_uri', $privacy_url);
     $config->save();
   }
 
