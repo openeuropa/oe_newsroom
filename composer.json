@@ -6,9 +6,10 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
+        "php": ">=7.4",
         "drupal/core": "^9.2",
         "drupal/multivalue_form_element": "^1.0@beta",
-        "php": ">=7.4"
+        "guzzlehttp/psr7": "^1.7"
     },
     "require-dev": {
         "composer/installers": "~1.11",
