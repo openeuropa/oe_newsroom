@@ -9,6 +9,7 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\State\State;
 use Drupal\http_request_mock\ServiceMockPluginInterface;
+use GuzzleHttp\Psr7\Message;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -24,6 +25,21 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  */
 class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, ContainerFactoryPluginInterface {
+
+  /**
+   * Key used to store in the state service the incoming requests.
+   */
+  public const STATE_KEY_REQUESTS = 'oe_newsroom_newsletter_mock.requests';
+
+  /**
+   * Key used to store in the state service the responses returned.
+   */
+  public const STATE_KEY_RESPONSES = 'oe_newsroom_newsletter_mock.responses';
+
+  /**
+   * Key used to store in the state service the next response data to return.
+   */
+  public const STATE_KEY_NEXT_RESPONSE = 'oe_newsroom_newsletter_mock.next_response';
 
   /**
    * The key of the state entry that contains the mocked api subscriptions.
@@ -73,18 +89,43 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
    * {@inheritdoc}
    */
   public function getResponse(RequestInterface $request, array $options): ResponseInterface {
-    switch ($request->getUri()->getPath()) {
-      case '/newsroom/api/v1/subscriptions':
-        return $this->subscriptions($request);
+    // Store the request to allow tests to access the history of requests.
+    $request_history = $this->state->get(self::STATE_KEY_REQUESTS, []);
+    $request_history[] = Message::toString($request);
+    $this->state->set(self::STATE_KEY_REQUESTS, $request_history);
 
-      case '/newsroom/api/v1/subscribe':
-        return $this->subscribe($request);
+    // If a response was set in the state service, use that.
+    $next_response = $this->state->get(self::STATE_KEY_NEXT_RESPONSE);
+    if (is_string($next_response)) {
+      $response = Message::parseResponse($next_response);
+      // Make sure to return the simulated response only once.
+      $this->state->set(self::STATE_KEY_NEXT_RESPONSE, NULL);
+    }
+    else {
+      switch ($request->getUri()->getPath()) {
+        case '/newsroom/api/v1/subscriptions':
+          $response = $this->subscriptions($request);
+          break;
 
-      case '/newsroom/api/v1/unsubscribe':
-        return $this->unsubscribe($request);
+        case '/newsroom/api/v1/subscribe':
+          $response = $this->subscribe($request);
+          break;
+
+        case '/newsroom/api/v1/unsubscribe':
+          $response = $this->unsubscribe($request);
+          break;
+
+        default:
+          $response = new Response(404);
+      }
     }
 
-    return new Response(404);
+    // Do the same for responses.
+    $response_history = $this->state->get(self::STATE_KEY_RESPONSES, []);
+    $response_history[] = Message::toString($response);
+    $this->state->set(self::STATE_KEY_RESPONSES, $response_history);
+
+    return $response;
   }
 
   /**
