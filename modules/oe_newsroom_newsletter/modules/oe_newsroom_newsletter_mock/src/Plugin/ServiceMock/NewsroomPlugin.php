@@ -105,7 +105,7 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
    *   Generated subscription array, similar to newsrooms one.
    */
   protected function generateSubscriptionArray(string $universe, string $email, string $sv_id, string $language_code, bool $isNewSubscription): array {
-    // These are here google translations, but it will do the job to simulate
+    // These are here Google translations, but it will do the job to simulate
     // the original behaviour.
     $new_subscription = [
       'bg' => 'Благодарим ви, че сте се регистрирали за услугата: Услуга за бюлетини за тестове',

@@ -191,6 +191,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
    * {@inheritdoc}
    */
   public function unsubscribe(string $email, array $svIds = []): bool {
+    // @todo This method should unsubscribe from one sv ID only.
     // This is necessary to split separately newsletters distribution lists.
     $sv_ids_separated = explode(',', implode(',', $svIds));
 
@@ -211,6 +212,10 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
 
       // If the unsubscription was success the API returns HTTP code 200.
       // And a text message in the HTTP message body that we don't need now.
+      // @todo Do not bail out at first failure, but instead run all the
+      //   unsubscriptions and show that some of them where unsuccessful.
+      // @todo This is leaking if a user is subscribed to a newsletter.
+      //   MUST be removed.
       if ($response->getStatusCode() !== 200) {
         return FALSE;
       }
