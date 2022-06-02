@@ -52,6 +52,13 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
   public const STATE_KEY_UNIVERSE = 'oe_newsroom.mock_api_universe';
 
   /**
+   * Key used to store in state if unsubscription requests must be valid.
+   *
+   * This means that an entry in the subscriptions stored must be found.
+   */
+  public const STAKE_KEY_VALIDATE_UNSUBSCRIPTIONS = 'oe_newsroom_newsletter_mock.validate_unsubscriptions';
+
+  /**
    * The state service.
    *
    * @var \Drupal\Core\State\StateInterface
@@ -315,16 +322,24 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
 
     $subscriptions = $this->state->get(self::STATE_KEY_SUBSCRIPTIONS, []);
     $universes = $this->state->get(self::STATE_KEY_UNIVERSE, []);
-    $universe = $universes[$parameters['app']];
 
+    // If unsubscribe validation is disabled, return a successful action.
+    if (!$this->state->get(self::STAKE_KEY_VALIDATE_UNSUBSCRIPTIONS, TRUE)) {
+      // The body message here is custom and doesn't actually exists.
+      return new Response(200, [], 'User unsubscribed without validation.');
+    }
+
+    $universe = $universes[$parameters['app']] ?? NULL;
     // When you try to unsubscribe a user that newsroom does not have at all,
     // you will get an internal error which will converted by our API to this.
-    if (!isset($subscriptions[$universe][$sv_id][$email])) {
+    // @todo What does this mean?
+    if (!$universe || !isset($subscriptions[$universe][$sv_id][$email])) {
       return new Response(404, [], 'Not found');
     }
 
     // When the user e-mail exists in the e-mail it will return the same message
     // regardless if it's subscribed or not previously.
+    // @todo What does this mean?
     $subscriptions[$universe][$sv_id][$email] = [
       'subscribed' => FALSE,
       'language' => NULL,
