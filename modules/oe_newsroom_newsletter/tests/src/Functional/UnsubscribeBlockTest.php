@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_newsroom_newsletter\Functional;
 
+use Behat\Mink\Element\NodeElement;
 use Drupal\oe_newsroom_newsletter_mock\Plugin\ServiceMock\NewsroomPlugin;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\oe_newsroom_newsletter\Traits\NewsroomClientMockTrait;
@@ -66,6 +67,25 @@ class UnsubscribeBlockTest extends BrowserTestBase {
     $dist_name_fields[0]->setValue('First distribution list');
     $page->pressButton('Save block');
     $assert_session->pageTextContains('The block configuration has been saved');
+
+    // Edit the block.
+    $this->drupalGet('/admin/structure/block/manage/newsletterunsubscriptionblock');
+    // Set partial values for the third and fourth Sv ID/Name pairs.
+    // The second one is left blank to verify that the correct deltas are
+    // marked by the validation errors.
+    $sv_id_fields[3]->setValue('5555');
+    $dist_name_fields[4]->setValue('Another distribution list');
+    $page->pressButton('Save block');
+    $assert_session->pageTextContains('Both sv IDs and name are required.');
+    // The elements of the two pairs have been marked with the validation error.
+    $has_error_fn = fn (NodeElement $element) => $element->hasClass('error');
+    $this->assertTrue($has_error_fn($sv_id_fields[3]));
+    $this->assertTrue($has_error_fn($dist_name_fields[3]));
+    $this->assertTrue($has_error_fn($sv_id_fields[4]));
+    $this->assertTrue($has_error_fn($dist_name_fields[4]));
+    // Check that only these 2 pairs have been marked with a violation.
+    $this->assertCount(2, array_filter($sv_id_fields, $has_error_fn));
+    $this->assertCount(2, array_filter($dist_name_fields, $has_error_fn));
 
     /** @var \Drupal\block\Entity\Block $block */
     $block = \Drupal::entityTypeManager()->getStorage('block')->load('newsletterunsubscriptionblock');

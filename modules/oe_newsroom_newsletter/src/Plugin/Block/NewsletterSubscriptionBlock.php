@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_newsroom_newsletter\Plugin\Block;
 
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Cache\Cache;
@@ -156,6 +157,22 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
 
     if (!empty($form_state->getValue('newsletters_language')) && !in_array($form_state->getValue('newsletters_language_default'), $form_state->getValue('newsletters_language'))) {
       $form_state->setError($form['newsletters_language_default'], $this->t('The default language should be part of the possible newsletter languages.'));
+    }
+
+    // Since the distribution lists field is required, no need to run validation
+    // when less than two distributions exist.
+    if (count($form_state->getValue('distribution_lists', [])) < 2) {
+      return;
+    }
+
+    // The multivalue element rekeys the items to have consecutive deltas.
+    // To set the validation, we need to access the original unprocessed deltas.
+    $unprocessed_lists = NestedArray::getValue($form_state->getUserInput(), $form['distribution_lists']['#parents']);
+    unset($unprocessed_lists[0]);
+    foreach ($unprocessed_lists as $delta => $list) {
+      if (empty($list['sv_id']) xor empty($list['name'])) {
+        $form_state->setError($form['distribution_lists'][$delta], $this->t('Both sv IDs and name are required.'));
+      }
     }
   }
 
