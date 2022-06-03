@@ -114,7 +114,19 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
   public function blockValidate($form, FormStateInterface $form_state): void {
     parent::blockValidate($form, $form_state);
 
+    // Collect all the sv IDs specified across all distribution lists.
     $distribution_lists = $form_state->getValue('distribution_lists', []);
+    $sv_ids = array_unique(array_reduce($distribution_lists, function ($carry, $item) {
+      return array_merge($carry, explode(',', $item['sv_id']));
+    }, []));
+    // Since there is no queue system implemented, limit the amount of requests
+    // triggered with a single unsubscribe action.
+    if (count($sv_ids) > 5) {
+      $form_state->setError($form['distribution_lists'], $this->t('Too many sv IDs specified between all distribution lists. Maximum 5 allowed, @count found.', [
+        '@count' => count($sv_ids),
+      ]));
+    }
+
     // Since the distribution lists field is required, no need to run validation
     // when less than two distributions exist.
     if (count($distribution_lists) < 2) {

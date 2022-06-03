@@ -87,6 +87,17 @@ class UnsubscribeBlockTest extends BrowserTestBase {
     $this->assertCount(2, array_filter($sv_id_fields, $has_error_fn));
     $this->assertCount(2, array_filter($dist_name_fields, $has_error_fn));
 
+    // Set more than 5 total sv IDs across all pairs.
+    $sv_id_fields[3]->setValue('5555, 12000');
+    $dist_name_fields[3]->setValue('Two newsletters');
+    $sv_id_fields[4]->setValue('5555,777,888,9999');
+    $page->pressButton('Save block');
+    $assert_session->pageTextContains('Too many sv IDs specified between all distribution lists. Maximum 5 allowed, 6 found.');
+
+    $sv_id_fields[4]->setValue('5555,777,888');
+    $page->pressButton('Save block');
+    $assert_session->pageTextContains('The block configuration has been saved');
+
     /** @var \Drupal\block\Entity\Block $block */
     $block = \Drupal::entityTypeManager()->getStorage('block')->load('newsletterunsubscriptionblock');
     $settings = $block->get('settings');
@@ -94,6 +105,14 @@ class UnsubscribeBlockTest extends BrowserTestBase {
       [
         'sv_id' => '00001',
         'name' => 'First distribution list',
+      ],
+      [
+        'sv_id' => '5555, 12000',
+        'name' => 'Two newsletters',
+      ],
+      [
+        'sv_id' => '5555,777,888',
+        'name' => 'Another distribution list',
       ],
     ], $settings['distribution_lists']);
   }
