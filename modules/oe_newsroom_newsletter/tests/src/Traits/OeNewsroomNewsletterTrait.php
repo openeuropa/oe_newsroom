@@ -111,11 +111,8 @@ trait OeNewsroomNewsletterTrait {
       'app_id' => 'example-app',
     ];
 
-    $config = \Drupal::configFactory()
-      ->getEditable(OeNewsroom::CONFIG_NAME)
-      ->set('universe', $values['universe'])
-      ->set('app_id', $values['app_id']);
-    $config->save();
+    $config = \Drupal::configFactory()->getEditable(OeNewsroom::CONFIG_NAME);
+    $config->setData($values + $config->get())->save();
   }
 
   /**
@@ -125,10 +122,10 @@ trait OeNewsroomNewsletterTrait {
    *   The value of the privacy url. If left empty, a default is provided.
    */
   protected function configureNewsletter(string $privacy_url = '/privacy-url'): void {
-    $config = \Drupal::configFactory()
+    \Drupal::configFactory()
       ->getEditable(OeNewsroomNewsletter::CONFIG_NAME)
-      ->set('privacy_uri', $privacy_url);
-    $config->save();
+      ->set('privacy_uri', $privacy_url)
+      ->save();
   }
 
 }
