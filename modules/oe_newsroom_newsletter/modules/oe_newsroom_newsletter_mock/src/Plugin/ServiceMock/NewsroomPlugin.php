@@ -162,9 +162,10 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
       'de' => 'Vielen Dank für Ihre Anmeldung zum Service: Test Newsletter Service',
       'et' => 'Täname, et registreerusite teenusesse: testige uudiskirja teenust',
       'el' => 'Ευχαριστούμε για την εγγραφή σας στην υπηρεσία: Δοκιμή υπηρεσίας ενημερωτικών δελτίων',
-      'en' => 'Thanks for Signing Up to the service: Test Newsletter Service',
+      'en' => 'Thanks for signing up to the service: Test Newsletter Service',
       'es' => 'Gracias por suscribirse al servicio: Test Newsletter Service',
-      'fr' => 'Merci de vous être inscrit au service : Testez le service de newsletter',
+      // Skip French translation on purpose to test the fallback behaviour.
+      'fr' => '',
       'ga' => 'Go raibh maith agat as Síniú leis an tseirbhís: Seirbhís Nuachtlitir Tástála',
       'hr' => 'Hvala vam što ste se prijavili za uslugu: Test Newsletter Service',
       'it' => 'Grazie per esserti iscritto al servizio: Test Newsletter Service',

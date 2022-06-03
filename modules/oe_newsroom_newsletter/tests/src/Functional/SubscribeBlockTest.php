@@ -212,6 +212,10 @@ class SubscribeBlockTest extends BrowserTestBase {
     $expected_url = Url::fromUserInput('/privacy-url')->toString();
     $this->assertEquals($expected_url, $privacy_link->getAttribute('href'));
     $this->assertEquals('', $assert_session->fieldExists('Your e-mail')->getValue());
+    $assert_session->elementNotExists('named', [
+      'select',
+      'Select the language in which you want to receive the newsletters',
+    ], $block_wrapper);
 
     // Assert the required fields.
     $block_wrapper->pressButton('Subscribe');
@@ -321,6 +325,110 @@ class SubscribeBlockTest extends BrowserTestBase {
     // distribution list.
     $this->assertCount(6, $this->getNewsroomClientRequests());
     $this->assertLastSubscribeRequest('111,01011,2222', strtolower($user->getEmail()), 'en');
+  }
+
+  /**
+   * Test the form when multiple system languages are available.
+   */
+  public function testSubscribeFormLanguages(): void {
+    $this->setApiPrivateKey();
+    $this->configureNewsroom();
+    $this->configureNewsletter();
+
+    // Add some languages to the system.
+    ConfigurableLanguage::createFromLangcode('it')->save();
+    ConfigurableLanguage::createFromLangcode('de')->save();
+    ConfigurableLanguage::createFromLangcode('fr')->save();
+
+    $this->placeNewsletterSubscriptionBlock([], TRUE);
+    $this->grantPermissions(Role::load(Role::ANONYMOUS_ID), [
+      'subscribe to newsroom newsletters',
+    ]);
+
+    $this->drupalGet('<front>');
+    $assert_session = $this->assertSession();
+    $block_wrapper = $assert_session->elementExists('css', self::BLOCK_CSS_SELECTOR);
+    $language_select = $assert_session->selectExists('Select the language in which you want to receive the newsletters', $block_wrapper);
+    // Since no languages are specified in the block, all languages are
+    // selectable.
+    $this->assertEquals([
+      'en' => 'English',
+      'it' => 'Italian',
+      'de' => 'German',
+      'fr' => 'French',
+    ], $this->getOptions($language_select));
+    // Since the anonymous user has no preferred language, the default site
+    // language is pre-selected.
+    $this->assertEquals('en', $language_select->getValue());
+
+    $block = \Drupal::entityTypeManager()->getStorage('block')->load('subscribe');
+    $settings = $block->get('settings');
+    // Set a default newsletter language. This value is used only when the
+    // current site language or the user preferred language are not available.
+    $settings['newsletters_language_default'] = 'it';
+    $block->set('settings', $settings)->save();
+    $this->drupalGet('<front>');
+    $this->assertEquals('en', $language_select->getValue());
+
+    // Limit the allowed choice of languages.
+    $settings['newsletters_language'] = ['it', 'de', 'fr'];
+    $block->set('settings', $settings)->save();
+    $this->drupalGet('<front>');
+    $this->assertEquals([
+      'it' => 'Italian',
+      'de' => 'German',
+      'fr' => 'French',
+    ], $this->getOptions($language_select));
+    // The default language configured in the block is now the default option,
+    // as English is not a valid choice anymore.
+    $this->assertEquals('it', $language_select->getValue());
+
+    // Create a user with German as preferred language.
+    $user = $this->createUser(['subscribe to newsroom newsletters'], NULL, FALSE, [
+      'preferred_langcode' => 'de',
+    ]);
+    $this->drupalLogin($user);
+    $this->drupalGet('<front>');
+    // The user preferred language is the default selected option.
+    $this->assertEquals('de', $language_select->getValue());
+    // The languages configured in the block are still available.
+    $this->assertEquals([
+      'it' => 'Italian',
+      'de' => 'German',
+      'fr' => 'French',
+    ], $this->getOptions($language_select));
+
+    $page = $this->getSession()->getPage();
+    $block_wrapper->checkField('Newsletter collection');
+    $page->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
+    $block_wrapper->pressButton('Subscribe');
+    // The message is presented in the chosen user language if returned from the
+    // API.
+    $assert_session->pageTextContains('Vielen Dank für Ihre Anmeldung zum Service: Test Newsletter Service');
+    $this->assertCount(1, $this->getNewsroomClientRequests());
+    $this->assertLastSubscribeRequest('222,333', strtolower($user->getEmail()), 'de');
+
+    // Choose French as subscription language.
+    $this->drupalGet('<front>');
+    $block_wrapper->checkField('Newsletter 1');
+    $page->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
+    $block_wrapper->selectFieldOption('Select the language in which you want to receive the newsletters', 'French');
+    $block_wrapper->pressButton('Subscribe');
+    // The mocked endpoint response doesn't contain a message for French, so it
+    // falls back to a default message.
+    $assert_session->pageTextContains('You have been successfully subscribed.');
+    $this->assertCount(2, $this->getNewsroomClientRequests());
+    $this->assertLastSubscribeRequest('111', strtolower($user->getEmail()), 'fr');
+
+    $this->configureNewsletter('https://www.example.com/page_[lang_code]');
+    ConfigurableLanguage::createFromLangcode('pt-pt')->save();
+    $this->drupalGet('/pt-pt');
+    $privacy_link = $this->getSession()->getPage()->find('named_exact', [
+      'link',
+      'privacy statement',
+    ]);
+    $this->assertNotEmpty($privacy_link);
+    $this->assertEquals('https://www.example.com/page_pt', $privacy_link->getAttribute('href'));
   }
 
   /**
