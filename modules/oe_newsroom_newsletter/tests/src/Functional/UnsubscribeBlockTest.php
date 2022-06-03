@@ -198,7 +198,7 @@ class UnsubscribeBlockTest extends BrowserTestBase {
     // Add more distribution lists to the block configuration.
     $block = \Drupal::entityTypeManager()->getStorage('block')->load('unsubscribe');
     $settings = $block->get('settings');
-    $second_list = $this->randomString();
+    $second_list = $this->randomMachineName();
     $settings['distribution_lists'][] = [
       'sv_id' => '01011,2222',
       'name' => $second_list,
