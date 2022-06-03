@@ -25,11 +25,15 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   admin_label = @Translation("Newsletter unsubscription block"),
  *   category = @Translation("OE Newsroom Newsletter")
  * )
+ *
+ * @internal This class depends on the client that will be later moved to a
+ *   dedicated library. This class will be refactored and this will break any
+ *   dependencies on it.
  */
 class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
   /**
-   * API for newsroom calls.
+   * The Newsroom newsletter client.
    *
    * @var \Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface
    */

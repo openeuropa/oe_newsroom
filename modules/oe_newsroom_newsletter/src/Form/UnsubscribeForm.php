@@ -12,11 +12,11 @@ use Drupal\oe_newsroom_newsletter\Exception\InvalidResponseException;
 use GuzzleHttp\Exception\GuzzleException;
 
 /**
- * Subscribe form.
+ * Unsubscribe form.
  *
- * Arguments:
- *  - A distribution lists array
- *    ex. array(0 => array('sv_id' => 20, 'name' => 'XY Newsletter'))
+ * @internal This class depends on the client that will be later moved to a
+ *   dedicated library. This class will be refactored and this will break any
+ *   dependencies on it.
  */
 class UnsubscribeForm extends NewsletterFormBase {
 

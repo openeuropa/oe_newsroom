@@ -17,9 +17,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Client to access the Newsroom newsletter subscription API.
  *
- * @internal This class is marked as final and internal as it will be later moved to a
- *   dedicated library. Please note that this class may change at any time and
- *   this will break any dependencies on it.
+ * @internal This class is marked as final and internal as it will be later
+ *   moved to a dedicated library. Please note that this class may change at any
+ *   time and this will break any dependencies on it.
  *
  * @SuppressWarnings(PHPMD.TooManyFields)
  */

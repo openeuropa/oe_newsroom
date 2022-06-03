@@ -24,17 +24,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Subscribe form.
  *
- * Arguments:
- *  - A distribution lists array
- *    ex. array(0 => array('sv_id' => 20, 'name' => 'XY Newsletter'))
- *  - A selectable list array of languages
- *    ex. array(0 => 'de', 1 => 'en')
- *  - A default language string
- *    ex. 'en'
- *  - An intro text string
- *    ex. 'This is the introduction text.'
- *  - A successful subscription message string
- *    ex. 'Subscribed.'
+ * @internal This class depends on the client that will be later moved to a
+ *   dedicated library. This class will be refactored and this will break any
+ *   dependencies on it.
  */
 class SubscribeForm extends NewsletterFormBase {
 

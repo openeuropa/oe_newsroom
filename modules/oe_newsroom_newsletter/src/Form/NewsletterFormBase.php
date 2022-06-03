@@ -18,6 +18,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Base form for subscription and unsubscription operations.
+ *
+ * @internal This class depends on the client that will be later moved to a
+ *   dedicated library. This class will be refactored and this will break any
+ *   dependencies on it.
  */
 abstract class NewsletterFormBase extends FormBase {
 

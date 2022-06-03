@@ -27,6 +27,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   admin_label = @Translation("Newsletter subscription block"),
  *   category = @Translation("OE Newsroom Newsletter")
  * )
+ *
+ * @internal This class depends on the client that will be later moved to a
+ *   dedicated library. This class will be refactored and this will break any
+ *   dependencies on it.
  */
 class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
@@ -38,7 +42,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
   protected $privacyUri;
 
   /**
-   * API for Newsroom calls.
+   * The Newsroom newsletter client.
    *
    * @var \Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface
    */
