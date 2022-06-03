@@ -128,7 +128,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
     $form['distribution_lists'] = [
       '#type' => 'multivalue',
       '#title' => $this->t('Newsletter distribution lists'),
-      '#description' => $this->t("If there's a single choice here, it will remain hidden on the (un)subscription form."),
+      '#description' => $this->t("If there's a single choice here, it will remain hidden on the subscription form."),
       '#cardinality' => 5,
       '#required' => TRUE,
       'sv_id' => [
