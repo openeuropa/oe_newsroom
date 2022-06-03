@@ -282,6 +282,45 @@ class SubscribeBlockTest extends BrowserTestBase {
     $block_wrapper->pressButton('Subscribe');
     $assert_session->pageTextContains('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.');
     $this->assertCount(4, $this->getNewsroomClientRequests());
+
+    // Add more distribution lists to the block configuration.
+    $settings = $block->get('settings');
+    $second_list = $this->randomString();
+    $settings['distribution_lists'][] = [
+      'sv_id' => '01011,2222',
+      'name' => $second_list,
+    ];
+    // Simplify the success message for later assertions.
+    $settings['successful_subscription_message'] = 'You have been subscribed successfully.';
+    $block->set('settings', $settings)->save();
+
+    $this->drupalGet('<front>');
+    $assert_session->elementExists('named_exact', ['fieldset', 'Newsletters'], $block_wrapper);
+    $assert_session->checkboxNotChecked('Newsletter 1', $block_wrapper);
+    $assert_session->checkboxNotChecked($second_list, $block_wrapper);
+
+    // Verify that at least one distribution list must be selected.
+    $block_wrapper->pressButton('Subscribe');
+    $assert_session->pageTextContains('Newsletters field is required.');
+
+    // Select the distribution list that points to two sv IDs.
+    $page->checkField($second_list);
+    $page->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
+    $block_wrapper->pressButton('Subscribe');
+    $assert_session->pageTextContains('You have been subscribed successfully.');
+    $this->assertCount(5, $this->getNewsroomClientRequests());
+    $this->assertLastSubscribeRequest('01011,2222', strtolower($user->getEmail()), 'en');
+
+    // Select now both the distribution lists.
+    $page->checkField('Newsletter 1');
+    $page->checkField($second_list);
+    $page->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
+    $block_wrapper->pressButton('Subscribe');
+    $assert_session->pageTextContains('You have been subscribed successfully.');
+    // Only one request has been made, containing all the sv IDs of each
+    // distribution list.
+    $this->assertCount(6, $this->getNewsroomClientRequests());
+    $this->assertLastSubscribeRequest('111,01011,2222', strtolower($user->getEmail()), 'en');
   }
 
   /**
