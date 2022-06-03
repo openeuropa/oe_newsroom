@@ -198,23 +198,24 @@ class UnsubscribeBlockTest extends BrowserTestBase {
     // Add more distribution lists to the block configuration.
     $block = \Drupal::entityTypeManager()->getStorage('block')->load('unsubscribe');
     $settings = $block->get('settings');
+    $second_list = $this->randomString();
     $settings['distribution_lists'][] = [
       'sv_id' => '01011,2222',
-      'name' => 'Newsletter collection',
+      'name' => $second_list,
     ];
     $block->set('settings', $settings)->save();
 
     $this->drupalGet('<front>');
     $assert_session->elementExists('named_exact', ['fieldset', 'Newsletters'], $block_wrapper);
     $assert_session->checkboxNotChecked('Newsletter 1', $block_wrapper);
-    $assert_session->checkboxNotChecked('Newsletter collection', $block_wrapper);
+    $assert_session->checkboxNotChecked($second_list, $block_wrapper);
 
     // Verify that at least one distribution list must be selected.
     $block_wrapper->pressButton('Unsubscribe');
     $assert_session->pageTextContains('Newsletters field is required.');
 
     // Select the distribution list that points to two sv IDs.
-    $page->checkField('Newsletter collection');
+    $page->checkField($second_list);
     $block_wrapper->pressButton('Unsubscribe');
     $assert_session->pageTextContains('Successfully unsubscribed!');
     $requests = $this->getNewsroomClientRequests();
@@ -226,7 +227,7 @@ class UnsubscribeBlockTest extends BrowserTestBase {
     // Select now both the distribution lists.
     $this->clearNewsroomClientRequests();
     $page->checkField('Newsletter 1');
-    $page->checkField('Newsletter collection');
+    $page->checkField($second_list);
     $block_wrapper->pressButton('Unsubscribe');
     $assert_session->pageTextContains('Successfully unsubscribed!');
     $requests = $this->getNewsroomClientRequests();
