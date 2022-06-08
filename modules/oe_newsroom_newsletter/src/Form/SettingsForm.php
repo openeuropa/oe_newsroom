@@ -8,7 +8,7 @@ use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
-use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
+use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
 
 /**
  * Newsletter settings form.
@@ -20,7 +20,7 @@ class SettingsForm extends ConfigFormBase {
    */
   protected function getEditableConfigNames(): array {
     return [
-      OeNewsroomNewsletter::CONFIG_NAME,
+      NewsroomNewsletter::CONFIG_NAME,
     ];
   }
 
@@ -35,7 +35,7 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    $config = $this->config(OeNewsroomNewsletter::CONFIG_NAME);
+    $config = $this->config(NewsroomNewsletter::CONFIG_NAME);
 
     $form['privacy_uri'] = [
       '#type' => 'textfield',
@@ -112,7 +112,7 @@ class SettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     parent::submitForm($form, $form_state);
 
-    $this->config(OeNewsroomNewsletter::CONFIG_NAME)
+    $this->config(NewsroomNewsletter::CONFIG_NAME)
       ->set('privacy_uri', $form_state->getValue('privacy_uri'))
       ->save();
   }

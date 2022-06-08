@@ -9,7 +9,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\oe_newsroom\OeNewsroom;
+use Drupal\oe_newsroom\Newsroom;
 use Drupal\oe_newsroom_newsletter\Exception\InvalidResponseException;
 use GuzzleHttp\ClientInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -80,7 +80,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
    *   Http client to send requests to the API.
    */
   protected function __construct(ConfigFactoryInterface $configFactory, Settings $settings, ClientInterface $httpClient) {
-    $config = $configFactory->get(OeNewsroom::CONFIG_NAME);
+    $config = $configFactory->get(Newsroom::CONFIG_NAME);
 
     $this->privateKey = $settings->get('oe_newsroom')['newsroom_api_key'] ?? NULL;
     $this->hashMethod = $config->get('hash_method');

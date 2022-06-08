@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_newsroom\Functional;
 
-use Drupal\oe_newsroom\OeNewsroom;
+use Drupal\oe_newsroom\Newsroom;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -61,7 +61,7 @@ class SettingsFormTest extends BrowserTestBase {
     $assert_session->pageTextContains('The configuration options have been saved.');
 
     // Validate the saved values.
-    $config = $this->config(OeNewsroom::CONFIG_NAME);
+    $config = $this->config(Newsroom::CONFIG_NAME);
     $this->assertSame('sha256', $config->get('hash_method'));
     $this->assertTrue($config->get('normalised'));
     $this->assertSame('Site1', $config->get('universe'));

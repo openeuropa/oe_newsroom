@@ -6,7 +6,7 @@ namespace Drupal\oe_newsroom\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\oe_newsroom\OeNewsroom;
+use Drupal\oe_newsroom\Newsroom;
 
 /**
  * Newsroom settings form.
@@ -18,7 +18,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
    */
   protected function getEditableConfigNames() {
     return [
-      OeNewsroom::CONFIG_NAME,
+      Newsroom::CONFIG_NAME,
     ];
   }
 
@@ -33,7 +33,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->config(OeNewsroom::CONFIG_NAME);
+    $config = $this->config(Newsroom::CONFIG_NAME);
 
     $form['universe'] = [
       '#type' => 'textfield',
@@ -76,7 +76,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
 
-    $this->config(OeNewsroom::CONFIG_NAME)
+    $this->config(Newsroom::CONFIG_NAME)
       ->set('universe', $form_state->getValue('universe'))
       ->set('app_id', $form_state->getValue('app_id'))
       ->set('hash_method', $form_state->getValue('hash_method'))

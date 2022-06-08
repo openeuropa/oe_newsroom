@@ -10,7 +10,7 @@ use Drupal\Core\Url;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\oe_newsroom_newsletter\Traits\NewsroomClientMockTrait;
-use Drupal\Tests\oe_newsroom_newsletter\Traits\OeNewsroomNewsletterTrait;
+use Drupal\Tests\oe_newsroom_newsletter\Traits\NewsroomNewsletterTrait;
 use Drupal\user\Entity\Role;
 use GuzzleHttp\Psr7\Message;
 use GuzzleHttp\Psr7\Response;
@@ -26,7 +26,7 @@ class SubscribeBlockTest extends BrowserTestBase {
   protected const BLOCK_CSS_SELECTOR = 'div.oe-newsroom-newsletter-subscribe-form';
 
   use NewsroomClientMockTrait;
-  use OeNewsroomNewsletterTrait;
+  use NewsroomNewsletterTrait;
 
   /**
    * {@inheritdoc}

@@ -6,7 +6,7 @@ namespace Drupal\Tests\oe_newsroom_newsletter\Functional;
 
 use Behat\Mink\Exception\ResponseTextException;
 use Drupal\language\Entity\ConfigurableLanguage;
-use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
+use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -90,7 +90,7 @@ class SettingsFormTest extends BrowserTestBase {
     }
 
     // Validate the saved value.
-    $config = $this->config(OeNewsroomNewsletter::CONFIG_NAME);
+    $config = $this->config(NewsroomNewsletter::CONFIG_NAME);
     $this->assertSame('https://www.example.com/privacy_[lang_code]', $config->get('privacy_uri'));
   }
 

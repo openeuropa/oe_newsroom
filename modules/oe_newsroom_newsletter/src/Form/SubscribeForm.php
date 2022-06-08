@@ -13,11 +13,11 @@ use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
-use Drupal\oe_newsroom\OeNewsroom;
+use Drupal\oe_newsroom\Newsroom;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Exception\InvalidResponseException;
-use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
+use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -187,7 +187,7 @@ class SubscribeForm extends NewsletterFormBase {
       $this->logger->get('oe_newsroom_newsletter')->error('Exception thrown with code %code while subscribing email %email to the newsletter(s) with ID(s) %sv_ids and universe %universe: %exception', [
         '%code' => $e->getCode(),
         '%email' => $values['email'],
-        '%universe' => $this->config(OeNewsroom::CONFIG_NAME)->get('universe'),
+        '%universe' => $this->config(Newsroom::CONFIG_NAME)->get('universe'),
         '%sv_ids' => implode(',', $distribution_lists),
         '%exception' => $e->getMessage(),
       ]);
@@ -204,7 +204,7 @@ class SubscribeForm extends NewsletterFormBase {
    *   The privacy URI.
    */
   protected function getPrivacyUri(string $language): string {
-    $uri = $this->config(OeNewsroomNewsletter::CONFIG_NAME)->get('privacy_uri');
+    $uri = $this->config(NewsroomNewsletter::CONFIG_NAME)->get('privacy_uri');
     if (parse_url($uri, PHP_URL_SCHEME) === NULL) {
       if (strpos($uri, '<front>') === 0) {
         $uri = '/' . substr($uri, strlen('<front>'));

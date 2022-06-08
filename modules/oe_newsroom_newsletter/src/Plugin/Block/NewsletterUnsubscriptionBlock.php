@@ -12,7 +12,7 @@ use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\oe_newsroom\OeNewsroom;
+use Drupal\oe_newsroom\Newsroom;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Form\UnsubscribeForm;
@@ -175,7 +175,7 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
    */
   public function getCacheTags(): array {
     return Cache::mergeTags(parent::getCacheTags(), [
-      'config:' . OeNewsroom::CONFIG_NAME,
+      'config:' . Newsroom::CONFIG_NAME,
     ]);
   }
 

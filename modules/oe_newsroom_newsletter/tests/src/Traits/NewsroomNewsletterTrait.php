@@ -4,13 +4,13 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\oe_newsroom_newsletter\Traits;
 
-use Drupal\oe_newsroom\OeNewsroom;
-use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
+use Drupal\oe_newsroom\Newsroom;
+use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
 
 /**
  * Shared methods prepared to use in any test, if needed.
  */
-trait OeNewsroomNewsletterTrait {
+trait NewsroomNewsletterTrait {
 
   /**
    * Unset the API private key.
@@ -111,7 +111,7 @@ trait OeNewsroomNewsletterTrait {
       'app_id' => 'example-app',
     ];
 
-    $config = \Drupal::configFactory()->getEditable(OeNewsroom::CONFIG_NAME);
+    $config = \Drupal::configFactory()->getEditable(Newsroom::CONFIG_NAME);
     $config->setData($values + $config->get())->save();
   }
 
@@ -123,7 +123,7 @@ trait OeNewsroomNewsletterTrait {
    */
   protected function configureNewsletter(string $privacy_url = '/privacy-url'): void {
     \Drupal::configFactory()
-      ->getEditable(OeNewsroomNewsletter::CONFIG_NAME)
+      ->getEditable(NewsroomNewsletter::CONFIG_NAME)
       ->set('privacy_uri', $privacy_url)
       ->save();
   }

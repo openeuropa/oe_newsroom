@@ -8,7 +8,7 @@ use Behat\Mink\Element\NodeElement;
 use Drupal\oe_newsroom_newsletter_mock\Plugin\ServiceMock\NewsroomPlugin;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\oe_newsroom_newsletter\Traits\NewsroomClientMockTrait;
-use Drupal\Tests\oe_newsroom_newsletter\Traits\OeNewsroomNewsletterTrait;
+use Drupal\Tests\oe_newsroom_newsletter\Traits\NewsroomNewsletterTrait;
 use Drupal\user\Entity\Role;
 use GuzzleHttp\Psr7\Message;
 use GuzzleHttp\Psr7\Response;
@@ -24,7 +24,7 @@ class UnsubscribeBlockTest extends BrowserTestBase {
   protected const BLOCK_CSS_SELECTOR = 'div.oe-newsroom-newsletter-unsubscribe-form';
 
   use NewsroomClientMockTrait;
-  use OeNewsroomNewsletterTrait;
+  use NewsroomNewsletterTrait;
 
   /**
    * {@inheritdoc}

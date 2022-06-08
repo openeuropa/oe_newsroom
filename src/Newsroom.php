@@ -7,7 +7,7 @@ namespace Drupal\oe_newsroom;
 /**
  * Class for constants and general functions for the Newsroom module.
  */
-final class OeNewsroom {
+final class Newsroom {
 
   public const CONFIG_NAME = 'oe_newsroom.settings';
 
