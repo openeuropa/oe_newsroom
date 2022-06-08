@@ -9,7 +9,7 @@ use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
 /**
  * Shared methods prepared to use in any test, if needed.
  */
-trait NewsroomNewsletterTrait {
+trait NewsroomNewsletterTestTrait {
 
   /**
    * Block default settings.
