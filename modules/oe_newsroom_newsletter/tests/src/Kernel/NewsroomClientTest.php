@@ -9,6 +9,7 @@ use Drupal\Core\Site\Settings;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_newsletter_mock\Plugin\ServiceMock\NewsroomPlugin;
+use Drupal\Tests\oe_newsroom\NewsroomTestTrait;
 use Drupal\Tests\oe_newsroom_newsletter\Traits\NewsroomClientMockTrait;
 use Drupal\Tests\oe_newsroom_newsletter\Traits\NewsroomNewsletterTrait;
 use GuzzleHttp\Psr7\Message;
@@ -21,6 +22,7 @@ class NewsroomClientTest extends KernelTestBase {
 
   use NewsroomClientMockTrait;
   use NewsroomNewsletterTrait;
+  use NewsroomTestTrait;
 
   /**
    * {@inheritdoc}

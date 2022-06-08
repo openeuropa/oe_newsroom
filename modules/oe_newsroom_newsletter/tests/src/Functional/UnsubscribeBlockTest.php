@@ -7,6 +7,7 @@ namespace Drupal\Tests\oe_newsroom_newsletter\Functional;
 use Behat\Mink\Element\NodeElement;
 use Drupal\oe_newsroom_newsletter_mock\Plugin\ServiceMock\NewsroomPlugin;
 use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\oe_newsroom\NewsroomTestTrait;
 use Drupal\Tests\oe_newsroom_newsletter\Traits\NewsroomClientMockTrait;
 use Drupal\Tests\oe_newsroom_newsletter\Traits\NewsroomNewsletterTrait;
 use Drupal\user\Entity\Role;
@@ -25,6 +26,7 @@ class UnsubscribeBlockTest extends BrowserTestBase {
 
   use NewsroomClientMockTrait;
   use NewsroomNewsletterTrait;
+  use NewsroomTestTrait;
 
   /**
    * {@inheritdoc}

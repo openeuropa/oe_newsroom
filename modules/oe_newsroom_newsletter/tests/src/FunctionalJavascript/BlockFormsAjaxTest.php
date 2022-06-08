@@ -6,6 +6,7 @@ namespace Drupal\Tests\oe_newsroom_newsletter\FunctionalJavascript;
 
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\oe_newsroom_newsletter_mock\Plugin\ServiceMock\NewsroomPlugin;
+use Drupal\Tests\oe_newsroom\NewsroomTestTrait;
 use Drupal\Tests\oe_newsroom_newsletter\Traits\NewsroomClientMockTrait;
 use Drupal\Tests\oe_newsroom_newsletter\Traits\NewsroomNewsletterTrait;
 use Drupal\user\Entity\Role;
@@ -18,6 +19,7 @@ class BlockFormsAjaxTest extends WebDriverTestBase {
 
   use NewsroomClientMockTrait;
   use NewsroomNewsletterTrait;
+  use NewsroomTestTrait;
 
   /**
    * {@inheritdoc}
