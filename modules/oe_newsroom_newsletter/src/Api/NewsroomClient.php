@@ -165,7 +165,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
       throw new ClientException('An error has occurred during a subscribe request.', 0, $exception);
     }
 
-    // @todo The HTTP client should already thrown exceptions for any response
+    // @todo The HTTP client should already throw exceptions for any response
     //   code other than 200.
     if ($request->getStatusCode() !== 200) {
       throw new InvalidResponseException('Newsroom API returned a response with HTTP status ' . $request->getStatusCode() . ' instead of expected 200.');
