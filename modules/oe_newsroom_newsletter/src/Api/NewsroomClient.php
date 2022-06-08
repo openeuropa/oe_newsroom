@@ -11,7 +11,9 @@ use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\oe_newsroom\Newsroom;
 use Drupal\oe_newsroom_newsletter\Exception\InvalidResponseException;
+use Drupal\oe_newsroom_newsletter\Exception\ClientException;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -156,7 +158,12 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
     }
 
     // Send the request.
-    $request = $this->httpClient->request('POST', self::API_URL . '/subscribe', ['json' => $payload]);
+    try {
+      $request = $this->httpClient->request('POST', self::API_URL . '/subscribe', ['json' => $payload]);
+    }
+    catch (GuzzleException $exception) {
+      throw new ClientException('An error has occurred during a subscribe request.', 0, $exception);
+    }
 
     // @todo The HTTP client should already thrown exceptions for any response
     //   code other than 200.
@@ -208,7 +215,12 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
       ];
 
       // Send the request.
-      $response = $this->httpClient->get(self::API_URL . '/unsubscribe', $payload);
+      try {
+        $response = $this->httpClient->get(self::API_URL . '/unsubscribe', $payload);
+      }
+      catch (GuzzleException $exception) {
+        throw new ClientException('An error has occurred during an unsubscribe request.', 0, $exception);
+      }
 
       // If the unsubscription was success the API returns HTTP code 200.
       // And a text message in the HTTP message body that we don't need now.
