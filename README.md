@@ -1,9 +1,45 @@
-# OpenEuropa oe_newsroom
+# OpenEuropa Newsroom
 
-The OpenEuropa oe_newsroom provides integration with newsroom newsletter and notification.
+The OpenEuropa oe_newsroom provides integration with the Newsroom service.
 
-For usage please read the following readme file: [README.usage.md](README.usage.md)
-For development continue to read the current.
+The main module offers a user interface to configure the required parameters for using the Newsroom API.
+
+## Usage
+
+In order to start using the module, you will need:
+- universe;
+- application (name);
+- hash method;
+- normalisation;
+- private key.
+
+These are provided by the Newsroom team. All except the private key can be configured by a user with the `administer newsroom configuration` permission
+at the page `/admin/config/system/newsroom-settings`.
+
+The private key must be configured in settings.php due the sensitive nature.\
+It is recommended to add to the website `runner.yml` file the following line:
+```
+$settings['oe_newsroom']['newsroom_api_key'] = getenv('NEWSROOM_API_PRIVATE_KEY');
+```
+Then for local development the environment variable `NEWSROOM_API_PRIVATE_KEY` can be set in the `docker-compose.override.yml` file.
+
+**NEVER commit the private key into GIT!**
+
+Create a DevOps ticket to set the environment variable `NEWSROOM_API_PRIVATE_KEY` for acceptance and production environments.
+
+## Sub-modules
+
+### OpenEuropa Newsroom Newsletter
+
+Provides configurable blocks to subscribe and unsubscribe to distribution lists.
+
+## Limitations
+
+- The oe_newsroom_newsletter sub-module contains a basic client that implements a subset of Newsroom APIs. This client will be moved to a
+dedicated PHP library. For this reason, the client and all the classes that depend on it have been marked as `@internal`.
+The client has not been declared as service to discourage using it as dependency.
+- The unsubscribe Newsroom API must be invoked once for each distribution list. To avoid locking the website for a long time while
+executing the requests, the maximum number of distribution lists that can be specified is limited to 5.
 
 ## Development setup
 
@@ -16,13 +52,24 @@ composer install
 ```
 
 A post command hook (`drupal:site-setup`) is triggered automatically after `composer install`.
-It will make sure that the necessary symlinks are properly setup in the development site.
-It will also perform token substitution in development configuration files such as `behat.yml.dist`.
+This will symlink the module in the proper directory within the test site and perform token substitution in test configuration files.
+
+**Please note:** project files and directories are symlinked within the test site by using the
+[OpenEuropa Task Runner's Drupal project symlink](https://github.com/openeuropa/task-runner-drupal-project-symlink) command.
+
+If you add a new file or directory in the root of the project, you need to re-run `drupal:site-setup` in order to make
+sure they are be correctly symlinked.
+
+If you don't want to re-run a full site setup for that, you can simply run:
+
+```
+$ ./vendor/bin/run drupal:symlink-project
+```
 
 * Install test site by running:
 
 ```bash
-./vendor/bin/run drupal:site-install
+$ ./vendor/bin/run drupal:site-install
 ```
 
 The development site web root should be available in the `build` directory.
@@ -87,12 +134,6 @@ To run the phpunit tests:
 
 ```bash
 docker-compose exec web ./vendor/bin/phpunit
-```
-
-To run the behat tests:
-
-```bash
-docker-compose exec web ./vendor/bin/behat
 ```
 
 #### Step debugging
