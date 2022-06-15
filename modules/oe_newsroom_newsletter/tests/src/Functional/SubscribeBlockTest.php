@@ -275,13 +275,15 @@ class SubscribeBlockTest extends BrowserTestBase {
     // Customise some strings with markup.
     $block = \Drupal::entityTypeManager()->getStorage('block')->load('subscribe');
     $block->set('settings', [
-      'intro_text' => 'Introduction text with <em>some</em> markup <script type="text/javascript">malicious</script>',
+      'intro_text' => 'Introduction text with <em>some</em> markup' . "\n" . ' <script type="text/javascript">malicious</script>',
       'successful_subscription_message' => 'You have successfully <em>subscribed</em> to the <script type="text/javascript">newsletter!</script>',
     ] + $block->get('settings'))->save();
 
     $this->drupalGet('<front>');
     // Check that introduction text and success messages are properly escaped.
     $this->assertStringContainsString('Introduction text with <em>some</em> markup <script type="text/javascript">malicious</script>', $block_wrapper->getText());
+    // Check that new lines are converted to <br> elements.
+    $this->assertStringContainsString("em&gt; markup<br>\n &lt;script", $block_wrapper->getHtml());
     $page->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
     // Replace the pre-filled user e-mail with a custom one. This allows to
     // assert that the one sent through the form is always used.
