@@ -9,6 +9,7 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\State\State;
 use Drupal\http_request_mock\ServiceMockPluginInterface;
+use GuzzleHttp\Psr7\Message;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -26,6 +27,21 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, ContainerFactoryPluginInterface {
 
   /**
+   * Key used to store in the state service the incoming requests.
+   */
+  public const STATE_KEY_REQUESTS = 'oe_newsroom_newsletter_mock.requests';
+
+  /**
+   * Key used to store in the state service the responses returned.
+   */
+  public const STATE_KEY_RESPONSES = 'oe_newsroom_newsletter_mock.responses';
+
+  /**
+   * Key used to store in the state service the next response data to return.
+   */
+  public const STATE_KEY_NEXT_RESPONSE = 'oe_newsroom_newsletter_mock.next_response';
+
+  /**
    * The key of the state entry that contains the mocked api subscriptions.
    */
   public const STATE_KEY_SUBSCRIPTIONS = 'oe_newsroom.mock_api_subscriptions';
@@ -34,6 +50,13 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
    * The key of the state entry that contains the mocked api universe.
    */
   public const STATE_KEY_UNIVERSE = 'oe_newsroom.mock_api_universe';
+
+  /**
+   * Key used to store in state if unsubscription requests must be valid.
+   *
+   * This means that an entry in the subscriptions stored must be found.
+   */
+  public const STAKE_KEY_VALIDATE_UNSUBSCRIPTIONS = 'oe_newsroom_newsletter_mock.validate_unsubscriptions';
 
   /**
    * The state service.
@@ -73,18 +96,43 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
    * {@inheritdoc}
    */
   public function getResponse(RequestInterface $request, array $options): ResponseInterface {
-    switch ($request->getUri()->getPath()) {
-      case '/newsroom/api/v1/subscriptions':
-        return $this->subscriptions($request);
+    // Store the request to allow tests to access the history of requests.
+    $request_history = $this->state->get(self::STATE_KEY_REQUESTS, []);
+    $request_history[] = Message::toString($request);
+    $this->state->set(self::STATE_KEY_REQUESTS, $request_history);
 
-      case '/newsroom/api/v1/subscribe':
-        return $this->subscribe($request);
+    // If a response was set in the state service, use that.
+    $next_response = $this->state->get(self::STATE_KEY_NEXT_RESPONSE);
+    if (is_string($next_response)) {
+      $response = Message::parseResponse($next_response);
+      // Make sure to return the simulated response only once.
+      $this->state->set(self::STATE_KEY_NEXT_RESPONSE, NULL);
+    }
+    else {
+      switch ($request->getUri()->getPath()) {
+        case '/newsroom/api/v1/subscriptions':
+          $response = $this->subscriptions($request);
+          break;
 
-      case '/newsroom/api/v1/unsubscribe':
-        return $this->unsubscribe($request);
+        case '/newsroom/api/v1/subscribe':
+          $response = $this->subscribe($request);
+          break;
+
+        case '/newsroom/api/v1/unsubscribe':
+          $response = $this->unsubscribe($request);
+          break;
+
+        default:
+          $response = new Response(404);
+      }
     }
 
-    return new Response(404);
+    // Do the same for responses.
+    $response_history = $this->state->get(self::STATE_KEY_RESPONSES, []);
+    $response_history[] = Message::toString($response);
+    $this->state->set(self::STATE_KEY_RESPONSES, $response_history);
+
+    return $response;
   }
 
   /**
@@ -105,7 +153,7 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
    *   Generated subscription array, similar to newsrooms one.
    */
   protected function generateSubscriptionArray(string $universe, string $email, string $sv_id, string $language_code, bool $isNewSubscription): array {
-    // These are here google translations, but it will do the job to simulate
+    // These are here Google translations, but it will do the job to simulate
     // the original behaviour.
     $new_subscription = [
       'bg' => 'Благодарим ви, че сте се регистрирали за услугата: Услуга за бюлетини за тестове',
@@ -114,9 +162,10 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
       'de' => 'Vielen Dank für Ihre Anmeldung zum Service: Test Newsletter Service',
       'et' => 'Täname, et registreerusite teenusesse: testige uudiskirja teenust',
       'el' => 'Ευχαριστούμε για την εγγραφή σας στην υπηρεσία: Δοκιμή υπηρεσίας ενημερωτικών δελτίων',
-      'en' => 'Thanks for Signing Up to the service: Test Newsletter Service',
+      'en' => 'Thanks for signing up to the service: Test Newsletter Service',
       'es' => 'Gracias por suscribirse al servicio: Test Newsletter Service',
-      'fr' => 'Merci de vous être inscrit au service : Testez le service de newsletter',
+      // Skip French translation on purpose to test the fallback behaviour.
+      'fr' => '',
       'ga' => 'Go raibh maith agat as Síniú leis an tseirbhís: Seirbhís Nuachtlitir Tástála',
       'hr' => 'Hvala vam što ste se prijavili za uslugu: Test Newsletter Service',
       'it' => 'Grazie per esserti iscritto al servizio: Test Newsletter Service',
@@ -187,7 +236,7 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
    *   Http response.
    */
   protected function subscriptions(RequestInterface $request): ResponseInterface {
-    $data = Json::decode($request->getBody()->getContents());
+    $data = Json::decode((string) $request->getBody());
     $universe = $data['subscription']['universeAcronym'];
     $email = $data['subscription']['email'];
     $sv_ids = explode(',', $data['subscription']['sv_id']);
@@ -224,7 +273,7 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
    *   Http response.
    */
   protected function subscribe(RequestInterface $request): ResponseInterface {
-    $data = Json::decode($request->getBody()->getContents());
+    $data = Json::decode((string) $request->getBody());
     $universe = $data['subscription']['universeAcronym'];
     $app_id = $data['subscription']['topicExtWebsite'];
     $email = $data['subscription']['email'];
@@ -239,8 +288,8 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
     foreach (array_merge($sv_ids, $related_sv_ids) as $sv_id) {
       // Select the first to returned as the normal API class, but the
       // webservice marks all as subscribed, so let's mark it here too.
-      $new_subscrition = empty($subscriptions[$universe][$sv_id][$email]['subscribed']);
-      $current_subs[] = $this->generateSubscriptionArray($universe, $email, $sv_id, $language, $new_subscrition);
+      $new_subscription = empty($subscriptions[$universe][$sv_id][$email]['subscribed']);
+      $current_subs[] = $this->generateSubscriptionArray($universe, $email, $sv_id, $language, $new_subscription);
 
       $universes[$app_id] = $universe;
 
@@ -274,16 +323,24 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
 
     $subscriptions = $this->state->get(self::STATE_KEY_SUBSCRIPTIONS, []);
     $universes = $this->state->get(self::STATE_KEY_UNIVERSE, []);
-    $universe = $universes[$parameters['app']];
 
+    // If unsubscribe validation is disabled, return a successful action.
+    if (!$this->state->get(self::STAKE_KEY_VALIDATE_UNSUBSCRIPTIONS, TRUE)) {
+      // The body message here is custom and doesn't actually exists.
+      return new Response(200, [], 'User unsubscribed without validation.');
+    }
+
+    $universe = $universes[$parameters['app']] ?? NULL;
     // When you try to unsubscribe a user that newsroom does not have at all,
     // you will get an internal error which will converted by our API to this.
-    if (!isset($subscriptions[$universe][$sv_id][$email])) {
+    // @todo What does this mean?
+    if (!$universe || !isset($subscriptions[$universe][$sv_id][$email])) {
       return new Response(404, [], 'Not found');
     }
 
     // When the user e-mail exists in the e-mail it will return the same message
     // regardless if it's subscribed or not previously.
+    // @todo What does this mean?
     $subscriptions[$universe][$sv_id][$email] = [
       'subscribed' => FALSE,
       'language' => NULL,

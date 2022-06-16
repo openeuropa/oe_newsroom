@@ -4,14 +4,12 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_newsroom_newsletter\Api;
 
-use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-
 /**
  * Interface for newsroom client api class.
  *
  * @internal
  */
-interface NewsroomClientInterface extends ContainerInjectionInterface {
+interface NewsroomClientInterface {
 
   /**
    * A URL of the API.
@@ -34,17 +32,15 @@ interface NewsroomClientInterface extends ContainerInjectionInterface {
    * @param array $topicExtId
    *   An array of Topic IDs, only used for notifications.
    *
-   * @return array|null
-   *   Returns api response as an array.
+   * @return array
+   *   Returns API response as an array.
    *
-   * @throws \GuzzleHttp\Exception\ServerException
-   *   If the HTTP requests fails or if the response is not proper.
-   * @throws \GuzzleHttp\Exception\BadResponseException
-   *   If response is not proper we throw this exception.
-   *
-   * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+   * @throws \GuzzleHttp\Exception\GuzzleException
+   *   Thrown by the Guzzle client.
+   * @throws \Drupal\oe_newsroom_newsletter\Exception\InvalidResponseException
+   *   Thrown when the response is not valid.
    */
-  public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], string $language = NULL, array $topicExtId = []): ?array;
+  public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], string $language = NULL, array $topicExtId = []): array;
 
   /**
    * Unsubscribe an email from the newsletters.
@@ -61,9 +57,7 @@ interface NewsroomClientInterface extends ContainerInjectionInterface {
    *   true.
    *
    * @throws \GuzzleHttp\Exception\ServerException
-   *   If the HTTP requests fails or if the response is not proper.
-   * @throws \GuzzleHttp\Exception\BadResponseException
-   *   If response is not proper we throw this exception.
+   *   Thrown by the Guzzle client.
    */
   public function unsubscribe(string $email, array $svIds = []): bool;
 

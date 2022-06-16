@@ -11,10 +11,17 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Newsletter Form Base.
+ * Base form for subscription and unsubscription operations.
+ *
+ * @internal This class depends on the client that will be later moved to a
+ *   dedicated library. This class will be refactored and this will break any
+ *   dependencies on it.
  */
 abstract class NewsletterFormBase extends FormBase {
 
@@ -59,6 +66,18 @@ abstract class NewsletterFormBase extends FormBase {
   /**
    * {@inheritdoc}
    */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      NewsroomClient::create($container),
+      $container->get('current_user'),
+      $container->get('messenger'),
+      $container->get('logger.factory'),
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function buildForm(array $form, FormStateInterface $form_state, array $distribution_lists = []): array {
     $form['email'] = [
       '#type' => 'email',
@@ -71,7 +90,7 @@ abstract class NewsletterFormBase extends FormBase {
       $form['distribution_lists'] = [
         '#type' => 'checkboxes',
         '#title' => $this->t('Newsletters'),
-        '#description' => $this->t('Please select the newsletter lists you want to take an action on.'),
+        '#description' => $this->getDistributionListsFieldDescription(),
         '#options' => $options,
         '#required' => TRUE,
       ];
@@ -111,5 +130,13 @@ abstract class NewsletterFormBase extends FormBase {
 
     return $response;
   }
+
+  /**
+   * Returns the description to show under the description list field.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   *   The field description translatable string.
+   */
+  abstract protected function getDistributionListsFieldDescription(): TranslatableMarkup;
 
 }

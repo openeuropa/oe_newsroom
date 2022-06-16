@@ -1,6 +1,6 @@
 name: OpenEuropa Newsroom
 description: OpenEuropa Newsroom module, provides an API for the Newsroom.
 package: OpenEuropa
-core_version_requirement: ^8 || ^9
+core_version_requirement: ^9.2
 
 type: module

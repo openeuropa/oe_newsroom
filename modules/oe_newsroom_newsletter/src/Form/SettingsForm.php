@@ -8,19 +8,19 @@ use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
-use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
+use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
 
 /**
- * Newsroom Settings Form.
+ * Newsletter settings form.
  */
-class NewsroomSettingsForm extends ConfigFormBase {
+class SettingsForm extends ConfigFormBase {
 
   /**
    * {@inheritdoc}
    */
   protected function getEditableConfigNames(): array {
     return [
-      OeNewsroomNewsletter::CONFIG_NAME,
+      NewsroomNewsletter::CONFIG_NAME,
     ];
   }
 
@@ -35,7 +35,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    $config = $this->config(OeNewsroomNewsletter::CONFIG_NAME);
+    $config = $this->config(NewsroomNewsletter::CONFIG_NAME);
 
     $form['privacy_uri'] = [
       '#type' => 'textfield',
@@ -65,6 +65,12 @@ class NewsroomSettingsForm extends ConfigFormBase {
   public function validateForm(array &$form, FormStateInterface $form_state): void {
     $uri = trim($form['privacy_uri']['#value']);
 
+    // Bail out if no value is present. The field is required so the default
+    // form validation message will be presented.
+    if ($uri === '') {
+      return;
+    }
+
     if (parse_url($uri, PHP_URL_SCHEME) === NULL) {
       if ($uri !== '<front>' && str_contains($uri, '<front>')) {
         // Only support the <front> token if it's on its own.
@@ -72,21 +78,15 @@ class NewsroomSettingsForm extends ConfigFormBase {
         return;
       }
 
-      if (str_contains($uri, '<front>')) {
-        $uri = '/' . substr($uri, strlen('<front>'));
-      }
+      $uri = '/' . substr($uri, strlen('<front>'));
       $uri = 'internal:' . $uri;
     }
 
     // @see \Drupal\link\Plugin\Field\FieldWidget\LinkWidget::validateUriElement()
     if (
       parse_url($uri, PHP_URL_SCHEME) === 'internal'
-      && !in_array($form['privacy_uri']['#value'][0], [
-        '/',
-        '?',
-        '#',
-      ], TRUE)
-      && !str_contains($form['privacy_uri']['#value'], '<front>')
+      && !in_array($form['privacy_uri']['#value'][0], ['/', '?', '#'], TRUE)
+      && substr($form['privacy_uri']['#value'], 0, 7) !== '<front>'
     ) {
       $form_state->setError($form['privacy_uri'], $this->t('The specified target is invalid. Manually entered paths should start with one of the following characters: / ? #'));
       return;
@@ -112,7 +112,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     parent::submitForm($form, $form_state);
 
-    $this->config(OeNewsroomNewsletter::CONFIG_NAME)
+    $this->config(NewsroomNewsletter::CONFIG_NAME)
       ->set('privacy_uri', $form_state->getValue('privacy_uri'))
       ->save();
   }

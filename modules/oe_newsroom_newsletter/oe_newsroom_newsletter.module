@@ -14,6 +14,6 @@ function oe_newsroom_newsletter_local_tasks_alter(&$local_tasks) {
   // Redirect original configuration translation tab to second level, with this
   // it will make more sense on the UI and fixing the tab display issue too.
   if (!empty($local_tasks['config_translation.local_tasks:config_translation.item.overview.oe_newsroom_newsletter.settings'])) {
-    $local_tasks['config_translation.local_tasks:config_translation.item.overview.oe_newsroom_newsletter.settings']['parent_id'] = 'oe_newsroom_newsletter.settings_tab.collection';
+    $local_tasks['config_translation.local_tasks:config_translation.item.overview.oe_newsroom_newsletter.settings']['parent_id'] = 'oe_newsroom_newsletter.settings.primary';
   }
 }

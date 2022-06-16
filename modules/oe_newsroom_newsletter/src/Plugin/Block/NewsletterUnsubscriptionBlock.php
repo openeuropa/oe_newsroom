@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\oe_newsroom_newsletter\Plugin\Block;
 
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Cache\Cache;
@@ -11,10 +12,10 @@ use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\oe_newsroom\Newsroom;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Form\UnsubscribeForm;
-use Drupal\oe_newsroom_newsletter\OeNewsroomNewsletter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -25,11 +26,15 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   admin_label = @Translation("Newsletter unsubscription block"),
  *   category = @Translation("OE Newsroom Newsletter")
  * )
+ *
+ * @internal This class depends on the client that will be later moved to a
+ *   dedicated library. This class will be refactored and this will break any
+ *   dependencies on it.
  */
 class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
   /**
-   * API for newsroom calls.
+   * The Newsroom newsletter client.
    *
    * @var \Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface
    */
@@ -67,10 +72,17 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
   /**
    * {@inheritdoc}
    */
+  public function defaultConfiguration() {
+    return [
+      'distribution_lists' => [],
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function blockForm($form, FormStateInterface $form_state): array {
     $form = parent::blockForm($form, $form_state);
-
-    $config = $this->getConfiguration();
 
     $form['distribution_lists'] = [
       '#type' => 'multivalue',
@@ -90,10 +102,46 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
         '#description' => $this->t('This is used to help the user identify which list they want to unsubscribe from.'),
         '#maxlength' => 128,
       ],
-      '#default_value' => $config['distribution_lists'] ?? [],
+      '#default_value' => $this->configuration['distribution_lists'],
     ];
 
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function blockValidate($form, FormStateInterface $form_state): void {
+    parent::blockValidate($form, $form_state);
+
+    // Collect all the sv IDs specified across all distribution lists.
+    $distribution_lists = $form_state->getValue('distribution_lists', []);
+    $sv_ids = array_unique(array_reduce($distribution_lists, function ($carry, $item) {
+      return array_merge($carry, explode(',', $item['sv_id']));
+    }, []));
+    // Since there is no queue system implemented, limit the amount of requests
+    // triggered with a single unsubscribe action.
+    if (count($sv_ids) > 5) {
+      $form_state->setError($form['distribution_lists'], $this->t('Too many sv IDs specified between all distribution lists. Maximum 5 allowed, @count found.', [
+        '@count' => count($sv_ids),
+      ]));
+    }
+
+    // Since the distribution lists field is required, no need to run validation
+    // when less than two distributions exist.
+    if (count($distribution_lists) < 2) {
+      return;
+    }
+
+    // The multivalue element rekeys the items to have consecutive deltas.
+    // To set the validation, we need to access the original unprocessed deltas.
+    $unprocessed_lists = NestedArray::getValue($form_state->getUserInput(), $form['distribution_lists']['#parents']);
+    unset($unprocessed_lists[0]);
+    foreach ($unprocessed_lists as $delta => $list) {
+      if (empty($list['sv_id']) xor empty($list['name'])) {
+        $form_state->setError($form['distribution_lists'][$delta], $this->t('Both sv IDs and name are required.'));
+      }
+    }
   }
 
   /**
@@ -108,34 +156,27 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
    * {@inheritdoc}
    */
   public function build(): array {
-    if (!$this->newsroomClient->isConfigured()) {
+    if (!$this->newsroomClient->isConfigured() || empty($this->configuration['distribution_lists'])) {
       return [];
     }
-    if (empty($this->configuration['distribution_lists'])) {
-      return [];
-    }
+
     return $this->formBuilder->getForm(UnsubscribeForm::class, $this->configuration['distribution_lists']);
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   protected function blockAccess(AccountInterface $account) {
     return AccessResult::allowedIfHasPermission($account, 'unsubscribe from newsroom newsletters');
   }
 
   /**
-   * {@inheritDoc}
-   */
-  public function getCacheContexts(): array {
-    return Cache::mergeContexts(parent::getCacheContexts(), ['languages']);
-  }
-
-  /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getCacheTags(): array {
-    return Cache::mergeTags(parent::getCacheTags(), ['config:' . OeNewsroomNewsletter::CONFIG_NAME]);
+    return Cache::mergeTags(parent::getCacheTags(), [
+      'config:' . Newsroom::CONFIG_NAME,
+    ]);
   }
 
 }

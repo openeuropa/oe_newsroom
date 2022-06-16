@@ -6,24 +6,26 @@ namespace Drupal\oe_newsroom_newsletter\Api;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\oe_newsroom\OeNewsroom;
+use Drupal\oe_newsroom\Newsroom;
+use Drupal\oe_newsroom_newsletter\Exception\InvalidResponseException;
+use Drupal\oe_newsroom_newsletter\Exception\ClientException;
 use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\BadResponseException;
-use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * This connects to the Newsroom API and makes the requests to it no conf.
+ * Client to access the Newsroom newsletter subscription API.
  *
- * This class needs to be manually configured. It's a good choice when you need
- * to have a different setting then the configuration has.
+ * @internal This class is marked as final and internal as it will be later
+ *   moved to a dedicated library. Please note that this class may change at any
+ *   time and this will break any dependencies on it.
  *
  * @SuppressWarnings(PHPMD.TooManyFields)
- * @internal
  */
-final class NewsroomClient implements NewsroomClientInterface {
+final class NewsroomClient implements NewsroomClientInterface, ContainerInjectionInterface {
 
   use StringTranslationTrait;
 
@@ -80,9 +82,9 @@ final class NewsroomClient implements NewsroomClientInterface {
    *   Http client to send requests to the API.
    */
   protected function __construct(ConfigFactoryInterface $configFactory, Settings $settings, ClientInterface $httpClient) {
-    $config = $configFactory->get(OeNewsroom::CONFIG_NAME);
+    $config = $configFactory->get(Newsroom::CONFIG_NAME);
 
-    $this->privateKey = $settings->get('oe_newsroom')['newsroom_api_key'];
+    $this->privateKey = $settings->get('oe_newsroom')['newsroom_api_key'] ?? NULL;
     $this->hashMethod = $config->get('hash_method');
     $this->normalised = $config->get('normalised');
     $this->universe = $config->get('universe');
@@ -91,7 +93,7 @@ final class NewsroomClient implements NewsroomClientInterface {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public static function create(ContainerInterface $container): NewsroomClient {
     return new static(
@@ -108,7 +110,7 @@ final class NewsroomClient implements NewsroomClientInterface {
    *   True if the class is functional.
    */
   public function isConfigured(): bool {
-    // These fields should be filled up and has no default value, without them,
+    // These fields should be filled up and have no default value. Without them,
     // it's not possible to communicate with Newsroom.
     return !empty($this->privateKey) && !empty($this->universe) && !empty($this->appId);
   }
@@ -131,13 +133,12 @@ final class NewsroomClient implements NewsroomClientInterface {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    *
    * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    * @SuppressWarnings(PHPMD.NPathComplexity)
    */
-  public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], string $language = NULL, array $topicExtId = []): ?array {
-    // Prepare the post.
+  public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], string $language = NULL, array $topicExtId = []): array {
     $payload = [
       'key' => $this->generateKey($email),
       'subscription' => [
@@ -156,25 +157,23 @@ final class NewsroomClient implements NewsroomClientInterface {
       $payload['subscription']['topicExtId'] = implode(',', $topicExtId);
     }
 
+    // Send the request.
     try {
-      // Send the request.
       $request = $this->httpClient->request('POST', self::API_URL . '/subscribe', ['json' => $payload]);
     }
-    catch (ClientException $e) {
-      throw new BadResponseException(
-        'Invalid response returned by Newsroom API.',
-        $e->getRequest(),
-        $e->getResponse(),
-      );
+    catch (GuzzleException $exception) {
+      throw new ClientException('An error has occurred during a subscribe request.', 0, $exception);
     }
 
+    // @todo The HTTP client should already throw exceptions for any response
+    //   code other than 200.
     if ($request->getStatusCode() !== 200) {
-      throw new BadResponseException('Newsroom API returned a response with HTTP status ' . $request->getStatusCode() . ' but subscription item not found in it.', NULL);
+      throw new InvalidResponseException('Newsroom API returned a response with HTTP status ' . $request->getStatusCode() . ' instead of expected 200.');
     }
 
-    $data = Json::decode($request->getBody()->getContents());
+    $data = Json::decode((string) $request->getBody());
     if (empty($data)) {
-      throw new BadResponseException('Empty response returned by Newsroom newsletter API.', NULL);
+      throw new InvalidResponseException('Empty response returned by Newsroom newsletter API.');
     }
 
     $response = NULL;
@@ -192,13 +191,14 @@ final class NewsroomClient implements NewsroomClientInterface {
       return $response;
     }
 
-    throw new BadResponseException('The subscription service is not available at the moment. Please try again later.', NULL);
+    throw new InvalidResponseException('Newsroom API returned a 200 response but subscription items were found in it.');
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function unsubscribe(string $email, array $svIds = []): bool {
+    // @todo This method should unsubscribe from one sv ID only.
     // This is necessary to split separately newsletters distribution lists.
     $sv_ids_separated = explode(',', implode(',', $svIds));
 
@@ -214,20 +214,20 @@ final class NewsroomClient implements NewsroomClientInterface {
         ],
       ];
 
+      // Send the request.
       try {
-        // Send the request.
         $response = $this->httpClient->get(self::API_URL . '/unsubscribe', $payload);
       }
-      catch (ClientException $e) {
-        throw new BadResponseException(
-          'Invalid response returned by Newsroom API.',
-          $e->getRequest(),
-          $e->getResponse(),
-        );
+      catch (GuzzleException $exception) {
+        throw new ClientException('An error has occurred during an unsubscribe request.', 0, $exception);
       }
 
       // If the unsubscription was success the API returns HTTP code 200.
       // And a text message in the HTTP message body that we don't need now.
+      // @todo Do not bail out at first failure, but instead run all the
+      //   unsubscriptions and show that some of them where unsuccessful.
+      // @todo This is leaking if a user is subscribed to a newsletter.
+      //   MUST be removed.
       if ($response->getStatusCode() !== 200) {
         return FALSE;
       }
