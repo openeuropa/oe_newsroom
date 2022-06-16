@@ -1,0 +1,16 @@
+oe_newsroom.settings:
+  type: config_object
+  label: 'Newsroom settings'
+  mapping:
+    hash_method:
+      type: string
+      label: 'Hashing method'
+    normalised:
+      type: boolean
+      label: 'Normalise e-mail address'
+    universe:
+      type: string
+      label: 'Newsroom universe ID'
+    app_id:
+      type: string
+      label: 'Newsroom app ID'

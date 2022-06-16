@@ -1,0 +1,58 @@
+oe_newsroom_newsletter.settings:
+  type: config_object
+  label: 'Newsroom settings'
+  mapping:
+    privacy_uri:
+      type: label
+      label: 'Privacy URL'
+
+block.settings.oe_newsroom_newsletter_subscription_block:
+  type: block_settings
+  label: 'Newsletter subscription block'
+  mapping:
+    newsletters_language:
+      type: sequence
+      label: 'Array of selectable languages for newsletter'
+      sequence:
+        type: string
+        label: 'Language code'
+    newsletters_language_default:
+      type: string
+      label: 'Default newsletter language'
+    intro_text:
+      type: label
+      label: 'Introduction text'
+    successful_subscription_message:
+      type: label
+      label: 'Successful subscription message'
+    distribution_lists:
+      type: sequence
+      label: 'Array of distribution list values'
+      sequence:
+        type: mapping
+        label: 'Distribution list values'
+        mapping:
+          sv_id:
+            type: string
+            label: 'Sv ID'
+          name:
+            type: label
+            label: 'Name of the distribution list'
+
+block.settings.oe_newsroom_newsletter_unsubscription_block:
+  type: block_settings
+  label: 'Newsletter unsubscription block'
+  mapping:
+    distribution_lists:
+      type: sequence
+      label: 'Array of distribution list values'
+      sequence:
+        type: mapping
+        label: 'Distribution list values'
+        mapping:
+          sv_id:
+            type: string
+            label: 'Sv ID'
+          name:
+            type: label
+            label: 'Name of the distribution list'

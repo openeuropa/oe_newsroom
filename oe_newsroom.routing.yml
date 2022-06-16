@@ -1,0 +1,7 @@
+oe_newsroom.settings_form:
+  path: '/admin/config/system/newsroom-settings'
+  defaults:
+    _form: '\Drupal\oe_newsroom\Form\NewsroomSettingsForm'
+    _title: 'Newsroom Settings Form'
+  requirements:
+    _permission: 'administer newsroom configuration'
