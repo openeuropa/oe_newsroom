@@ -10,7 +10,7 @@ declare(strict_types = 1);
 /**
  * Change the name to 'normalised'.
  */
-function oe_newsroom_post_update_10001(&$sandbox) {
+function oe_newsroom_post_update_00001(&$sandbox) {
   $config = \Drupal::configFactory()->getEditable('oe_newsroom.settings');
   if (($normalised = $config->get('normalized')) !== NULL) {
     $config->set('normalised', $normalised);
