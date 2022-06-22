@@ -1,8 +1,16 @@
 # Change Log
 
+## [1.0.0-alpha2](https://github.com/openeuropa/oe_newsroom/tree/1.0.0-alpha2) (2022-06-22)
+[Full Changelog](https://github.com/openeuropa/oe_newsroom/compare/1.0.0-alpha1...1.0.0-alpha2)
+
+**Merged pull requests:**
+
+- FCH-274: Update config normalised with the normalized value [\#4](https://github.com/openeuropa/oe_newsroom/pull/4) ([piotrsmykaj](https://github.com/piotrsmykaj))
+
 ## [1.0.0-alpha1](https://github.com/openeuropa/oe_newsroom/tree/1.0.0-alpha1) (2022-06-16)
 **Merged pull requests:**
 
+- Prepare changelog for release 1.0.0-alpha1. [\#3](https://github.com/openeuropa/oe_newsroom/pull/3) ([brummbar](https://github.com/brummbar))
 - OEL-1575: Updates and fixes for existing contribution. [\#2](https://github.com/openeuropa/oe_newsroom/pull/2) ([brummbar](https://github.com/brummbar))
 - FCH-244: Push oe\_newsroom modules. [\#1](https://github.com/openeuropa/oe_newsroom/pull/1) ([piotrsmykaj](https://github.com/piotrsmykaj))
 
