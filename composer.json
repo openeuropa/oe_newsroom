@@ -6,22 +6,20 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": ">=7.4",
-        "drupal/core": "^9.2",
-        "drupal/multivalue_form_element": "^1.0@beta",
-        "guzzlehttp/psr7": "^1.7"
+        "php": ">=8.0",
+        "drupal/core": "^9.4 || ^10",
+        "drupal/multivalue_form_element": "^1.0@beta"
     },
     "require-dev": {
         "composer/installers": "~1.11",
-        "drupal/config_devel": "~1.2",
-        "drupal/core-composer-scaffold": "^9.2",
-        "drupal/core-dev": "^9.2",
-        "drupal/http_request_mock": "^1.0",
-        "drush/drush": "^10.3",
-        "egulias/email-validator": "^2.1.22 || ^3.0",
-        "openeuropa/code-review": "^1.7 || ^2.0",
-        "openeuropa/task-runner-drupal-project-symlink": "^1.0.0-beta5",
-        "phpspec/prophecy-phpunit": "^1 || ^2"
+        "drupal/core-composer-scaffold": "^9.4 || ^10",
+        "drupal/core-dev": "^9.4 || ^10",
+        "drupal/http_request_mock": "^1.1",
+        "drush/drush": "^11.1",
+        "guzzlehttp/psr7": "^2.5",
+        "openeuropa/code-review": "^2.0.0-alpha6",
+        "openeuropa/task-runner-drupal-project-symlink": "^1.0.0-beta6",
+        "phpspec/prophecy-phpunit": "^2"
     },
     "scripts": {
         "drupal-scaffold": "DrupalComposer\\DrupalScaffold\\Plugin::scaffold",
@@ -57,10 +55,7 @@
             "build/profiles/contrib/{$name}": ["type:drupal-profile"],
             "build/modules/contrib/{$name}": ["type:drupal-module"],
             "build/themes/contrib/{$name}": ["type:drupal-theme"]
-        },
-        "_readme": [
-            "Explicit requirement for egulias/email-validator due to https://www.drupal.org/project/drupal/issues/3061074#comment-14300579. It can be removed when Drupal core 9.2 support is droppped."
-        ]
+        }
     },
     "config": {
         "sort-packages": true,
@@ -68,7 +63,8 @@
             "composer/installers": true,
             "drupal/core-composer-scaffold": true,
             "dealerdirect/phpcodesniffer-composer-installer": true,
-            "phpro/grumphp": true
+            "phpro/grumphp": true,
+            "phpstan/extension-installer": true
         }
     }
 }
