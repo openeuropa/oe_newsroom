@@ -1,10 +1,18 @@
 # Change Log
 
+## [1.0.0-alpha3](https://github.com/openeuropa/oe_newsroom/tree/1.0.0-alpha3) (2023-05-12)
+[Full Changelog](https://github.com/openeuropa/oe_newsroom/compare/1.0.0-alpha2...1.0.0-alpha3)
+
+**Merged pull requests:**
+
+- EWPP-2999: Drupal 10 compatibility. [\#6](https://github.com/openeuropa/oe_newsroom/pull/6) ([brummbar](https://github.com/brummbar))
+
 ## [1.0.0-alpha2](https://github.com/openeuropa/oe_newsroom/tree/1.0.0-alpha2) (2022-06-22)
 [Full Changelog](https://github.com/openeuropa/oe_newsroom/compare/1.0.0-alpha1...1.0.0-alpha2)
 
 **Merged pull requests:**
 
+- Prepare changelog for release 1.0.0-alpha2. [\#5](https://github.com/openeuropa/oe_newsroom/pull/5) ([brummbar](https://github.com/brummbar))
 - FCH-274: Update config normalised with the normalized value [\#4](https://github.com/openeuropa/oe_newsroom/pull/4) ([piotrsmykaj](https://github.com/piotrsmykaj))
 
 ## [1.0.0-alpha1](https://github.com/openeuropa/oe_newsroom/tree/1.0.0-alpha1) (2022-06-16)
