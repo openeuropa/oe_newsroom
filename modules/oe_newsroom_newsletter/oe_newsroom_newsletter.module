@@ -5,7 +5,7 @@
  * Hook implementations for the OpenEuropa Newsroom Newsletter module.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 /**
  * Implements hook_local_tasks_alter().

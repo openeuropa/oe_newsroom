@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\oe_newsroom_newsletter\Api;
 
@@ -10,8 +10,8 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\oe_newsroom\Newsroom;
-use Drupal\oe_newsroom_newsletter\Exception\InvalidResponseException;
 use Drupal\oe_newsroom_newsletter\Exception\ClientException;
+use Drupal\oe_newsroom_newsletter\Exception\InvalidResponseException;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\DependencyInjection\ContainerInterface;

@@ -5,7 +5,7 @@
  * OE Newsroom post updates.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 /**
  * Change the name to 'normalised'.
