@@ -67,6 +67,7 @@ class UnsubscribeBlockTest extends BrowserTestBase {
 
     $sv_id_fields[0]->setValue('00001');
     $dist_name_fields[0]->setValue('First distribution list');
+    $page->findField('id')->setValue('newsletterunsubscriptionblock');
     $page->pressButton('Save block');
     $assert_session->pageTextContains('The block configuration has been saved');
 
