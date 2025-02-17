@@ -9,6 +9,7 @@ use Drupal\Component\Serialization\Json;
 use Drupal\Core\Url;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\oe_newsroom\NewsroomConfigurationTestTrait;
 use Drupal\Tests\oe_newsroom\NewsroomTestTrait;
 use Drupal\Tests\oe_newsroom_newsletter\Traits\NewsroomClientMockTrait;
 use Drupal\Tests\oe_newsroom_newsletter\Traits\NewsroomNewsletterTestTrait;
@@ -27,6 +28,7 @@ class SubscribeBlockTest extends BrowserTestBase {
   protected const BLOCK_CSS_SELECTOR = 'div.oe-newsroom-newsletter-subscribe-form';
 
   use NewsroomClientMockTrait;
+  use NewsroomConfigurationTestTrait;
   use NewsroomNewsletterTestTrait;
   use NewsroomTestTrait;
 

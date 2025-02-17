@@ -40,7 +40,7 @@ interface NewsroomClientInterface {
    * @throws \Drupal\oe_newsroom_newsletter\Exception\InvalidResponseException
    *   Thrown when the response is not valid.
    */
-  public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], string $language = NULL, array $topicExtId = []): array;
+  public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], ?string $language = NULL, array $topicExtId = []): array;
 
   /**
    * Unsubscribe an email from the newsletters.
