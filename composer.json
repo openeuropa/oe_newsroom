@@ -18,8 +18,7 @@
         "drush/drush": "^12 || ^13",
         "guzzlehttp/psr7": "^2.5",
         "openeuropa/code-review-drupal": "^1.0.0-alpha",
-        "openeuropa/task-runner-drupal-project-symlink": "^1.0",
-        "phpspec/prophecy-phpunit": "^2"
+        "openeuropa/task-runner-drupal-project-symlink": "^1.0"
     },
     "scripts": {
         "drupal-scaffold": "DrupalComposer\\DrupalScaffold\\Plugin::scaffold",
