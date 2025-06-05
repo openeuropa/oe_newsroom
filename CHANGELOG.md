@@ -1,13 +1,26 @@
 # Change Log
 
+## [1.0.0](https://github.com/openeuropa/oe_newsroom/tree/1.0.0) (2025-06-05)
+
+[Full Changelog](https://github.com/openeuropa/oe_newsroom/compare/1.0.0-alpha3...1.0.0)
+
+**Merged pull requests:**
+
+- EWPP-4654: Support D11 [\#10](https://github.com/openeuropa/oe_newsroom/pull/10) ([msnassar](https://github.com/msnassar))
+- EWPP-4991: Ensure PHP8.3 compatibility. [\#9](https://github.com/openeuropa/oe_newsroom/pull/9) ([msnassar](https://github.com/msnassar))
+- OEL-3053 [\#8](https://github.com/openeuropa/oe_newsroom/pull/8) ([AaronGilMartinez](https://github.com/AaronGilMartinez))
+
 ## [1.0.0-alpha3](https://github.com/openeuropa/oe_newsroom/tree/1.0.0-alpha3) (2023-05-12)
+
 [Full Changelog](https://github.com/openeuropa/oe_newsroom/compare/1.0.0-alpha2...1.0.0-alpha3)
 
 **Merged pull requests:**
 
+- Prepare changelog for release 1.0.0-alpha3. [\#7](https://github.com/openeuropa/oe_newsroom/pull/7) ([brummbar](https://github.com/brummbar))
 - EWPP-2999: Drupal 10 compatibility. [\#6](https://github.com/openeuropa/oe_newsroom/pull/6) ([brummbar](https://github.com/brummbar))
 
 ## [1.0.0-alpha2](https://github.com/openeuropa/oe_newsroom/tree/1.0.0-alpha2) (2022-06-22)
+
 [Full Changelog](https://github.com/openeuropa/oe_newsroom/compare/1.0.0-alpha1...1.0.0-alpha2)
 
 **Merged pull requests:**
@@ -16,6 +29,7 @@
 - FCH-274: Update config normalised with the normalized value [\#4](https://github.com/openeuropa/oe_newsroom/pull/4) ([piotrsmykaj](https://github.com/piotrsmykaj))
 
 ## [1.0.0-alpha1](https://github.com/openeuropa/oe_newsroom/tree/1.0.0-alpha1) (2022-06-16)
+
 **Merged pull requests:**
 
 - Prepare changelog for release 1.0.0-alpha1. [\#3](https://github.com/openeuropa/oe_newsroom/pull/3) ([brummbar](https://github.com/brummbar))
