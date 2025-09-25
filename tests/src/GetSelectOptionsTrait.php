@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\oe_newsroom;
 
 use Behat\Mink\Element\Element;
+use Behat\Mink\Element\NodeElement;
 
 /**
  * Contains a method to get select options.
@@ -24,7 +25,7 @@ trait GetSelectOptionsTrait {
    * @return array<string, string>
    *   Associative array of option keys and values.
    */
-  protected function getOptions($select, ?Element $container = NULL): array {
+  protected function getSelectOptions(string|NodeElement $select, ?Element $container = NULL): array {
     if (is_string($select)) {
       $select = $this->assertSession()->selectExists($select, $container);
     }

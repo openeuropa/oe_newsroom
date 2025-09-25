@@ -58,7 +58,7 @@ class SettingsFormTest extends BrowserTestBase {
     $this->assertEquals([
       'sha256' => 'SHA-256',
       'md5' => 'MD5',
-    ], $this->getOptions('Hash method'));
+    ], $this->getSelectOptions('Hash method'));
     $assert_session->checkboxChecked('Normalise before hashing');
     $page->pressButton('Save configuration');
     $assert_session->pageTextContains('The configuration options have been saved.');

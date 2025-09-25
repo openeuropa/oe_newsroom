@@ -63,8 +63,8 @@ class SubscribeBlockTest extends BrowserTestBase {
     $expected_languages = [
       'en' => 'English',
     ];
-    $this->assertEquals($expected_languages, $this->getOptions('Newsletter languages'));
-    $this->assertEquals($expected_languages, $this->getOptions('Default newsletter language'));
+    $this->assertEquals($expected_languages, $this->getSelectOptions('Newsletter languages'));
+    $this->assertEquals($expected_languages, $this->getSelectOptions('Default newsletter language'));
 
     // Check the required fields.
     $page->pressButton('Save block');
@@ -113,8 +113,8 @@ class SubscribeBlockTest extends BrowserTestBase {
 
     $expected_languages['it'] = 'Italian';
     $expected_languages['de'] = 'German';
-    $this->assertEqualsCanonicalizing($expected_languages, $this->getOptions('Newsletter languages'));
-    $this->assertEqualsCanonicalizing($expected_languages, $this->getOptions('Default newsletter language'));
+    $this->assertEqualsCanonicalizing($expected_languages, $this->getSelectOptions('Newsletter languages'));
+    $this->assertEqualsCanonicalizing($expected_languages, $this->getSelectOptions('Default newsletter language'));
 
     // Test that the default newsletter chosen language must be selected in the
     // allowed languages field too.
@@ -385,7 +385,7 @@ class SubscribeBlockTest extends BrowserTestBase {
       'it' => 'Italian',
       'de' => 'German',
       'fr' => 'French',
-    ], $this->getOptions($language_select));
+    ], $this->getSelectOptions($language_select));
     // Since the anonymous user has no preferred language, the default site
     // language is pre-selected.
     $this->assertEquals('en', $language_select->getValue());
@@ -407,7 +407,7 @@ class SubscribeBlockTest extends BrowserTestBase {
       'it' => 'Italian',
       'de' => 'German',
       'fr' => 'French',
-    ], $this->getOptions($language_select));
+    ], $this->getSelectOptions($language_select));
     // The default language configured in the block is now the default option,
     // as English is not a valid choice anymore.
     $this->assertEquals('it', $language_select->getValue());
@@ -425,7 +425,7 @@ class SubscribeBlockTest extends BrowserTestBase {
       'it' => 'Italian',
       'de' => 'German',
       'fr' => 'French',
-    ], $this->getOptions($language_select));
+    ], $this->getSelectOptions($language_select));
 
     $page = $this->getSession()->getPage();
     $block_wrapper->checkField('Newsletter collection');
