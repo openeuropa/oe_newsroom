@@ -6,6 +6,7 @@ namespace Drupal\Tests\oe_newsroom\Functional;
 
 use Drupal\oe_newsroom\Newsroom;
 use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\oe_newsroom\GetSelectOptionsTrait;
 
 /**
  * Test the Newsroom configuration form.
@@ -13,6 +14,8 @@ use Drupal\Tests\BrowserTestBase;
  * @group oe_newsroom
  */
 class SettingsFormTest extends BrowserTestBase {
+
+  use GetSelectOptionsTrait;
 
   /**
    * {@inheritdoc}
