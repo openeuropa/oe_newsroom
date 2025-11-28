@@ -1,0 +1,47 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for oe_newsroom_management module.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Link;
+use Drupal\Core\Mail\MailFormatHelper;
+use Drupal\Core\Url;
+use Drupal\oe_newsroom_management\TokenManager;
+
+/**
+ * Implements hook_mail().
+ *
+ *  Move this to a dedicated class.
+ */
+function oe_newsroom_management_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'request_access_mail':
+      $email = $params['email'];
+      $hash = \Drupal::service(TokenManager::class)->get($email);
+      $site_url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
+      $variables = [
+        '@site_url' => $site_url,
+        '@subscriptions_page_link' => Link::createFromRoute(
+          t('Access my subscriptions page'),
+          'oe_newsroom_management.node_subscriptions_management_anonymous',
+          [
+            'email' => $email,
+            'token' => $hash,
+          ],
+          [
+            'absolute' => TRUE,
+          ]
+        )->toString(),
+      ];
+
+      $text = t("You are receiving this e-mail because you requested access to your subscriptions page on @site_url. \r\n Click the following link to access your subscriptions page: @subscriptions_page_link \r\n If you didn't request access to your subscriptions page or you're not sure why you received this e-mail, you can delete it.", $variables);
+      $message['subject'] .= t('Access your subscriptions page on @site_url', ['@site_url' => $site_url]);
+      $message['body'][] = MailFormatHelper::htmlToText($text);
+
+      break;
+  }
+}

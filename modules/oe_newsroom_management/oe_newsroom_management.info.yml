@@ -1,0 +1,7 @@
+name: 'oe_newsroom_management'
+type: module
+description: 'Provides management for users and their subscriptions.'
+package: OpenEuropa
+core_version_requirement: ^10 || ^11
+dependencies:
+  - oe_newsroom:oe_newsroom_newsletter
