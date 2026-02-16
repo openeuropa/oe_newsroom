@@ -1,4 +1,4 @@
-name: 'oe_newsroom_management'
+name: OpenEuropa Newsroom management
 type: module
 description: 'Provides management for users and their subscriptions.'
 package: OpenEuropa
