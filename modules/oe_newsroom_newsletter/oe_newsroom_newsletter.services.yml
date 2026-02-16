@@ -11,3 +11,6 @@ services:
   # moved.
   Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface:
     class: Drupal\oe_newsroom_newsletter\Api\NewsroomClient
+  logger.channel.oe_newsroom_newsletter:
+    parent: logger.channel_base
+    arguments: ['oe_newsroom_newsletter']
