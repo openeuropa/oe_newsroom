@@ -31,32 +31,46 @@ class MailHooks {
    */
   #[Hook('mail')]
   public function mail(string $key, array &$message, array $params): void {
-    switch ($key) {
-      case 'request_access_mail':
-        $email = $params['email'];
-        $hash = $this->tokenManager->get($email);
-        $site_url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
-        $variables = [
-          '@site_url' => $site_url,
-          '@subscriptions_page_link' => Link::createFromRoute(
-            $this->t('Access my subscriptions page'),
-            'oe_newsroom_management.node_subscriptions_management_anonymous',
-            [
-              'email' => $email,
-              'token' => $hash,
-            ],
-            [
-              'absolute' => TRUE,
-            ]
-          )->toString(),
-        ];
+    match ($key) {
+      'request_access_mail' => $this->requestAccessMail($message, $params),
+    };
+  }
 
-        $text = $this->t("You are receiving this e-mail because you requested access to your subscriptions page on @site_url. \r\n Click the following link to access your subscriptions page: @subscriptions_page_link \r\n If you didn't request access to your subscriptions page or you're not sure why you received this e-mail, you can delete it.", $variables);
-        $message['subject'] .= $this->t('Access your subscriptions page on @site_url', ['@site_url' => $site_url]);
-        $message['body'][] = MailFormatHelper::htmlToText($text);
+  /**
+   * Prepares an email to request anonymous access to the subscriptions page.
+   *
+   * @param array $message
+   *   Email array to be populated.
+   * @param array{email: string} $params
+   *   Parameters to prepare this email.
+   *
+   * @param-out array{
+   *   subject: \Drupal\Component\Render\MarkupInterface,
+   *   body: list<string>,
+   * } $message
+   */
+  protected function requestAccessMail(array &$message, array $params): void {
+    $email = $params['email'];
+    $hash = $this->tokenManager->get($email);
+    $site_url = Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString();
+    $variables = [
+      '@site_url' => $site_url,
+      '@subscriptions_page_link' => Link::createFromRoute(
+        $this->t('Access my subscriptions page'),
+        'oe_newsroom_management.node_subscriptions_management_anonymous',
+        [
+          'email' => $email,
+          'token' => $hash,
+        ],
+        [
+          'absolute' => TRUE,
+        ],
+      )->toString(),
+    ];
 
-        break;
-    }
+    $text = $this->t("You are receiving this e-mail because you requested access to your subscriptions page on @site_url. \r\n Click the following link to access your subscriptions page: @subscriptions_page_link \r\n If you didn't request access to your subscriptions page or you're not sure why you received this e-mail, you can delete it.", $variables);
+    $message['subject'] .= $this->t('Access your subscriptions page on @site_url', ['@site_url' => $site_url]);
+    $message['body'][] = MailFormatHelper::htmlToText($text);
   }
 
 }
