@@ -113,7 +113,7 @@ interface NewsroomClientInterface {
    * Subscribe an e-mail to a node notification.
    *
    * @todo For the moment keep this as a separate method since method signature
-   * is quite different. Can we join both?
+   *   is quite different. Can we join both?
    *
    * @param string $node_id
    *   The node ID.
