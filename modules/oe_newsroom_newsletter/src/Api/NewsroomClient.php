@@ -270,9 +270,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
     //   get the subscriptions, the endpoint allows more like subscribing to
     //   newsletters.
     $query = [
-      'key' => $this->generateKey(
-        $this->normalised ? mb_strtolower($email) : $email,
-      ),
+      'key' => $this->generateKey($email),
       'app' => $this->appId,
       'user_email' => $email,
     ];
