@@ -30,7 +30,7 @@ class MailHooks {
    * Implements hook_mail().
    */
   #[Hook('mail')]
-  public function mail($key, &$message, $params) {
+  public function mail(string $key, array &$message, array $params): void {
     switch ($key) {
       case 'request_access_mail':
         $email = $params['email'];
