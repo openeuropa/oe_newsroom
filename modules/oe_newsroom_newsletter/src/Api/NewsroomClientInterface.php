@@ -70,7 +70,7 @@ interface NewsroomClientInterface {
    * @return array
    *   The subscriptions list.
    */
-  public function subscriptions(string $email);
+  public function subscriptions(string $email): array;
 
   /**
    * Create node notification.
