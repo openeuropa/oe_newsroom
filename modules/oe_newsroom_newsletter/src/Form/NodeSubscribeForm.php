@@ -149,19 +149,18 @@ class NodeSubscribeForm extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $values = $form_state->getValues();
     $node_id = $form_state->get('node_id');
-    // Default on publication.
-    $frequency = 2101;
 
     // Get user frequency and use if there is.
     // All node notifications share the same frequency.
     $subscriptions_response = $this->newsroomClient->subscriptions($values['email']);
-    if (isset($subscriptions_response[0]['frequency'])) {
-      $frequency = match($subscriptions_response[0]["frequency"]) {
-        'On Publication' => 2101,
-        'Daily' => 2102,
-        'Weekly' => 2103,
-      };
-    }
+
+    $frequency = match ($subscriptions_response[0]['frequency'] ?? NULL) {
+      'On Publication' => 2101,
+      'Daily' => 2102,
+      'Weekly' => 2103,
+      // Default on publication.
+      default => 2101,
+    };
 
     try {
       // @todo Add event here to allow to change parameters.
