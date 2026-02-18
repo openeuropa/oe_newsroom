@@ -149,26 +149,25 @@ class NodeSubscribeForm extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $values = $form_state->getValues();
     $node_id = $form_state->get('node_id');
-    // Default on publication.
-    $frequency = 2101;
 
     // Get user frequency and use if there is.
     // All node notifications share the same frequency.
-    $response = $this->newsroomClient->subscriptions($values['email']);
-    if (isset($response[0]['frequency'])) {
-      $frequency = match($response[0]["frequency"]) {
-        'On Publication' => 2101,
-        'Daily' => 2102,
-        'Weekly' => 2103,
-      };
-    }
+    $subscriptions_response = $this->newsroomClient->subscriptions($values['email']);
+
+    $frequency = match ($subscriptions_response[0]['frequency'] ?? NULL) {
+      'On Publication' => 2101,
+      'Daily' => 2102,
+      'Weekly' => 2103,
+      // Default on publication.
+      default => 2101,
+    };
 
     try {
       // @todo Add event here to allow to change parameters.
-      $response = $this->newsroomClient->nodeNotificationSubscribe($node_id, $values['email'], $frequency);
+      $subscribe_response = $this->newsroomClient->nodeNotificationSubscribe($node_id, $values['email'], $frequency);
       // Save the response (if there is) into form state just in case somebody
       // needs it.
-      $form_state->set('subscription', $response);
+      $form_state->set('subscription', $subscribe_response);
       // @todo Right now we prio the response message since it contains valuable
       // information, to see if there is any risk and reorder.
       $this->messenger()->addStatus($this->successfulMessage ?: $this->t('You have been successfully subscribed.'));
