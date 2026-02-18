@@ -158,6 +158,9 @@ interface NewsroomClientInterface {
    *
    * @param string $node_id
    *   The node ID.
+   *
+   * @return array
+   *   Decoded response data.
    */
   public function nodeNotificationGet(string $node_id): array;
 
