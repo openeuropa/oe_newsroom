@@ -15,16 +15,15 @@ jobs:
           - "8.1"
           - "8.3"
         core_version:
-          - "10.3.0"
-          - "10.4.0"
           - "10.5.0"
-          - "11.1.0"
+          - "10.6.0"
           - "11.2.0"
+          - "11.3.0"
         exclude:
           - php_version: "8.1"
-            core_version: "11.1.0"
-          - php_version: "8.1"
             core_version: "11.2.0"
+          - php_version: "8.1"
+            core_version: "11.3.0"
     env:
       PHP_VERSION: ${{ matrix.php_version }}
     steps:
