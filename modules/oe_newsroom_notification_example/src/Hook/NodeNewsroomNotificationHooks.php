@@ -6,7 +6,6 @@ namespace Drupal\oe_newsroom_notification_example\Hook;
 
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Hook\Attribute\Hook;
-use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Utility\Error;
 use Drupal\node\NodeInterface;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
@@ -24,7 +23,6 @@ class NodeNewsroomNotificationHooks {
    */
   public function __construct(
     protected readonly NewsroomClientInterface $newsroomClient,
-    protected readonly MessengerInterface $messenger,
     #[Autowire('logger.channel.oe_newsroom_newsletter')]
     protected readonly LoggerInterface $logger,
     protected readonly TimeInterface $time,
@@ -49,10 +47,8 @@ class NodeNewsroomNotificationHooks {
         node_title: $node->getTitle(),
         create_date: (string) $this->time->getRequestTime(),
       );
-      $this->messenger->addStatus('Notification created successfully.');
     }
     catch (ClientException $e) {
-      $this->messenger->addError(t('An error occurred while processing your the notification creation, please check logs to know more about the issue.'));
       $this->logger->error('%type thrown while creating a node notification in %function (line %line of %file).', [] + Error::decodeException($e->getPrevious()));
     }
   }
@@ -78,10 +74,8 @@ class NodeNewsroomNotificationHooks {
         node_title: $node->getTitle(),
         create_date: (string) $this->time->getRequestTime(),
       );
-      $this->messenger->addStatus('Notification created successfully.');
     }
     catch (ClientException $e) {
-      $this->messenger->addError(t('An error occurred while processing your the notification update, please check logs to know more about the issue.'));
       $this->logger->error('%type thrown while creating a node notification in %function (line %line of %file).', [] + Error::decodeException($e->getPrevious()));
     }
   }
@@ -93,10 +87,8 @@ class NodeNewsroomNotificationHooks {
   public function nodeDelete(NodeInterface $node): void {
     try {
       $this->newsroomClient->nodeNotificationDelete($node->id());
-      $this->messenger->addStatus('Notification deleted successfully.');
     }
     catch (ClientException $e) {
-      $this->messenger->addError(t('An error occurred while processing your the notification deletion, please check logs to know more about the issue.'));
       $this->logger->error('%type thrown while creating a node notification in %function (line %line of %file).', [] + Error::decodeException($e->getPrevious()));
     }
   }
