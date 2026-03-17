@@ -187,7 +187,7 @@ class SubscribeForm extends NewsletterFormBase {
   protected function getPrivacyUri(string $language): string {
     $uri = $this->config(NewsroomNewsletter::CONFIG_NAME)->get('privacy_uri');
     if (parse_url($uri, PHP_URL_SCHEME) === NULL) {
-      if (strpos($uri, '<front>') === 0) {
+      if (str_starts_with($uri, '<front>')) {
         $uri = '/' . substr($uri, strlen('<front>'));
       }
       $uri = 'internal:' . $uri;
