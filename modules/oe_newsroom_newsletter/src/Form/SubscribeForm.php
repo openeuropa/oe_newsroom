@@ -31,25 +31,20 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class SubscribeForm extends NewsletterFormBase {
 
   /**
-   * Language manager.
-   *
-   * @var \Drupal\Core\Language\LanguageManagerInterface
-   */
-  protected $languageManager;
-
-  /**
    * Successful subscription message.
    *
    * @var string
    */
   protected $successfulMessage;
 
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct(NewsroomClientInterface $newsroomClient, AccountProxyInterface $accountProxy, MessengerInterface $messenger, LoggerChannelFactoryInterface $logger, LanguageManagerInterface $languageManager) {
+  public function __construct(
+    NewsroomClientInterface $newsroomClient,
+    AccountProxyInterface $accountProxy,
+    MessengerInterface $messenger,
+    LoggerChannelFactoryInterface $logger,
+    protected LanguageManagerInterface $languageManager,
+  ) {
     parent::__construct($newsroomClient, $accountProxy, $messenger, $logger);
-    $this->languageManager = $languageManager;
   }
 
   /**
