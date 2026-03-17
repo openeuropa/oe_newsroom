@@ -31,8 +31,8 @@ class NodeSubscriptionBlock extends BlockBase implements ContainerFactoryPluginI
 
   public function __construct(
     array $configuration,
-    $plugin_id,
-    $plugin_definition,
+    string $plugin_id,
+    array $plugin_definition,
     protected NewsroomClientInterface $newsroomClient,
     protected FormBuilderInterface $formBuilder,
     protected ConfigFactoryInterface $configFactory,
