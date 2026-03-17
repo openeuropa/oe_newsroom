@@ -13,6 +13,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Plugin\Context\EntityContextDefinition;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\oe_newsroom\Newsroom;
@@ -26,6 +27,9 @@ use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
 #[Block(
   id: 'oe_newsroom_node_subscription_block',
   admin_label: new TranslatableMarkup('Node subscription block'),
+  context_definitions: [
+    'node' => new EntityContextDefinition('entity:node', new TranslatableMarkup("Node")),
+  ]
 )]
 class NodeSubscriptionBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
@@ -88,6 +92,9 @@ class NodeSubscriptionBlock extends BlockBase implements ContainerFactoryPluginI
    * {@inheritdoc}
    */
   public function build(): array {
+    /** @var \Drupal\node\NodeInterface $node */
+    $node = $this->getContextValue('node');
+
     $privacy_uri = $this->configFactory->get(NewsroomNewsletter::CONFIG_NAME)->get('privacy_uri');
     $sv_id = $this->configFactory->get(Newsroom::CONFIG_NAME)->get('sv_id');
 
@@ -97,6 +104,7 @@ class NodeSubscriptionBlock extends BlockBase implements ContainerFactoryPluginI
 
     return $this->formBuilder->getForm(
       NodeSubscribeForm::class,
+      $node,
       $this->configuration['intro_text'],
       $this->configuration['successful_subscription_message']
     );

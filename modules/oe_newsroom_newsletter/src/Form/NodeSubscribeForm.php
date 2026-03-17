@@ -12,6 +12,7 @@ use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Url;
+use Drupal\node\NodeInterface;
 use Drupal\Core\Utility\Error;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Exception\ClientException;
@@ -53,11 +54,11 @@ class NodeSubscribeForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, string $intro_text = '', string $successful_message = ''): array {
-    $node = $this->getRouteMatch()->getParameter('node');
+  public function buildForm(array $form, FormStateInterface $form_state, ?NodeInterface $node = NULL, string $intro_text = '', string $successful_message = ''): array {
     if ($node === NULL) {
       return [];
     }
+    assert($node instanceof NodeInterface);
 
     try {
       $notifications = \Drupal::service(NewsroomClientInterface::class)->nodeNotificationGet($node->id());
