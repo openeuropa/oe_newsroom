@@ -14,11 +14,9 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\oe_newsroom\Newsroom;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Form\SubscribeForm;
 use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a Newsletter subscription block.
@@ -52,20 +50,6 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->privacyUri = $configFactory->get(NewsroomNewsletter::CONFIG_NAME)->get('privacy_uri');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      NewsroomClient::create($container),
-      $container->get('form_builder'),
-      $container->get('config.factory'),
-    );
   }
 
   /**

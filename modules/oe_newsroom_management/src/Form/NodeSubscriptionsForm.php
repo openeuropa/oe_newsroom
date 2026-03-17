@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Drupal\oe_newsroom_management\Form;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\Utility\Error;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
@@ -21,38 +23,24 @@ use Drupal\oe_newsroom_newsletter\Exception\ClientException;
  */
 final class NodeSubscriptionsForm extends FormBase {
 
+  use AutowireTrait;
   use StringTranslationTrait;
+
+  public function __construct(
+    protected NewsroomClientInterface $newsroomClient,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    MessengerInterface $messenger,
+    TranslationInterface $translation,
+  ) {
+    $this->setStringTranslation($translation);
+    $this->setMessenger($messenger);
+  }
 
   /**
    * {@inheritdoc}
    */
   public function getFormId() {
     return 'oe_newsroom_management_node_subscriptions';
-  }
-
-  /**
-   * API for newsroom calls.
-   *
-   * @var \Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface
-   */
-  protected NewsroomClientInterface $newsroomClient;
-
-  /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManager
-   */
-  protected EntityTypeManager $entityTypeManager;
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    $instance = parent::create($container);
-    $instance->newsroomClient = NewsroomClient::create($container);
-    $instance->entityTypeManager = $container->get(EntityTypeManagerInterface::class);
-
-    return $instance;
   }
 
   /**
