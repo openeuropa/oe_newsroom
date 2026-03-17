@@ -31,9 +31,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 )]
 class NodeSubscriptionBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
-  /**
-   * {@inheritdoc}
-   */
   public function __construct(
     array $configuration,
     $plugin_id,
