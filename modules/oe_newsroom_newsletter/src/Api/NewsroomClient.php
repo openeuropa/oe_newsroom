@@ -103,7 +103,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container): NewsroomClient {
+  public static function create(ContainerInterface $container): static {
     return new static(
       $container->get('config.factory'),
       $container->get('settings'),
@@ -269,6 +269,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
     $query = [
       'key' => $this->generateKey($email),
       'app' => $this->appId,
+      // @todo Should this be the normalized email?
       'user_email' => $email,
     ];
 
@@ -359,7 +360,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
   public function nodeNotificationSubscribe(
     string $node_id,
     string $email,
-    // Add constants for the frecuency?
+    // Add constants for the frequency?
     int $frequency,
     bool $nomail = FALSE,
   ):array {
@@ -407,6 +408,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
       'subscription' => [
         'sv_id' => $this->svId,
         'node_id' => $node_id,
+        // @todo Should this be the original or the normalized email?
         'email' => $email,
       ],
     ];
@@ -430,7 +432,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
   /**
    * {@inheritdoc}
    */
-  public function nodeNotificationGet(string $node_id):array {
+  public function nodeNotificationGet(string $node_id): array {
     $query = [
       'key' => $this->generateComposedKey([
         $this->svId,
