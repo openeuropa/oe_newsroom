@@ -34,9 +34,9 @@ class SubscribeForm extends NewsletterFormBase {
   /**
    * Successful subscription message.
    *
-   * @var string
+   * This is initialized in ->buildForm().
    */
-  protected $successfulMessage;
+  protected string $successfulMessage;
 
   public function __construct(
     NewsroomClientInterface $newsroomClient,
