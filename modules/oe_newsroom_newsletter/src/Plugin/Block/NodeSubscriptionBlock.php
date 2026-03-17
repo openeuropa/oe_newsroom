@@ -70,7 +70,7 @@ class NodeSubscriptionBlock extends BlockBase implements ContainerFactoryPluginI
     $form['successful_subscription_message'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Successful subscription message'),
-      '#description' => $this->t('Text which will shown if the user successfully subscribed to the newsletters. Leave empty to use the message returned by the Newsroom API.'),
+      '#description' => $this->t('Text to show when a user successfully subscribes to a node. Leave empty to use the message returned by the Newsroom API.'),
       '#maxlength' => 255,
       '#default_value' => $this->configuration['successful_subscription_message'],
     ];
