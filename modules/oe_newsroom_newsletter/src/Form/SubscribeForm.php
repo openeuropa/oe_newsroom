@@ -14,10 +14,9 @@ use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
-use Drupal\Core\Utility\Error;
-use Drupal\oe_newsroom\Newsroom;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
-use Drupal\oe_newsroom_newsletter\Exception\ClientException;
+use Drupal\oe_newsroom\Domain\NewsletterSubscribeService;
+use Drupal\oe_newsroom\Exception\Domain\OperationFailure;
+use Drupal\oe_newsroom\ExceptionLogger;
 use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
 
 /**
@@ -39,13 +38,14 @@ class SubscribeForm extends NewsletterFormBase {
   protected string $successfulMessage;
 
   public function __construct(
-    NewsroomClientInterface $newsroomClient,
+    protected NewsletterSubscribeService $newsletterSubscribeService,
     AccountProxyInterface $accountProxy,
     MessengerInterface $messenger,
     LoggerChannelFactoryInterface $logger,
     protected LanguageManagerInterface $languageManager,
+    protected ExceptionLogger $exceptionLogger,
   ) {
-    parent::__construct($newsroomClient, $accountProxy, $messenger, $logger);
+    parent::__construct($accountProxy, $messenger, $logger);
   }
 
   /**
@@ -161,17 +161,13 @@ class SubscribeForm extends NewsletterFormBase {
 
     try {
       // Let's call the subscription service.
-      $response = $this->newsroomClient->subscribe($values['email'], $distribution_lists, [], $values['newsletters_language']);
+      $response = $this->newsletterSubscribeService->subscribe($values['email'], $distribution_lists, $values['newsletters_language']);
 
-      $this->messenger->addStatus($this->successfulMessage ?: $response['feedbackMessage'] ?: $this->t('You have been successfully subscribed.'));
+      $this->messenger->addStatus($this->successfulMessage ?: $response->feedbackMessage ?: $this->t('You have been successfully subscribed.'));
     }
-    catch (ClientException $e) {
+    catch (OperationFailure $e) {
       $this->messenger->addError($this->t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
-      $this->logger->get('oe_newsroom_newsletter')->error('%type thrown while subscribing email %email to the newsletter(s) with ID(s) %sv_ids and universe %universe: @message in %function (line %line of %file).', [
-        '%email' => $values['email'],
-        '%universe' => $this->config(Newsroom::CONFIG_NAME)->get('universe'),
-        '%sv_ids' => implode(',', $distribution_lists),
-      ] + Error::decodeException($e));
+      $this->exceptionLogger->logException($e, 'Failed to subscribe to newsletters on form submit.');
     }
   }
 

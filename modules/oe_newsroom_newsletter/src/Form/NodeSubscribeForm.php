@@ -13,9 +13,9 @@ use Drupal\Core\Link;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
-use Drupal\Core\Utility\Error;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
-use Drupal\oe_newsroom_newsletter\Exception\ClientException;
+use Drupal\oe_newsroom\Domain\NodeSubscriptionService;
+use Drupal\oe_newsroom\Exception\Domain\OperationError;
+use Drupal\oe_newsroom\ExceptionLogger;
 use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
 
 /**
@@ -40,8 +40,9 @@ class NodeSubscribeForm extends FormBase {
    * {@inheritdoc}
    */
   public function __construct(
-    protected NewsroomClientInterface $newsroomClient,
+    protected NodeSubscriptionService $nodeSubscriptionService,
     protected LanguageManagerInterface $languageManager,
+    protected ExceptionLogger $exceptionLogger,
   ) {}
 
   /**
@@ -61,16 +62,19 @@ class NodeSubscribeForm extends FormBase {
     assert($node instanceof NodeInterface);
 
     try {
-      $notifications = \Drupal::service(NewsroomClientInterface::class)->nodeNotificationGet($node->id());
+      $node_is_known = $this->nodeSubscriptionService->nodeAllowsSubscribing($node);
     }
-    catch (ClientException $e) {
-      $this->messenger()->addError($this->t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
-      $this->logger('oe_newsroom_newsletter')->error('%type thrown while getting notification for the node with ID %node_id. @message in %function (line %line of %file).', [
-        '%node_id' => $node->id(),
-      ] + Error::decodeException($e));
+    catch (OperationError $e) {
+      // Unable to determine if the node is known.
+      $this->exceptionLogger->logException($e, 'An error prevents the form from being shown.');
+      // @todo Determine the best place for this output.
+      //   Should the user see this at all?
+      $this->messenger()->addError($this->t('The subscription functionality is currently not available.'));
+      return [];
     }
 
-    if (empty($notifications)) {
+    if (!$node_is_known) {
+      // The node is not available for subscriptions.
       return [];
     }
 
@@ -140,35 +144,20 @@ class NodeSubscribeForm extends FormBase {
     $values = $form_state->getValues();
     $node_id = $form_state->get('node_id');
 
-    // Get user frequency and use if there is.
-    // All node notifications share the same frequency.
-    $subscriptions_response = $this->newsroomClient->subscriptions($values['email']);
-
-    $frequency = match ($subscriptions_response[0]['frequency'] ?? NULL) {
-      'On Publication' => 2101,
-      'Daily' => 2102,
-      'Weekly' => 2103,
-      // Default on publication.
-      default => 2101,
-    };
-
     try {
-      // @todo Add event here to allow to change parameters.
-      $subscribe_response = $this->newsroomClient->nodeNotificationSubscribe($node_id, $values['email'], $frequency);
-      // Save the response (if there is) into form state just in case somebody
-      // needs it.
-      $form_state->set('subscription', $subscribe_response);
-      // @todo Right now we prio the response message since it contains valuable
-      // information, to see if there is any risk and reorder.
-      $this->messenger()->addStatus($this->successfulMessage ?: $this->t('You have been successfully subscribed.'));
+      $this->nodeSubscriptionService->subscribe((int) $node_id, $values['email']);
     }
-    catch (ClientException $e) {
-      $this->messenger()->addError($this->t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
-      $this->logger('oe_newsroom_newsletter')->error('%type thrown while subscribing email %email to the node with ID %node_id: @message in %function (line %line of %file).', [
-        '%email' => $values['email'],
-        '%node_id' => $node_id,
-      ] + Error::decodeException($e));
+    // @todo Distinguish different failure scenarios.
+    catch (OperationError $e) {
+      $this->exceptionLogger->logException($e, 'Failed to node subscribe submit.');
+      $this->messenger()->addWarning($this->t(
+        'An error occured processing the subscription request, please try again later. If the error persists, contact the site owner.',
+      ));
+      return;
     }
+
+    $success_message = $this->successMessage ?: $this->t('You have been successfully subscribed.');
+    $this->messenger()->addStatus($success_message);
   }
 
   /**
@@ -180,7 +169,7 @@ class NodeSubscribeForm extends FormBase {
   protected function getPrivacyUri(): string {
     $uri = $this->config(NewsroomNewsletter::CONFIG_NAME)->get('privacy_uri');
     if (parse_url($uri, PHP_URL_SCHEME) === NULL) {
-      if (strpos($uri, '<front>') === 0) {
+      if (str_starts_with($uri, '<front>')) {
         $uri = '/' . substr($uri, strlen('<front>'));
       }
       $uri = 'internal:' . $uri;

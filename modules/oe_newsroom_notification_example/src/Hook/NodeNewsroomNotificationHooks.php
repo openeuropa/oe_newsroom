@@ -6,10 +6,11 @@ namespace Drupal\oe_newsroom_notification_example\Hook;
 
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Hook\Attribute\Hook;
-use Drupal\Core\Utility\Error;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\node\NodeInterface;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
-use Drupal\oe_newsroom_newsletter\Exception\ClientException;
+use Drupal\oe_newsroom\Domain\NodeNotificationService;
+use Drupal\oe_newsroom\Exception\Domain\OperationFailure;
+use Drupal\oe_newsroom\ExceptionLogger;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
@@ -22,9 +23,11 @@ class NodeNewsroomNotificationHooks {
    * Constructs a new instance.
    */
   public function __construct(
-    protected readonly NewsroomClientInterface $newsroomClient,
+    protected readonly NodeNotificationService $nodeNotificationService,
+    protected readonly MessengerInterface $messenger,
     #[Autowire('logger.channel.oe_newsroom_newsletter')]
     protected readonly LoggerInterface $logger,
+    protected readonly ExceptionLogger $exceptionLogger,
     protected readonly TimeInterface $time,
   ) {}
 
@@ -35,21 +38,15 @@ class NodeNewsroomNotificationHooks {
   public function nodeInsert(NodeInterface $node): void {
     // In order to allow users to subscribe we must create a initial notification.
     try {
-      $this->newsroomClient->nodeNotificationCreate(
-        // Section is the identifier for the templates to be used.
-        // This needs to be changed based on project configured sections in
-        // newsroom.
-        section_id: '17965',
-        notification_title: sprintf('Created: %s', $node->getTitle()),
-        notification_description: sprintf('The following page has been created: %s', $node->getTitle()),
-        notification_url: $node->toUrl()->setAbsolute()->toString(),
-        node_id: $node->id(),
-        node_title: $node->getTitle(),
-        create_date: (string) $this->time->getRequestTime(),
+      $this->nodeNotificationService->notify(
+        $node,
+        sprintf('Created: %s', $node->getTitle()),
+        sprintf('The following page has been created: %s', $node->getTitle()),
+        $node->toUrl(),
       );
     }
-    catch (ClientException $e) {
-      $this->logger->error('%type thrown while creating a node notification in %function (line %line of %file).', [] + Error::decodeException($e->getPrevious()));
+    catch (OperationFailure $e) {
+      $this->exceptionLogger->logException($e, sprintf('Failed to create a notification for node %d in Newsroom, after it was created in Drupal.', $node->id()));
     }
   }
 
@@ -65,18 +62,15 @@ class NodeNewsroomNotificationHooks {
     }
 
     try {
-      $this->newsroomClient->nodeNotificationCreate(
-        section_id: '17965',
-        notification_title: sprintf('Updated: %s', $node->getTitle()),
-        notification_description: sprintf('The following page has been updated: %s', $node->getTitle()),
-        notification_url: $node->toUrl()->setAbsolute()->toString(),
-        node_id: $node->id(),
-        node_title: $node->getTitle(),
-        create_date: (string) $this->time->getRequestTime(),
+      $this->nodeNotificationService->notify(
+        $node,
+        sprintf('Updated: %s', $node->getTitle()),
+        sprintf('The following page has been updated: %s', $node->getTitle()),
+        $node->toUrl(),
       );
     }
-    catch (ClientException $e) {
-      $this->logger->error('%type thrown while creating a node notification in %function (line %line of %file).', [] + Error::decodeException($e->getPrevious()));
+    catch (OperationFailure $e) {
+      $this->exceptionLogger->logException($e, sprintf('Failed to create a notification for node %d in Newsroom, after it was updated in Drupal.', $node->id()));
     }
   }
 
@@ -86,10 +80,10 @@ class NodeNewsroomNotificationHooks {
   #[Hook('node_delete')]
   public function nodeDelete(NodeInterface $node): void {
     try {
-      $this->newsroomClient->nodeNotificationDelete($node->id());
+      $this->nodeNotificationService->forget($node);
     }
-    catch (ClientException $e) {
-      $this->logger->error('%type thrown while creating a node notification in %function (line %line of %file).', [] + Error::decodeException($e->getPrevious()));
+    catch (OperationFailure $e) {
+      $this->exceptionLogger->logException($e, sprintf('Failed to delete node %d in Newsroom, after it was deleted in Drupal.', $node->id()));
     }
   }
 

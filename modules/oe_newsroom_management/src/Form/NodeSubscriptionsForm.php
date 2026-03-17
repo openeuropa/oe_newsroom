@@ -6,20 +6,22 @@ namespace Drupal\oe_newsroom_management\Form;
 
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\DependencyInjection\AutowireTrait;
-use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
-use Drupal\Core\Utility\Error;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
-use Drupal\oe_newsroom_newsletter\Exception\ClientException;
+use Drupal\oe_newsroom\Domain\NodeSubscriptionService;
+use Drupal\oe_newsroom\Exception\Domain\OperationError;
+use Drupal\oe_newsroom\Exception\Domain\OperationFailure;
+use Drupal\oe_newsroom\ExceptionLogger;
+use Drupal\oe_newsroom\Value\NotificationFrequency;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
- * Handles different request for node notifications.
+ * A form to manage node subscriptions.
  */
 final class NodeSubscriptionsForm extends FormBase {
 
@@ -27,8 +29,11 @@ final class NodeSubscriptionsForm extends FormBase {
   use StringTranslationTrait;
 
   public function __construct(
-    protected NewsroomClientInterface $newsroomClient,
     protected EntityTypeManagerInterface $entityTypeManager,
+    protected NodeSubscriptionService $nodeSubscriptionService,
+    protected ExceptionLogger $exceptionLogger,
+    #[Autowire(service: 'logger.channel.oe_newsroom')]
+    protected LoggerInterface $logger,
     MessengerInterface $messenger,
     TranslationInterface $translation,
   ) {
@@ -65,44 +70,36 @@ final class NodeSubscriptionsForm extends FormBase {
       '#weight' => 10,
     ];
 
-    $response = $this->newsroomClient->subscriptions($email);
-    if (!isset($response[0]['subscribedNotificationTopicType'])) {
-      return $form;
+    try {
+      $frequency = $this->nodeSubscriptionService->fetchSubscriptionFrequency($email);
     }
-
-    // Get user frequency and use if there is.
-    // All node notifications share the same frequency.
-    $frequency = 2101;
-    if (isset($response[0]['frequency'])) {
-      $frequency = match($response[0]["frequency"]) {
-        'On Publication' => 2101,
-        'Daily' => 2102,
-        'Weekly' => 2103,
-      };
+    catch (OperationError $e) {
+      $this->exceptionLogger->logException($e, 'A form cannot be shown due to an error');
+      return [];
+    }
+    $subscribed_node_ids = $this->nodeSubscriptionService->fetchSubsribedNodeIds($email);
+    if (!$subscribed_node_ids) {
+      return $form;
     }
 
     $form['frequency'] = [
       '#type' => 'select',
       '#title' => $this->t('Frequency to receive notifications for this site.'),
-      '#options' => [
-        2101 => 'On publication',
-        2102 => 'Daily',
-        2103 => 'Weekly',
-      ],
+      '#options' => $this->nodeSubscriptionService->getFrequencyOptions($this->t(...)),
       '#default_value' => $frequency,
       '#weight' => 0,
     ];
 
+
     $node_storage = $this->entityTypeManager->getStorage('node');
 
-    $subscriptions = $response[0]['subscribedNotificationTopicType'];
     // @todo Here we should filter by the configured app, universe and sv_id.
-    foreach ($subscriptions as $subscription) {
-      $node_id = $subscription['externalId'];
+    foreach ($subscribed_node_ids as $node_id) {
+      /** @var \Drupal\node\NodeInterface|null $node */
       $node = $node_storage->load($node_id);
 
       // @todo What happens if a node is deleted here but not it's corresponding
-      // notification.
+      //   notification?
       // For the moment only display existing nodes.
       if ($node === NULL) {
         continue;
@@ -149,49 +146,46 @@ final class NodeSubscriptionsForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // Updating a node subscription frequency will update all.
-    $frequency = $form_state->getValue('frequency');
-    $nid = $form_state->get('nid');
+    $frequency_value = $form_state->getValue('frequency');
+    $frequency = NotificationFrequency::tryFrom($frequency_value);
+
+    if (!$frequency) {
+      // @todo Should this simply crash the page instead?
+      $this->logger->error(sprintf('Unexpected frequency %s in form submission', var_export($frequency_value, TRUE)));
+      $this->messenger()->addStatus($this->t('An error occured while processing your request. Nothing was updated. You may try again later. If the error persists, contact the site owner.'));
+      return;
+    }
+
     $email = $form_state->get('email');
 
     try {
-      $this->newsroomClient->nodeNotificationSubscribe($nid, $email, (int) $frequency);
-      $this->messenger()->addStatus($this->t('Frequency updated.'));
+      $this->nodeSubscriptionService->setFrequency($email, $frequency);
     }
-    catch (ClientException $e) {
+    catch (OperationFailure $e) {
+      $this->exceptionLogger->logException($e, 'Failed to update the frequency in a form submission.');
       $this->messenger()->addError($this->t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
-      $this->logger('oe_newsroom_newsletter')->error('%type thrown while updating frequency for email %email to the node with ID %node_id: @message and frequency %frequency in %function (line %line of %file).', [
-        '%email' => $email,
-        '%node_id' => $nid,
-        '%frequency' => $frequency,
-      ] + Error::decodeException($e));
+      return;
     }
+
+    $this->messenger()->addStatus($this->t('The frequency was updated.'));
   }
 
   /**
-   * {@inheritdoc}
+   * Submit handler for the delete button.
    */
-  public static function deleteSubmit(array $form, FormStateInterface $form_state): void {
+  public function deleteSubmit(array $form, FormStateInterface $form_state): void {
     $triggering_element = $form_state->getTriggeringElement();
     $test = array_slice($triggering_element['#array_parents'], 0, -1);
     $row = NestedArray::getValue($form, $test);
     $node_id = $row['#node_id'];
-    $newsroomClient = NewsroomClient::create(\Drupal::getContainer());
     $email = $form_state->get('email');
 
     try {
-      $newsroomClient->nodeNotificationUnsubscribe(
-        node_id: $node_id,
-        email: $email,
-        request_authentication: FALSE,
-      );
-      \Drupal::messenger()->addStatus('Subscription succesfully deleted.');
+      $this->nodeSubscriptionService->unsubscribe($node_id, $email);      \Drupal::messenger()->addStatus('Subscription succesfully deleted.');
     }
-    catch (ClientException $e) {
-      \Drupal::messenger()->addError(t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
-      \Drupal::logger('oe_newsroom_newsletter')->error('%type thrown while unsubscribing email %email to the node with ID %node_id: @message in %function (line %line of %file).', [
-        '%email' => $email,
-        '%node_id' => $node_id,
-      ] + Error::decodeException($e));
+    catch (OperationFailure $e) {
+      $this->exceptionLogger->logException($e, 'Failed to unsubscribe in a form submission.');
+      $this->messenger->addError(t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
     }
   }
 
