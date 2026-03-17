@@ -33,27 +33,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
-  /**
-   * The Newsroom newsletter client.
-   *
-   * @var \Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface
-   */
-  protected $newsroomClient;
-
-  /**
-   * The form builder.
-   *
-   * @var \Drupal\Core\Form\FormBuilderInterface
-   */
-  private $formBuilder;
-
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, NewsroomClientInterface $newsroomClient, FormBuilderInterface $form_builder) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    protected readonly NewsroomClientInterface $newsroomClient,
+    private readonly FormBuilderInterface $formBuilder,
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->formBuilder = $form_builder;
-    $this->newsroomClient = $newsroomClient;
   }
 
   /**

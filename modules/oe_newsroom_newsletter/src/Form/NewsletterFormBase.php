@@ -25,42 +25,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 abstract class NewsletterFormBase extends FormBase {
 
-  /**
-   * API for newsroom calls.
-   *
-   * @var \Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface
-   */
-  protected $newsroomClient;
-
-  /**
-   * Account proxy.
-   *
-   * @var \Drupal\Core\Session\AccountProxyInterface
-   */
-  protected $accountProxy;
-
-  /**
-   * Messenger.
-   *
-   * @var \Drupal\Core\Messenger\MessengerInterface
-   */
-  protected $messenger;
-
-  /**
-   * Logger.
-   *
-   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
-   */
-  protected $logger;
-
-  /**
-   * Constructs a NewsletterFormBase object.
-   */
-  public function __construct(NewsroomClientInterface $newsroomClient, AccountProxyInterface $accountProxy, MessengerInterface $messenger, LoggerChannelFactoryInterface $logger) {
-    $this->newsroomClient = $newsroomClient;
-    $this->accountProxy = $accountProxy;
-    $this->messenger = $messenger;
-    $this->logger = $logger;
+  public function __construct(
+    protected readonly NewsroomClientInterface $newsroomClient,
+    protected readonly AccountProxyInterface $accountProxy,
+    MessengerInterface $messenger,
+    protected readonly LoggerChannelFactoryInterface $logger,
+  ) {
+    $this->setMessenger($messenger);
   }
 
   /**

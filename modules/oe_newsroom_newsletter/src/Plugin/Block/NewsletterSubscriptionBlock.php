@@ -42,28 +42,16 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
    */
   protected $privacyUri;
 
-  /**
-   * The Newsroom newsletter client.
-   *
-   * @var \Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface
-   */
-  protected $newsroomClient;
-
-  /**
-   * The form builder.
-   *
-   * @var \Drupal\Core\Form\FormBuilderInterface
-   */
-  private $formBuilder;
-
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, NewsroomClientInterface $newsroomClient, FormBuilderInterface $form_builder, ConfigFactoryInterface $configFactory) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    protected readonly NewsroomClientInterface $newsroomClient,
+    private readonly FormBuilderInterface $formBuilder,
+    ConfigFactoryInterface $configFactory,
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->privacyUri = $configFactory->get(NewsroomNewsletter::CONFIG_NAME)->get('privacy_uri');
-    $this->formBuilder = $form_builder;
-    $this->newsroomClient = $newsroomClient;
   }
 
   /**
