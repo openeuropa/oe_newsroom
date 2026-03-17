@@ -29,11 +29,11 @@ class NodeSubscribeForm extends FormBase {
   use AutowireTrait;
 
   /**
-   * Successful subscription message.
+   * Message to show on successful subscription.
    *
-   * @var string
+   * This is initialized in ->buildForm().
    */
-  protected $successfulMessage;
+  protected string $successfulMessage;
 
   /**
    * {@inheritdoc}
