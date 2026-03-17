@@ -34,7 +34,7 @@ class NodeSubscribeForm extends FormBase {
    *
    * This is initialized in ->buildForm().
    */
-  protected string $successfulMessage;
+  protected string $successMessage;
 
   /**
    * {@inheritdoc}
@@ -54,7 +54,7 @@ class NodeSubscribeForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, ?NodeInterface $node = NULL, string $intro_text = '', string $successful_message = ''): array {
+  public function buildForm(array $form, FormStateInterface $form_state, ?NodeInterface $node = NULL, string $intro_text = '', string $success_message = ''): array {
     if ($node === NULL) {
       return [];
     }
@@ -74,7 +74,7 @@ class NodeSubscribeForm extends FormBase {
       return [];
     }
 
-    $this->successfulMessage = $successful_message;
+    $this->successMessage = $success_message;
     $form_state->set('node_id', $node->id());
     $form['#id'] = Html::getUniqueId($this->getFormId());
 
