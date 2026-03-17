@@ -162,8 +162,6 @@ class SubscribeForm extends NewsletterFormBase {
     try {
       // Let's call the subscription service.
       $response = $this->newsroomClient->subscribe($values['email'], $distribution_lists, [], $values['newsletters_language']);
-      // Set response (if there is) into form state, if somebody need it.
-      $form_state->set('subscription', $response);
 
       $this->messenger->addStatus($this->successfulMessage ?: $response['feedbackMessage'] ?: $this->t('You have been successfully subscribed.'));
     }
