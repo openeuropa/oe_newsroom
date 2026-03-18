@@ -6,6 +6,7 @@ namespace Drupal\oe_newsroom_newsletter\Api;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -14,7 +15,6 @@ use Drupal\oe_newsroom_newsletter\Exception\ClientException;
 use Drupal\oe_newsroom_newsletter\Exception\InvalidResponseException;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Client to access the Newsroom newsletter subscription API.
@@ -27,6 +27,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 final class NewsroomClient implements NewsroomClientInterface, ContainerInjectionInterface {
 
+  use AutowireTrait;
   use StringTranslationTrait;
 
   /**
@@ -94,17 +95,6 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
     $this->universe = $config->get('universe');
     $this->appId = $config->get('app_id');
     $this->svId = $config->get('sv_id');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container): static {
-    return new static(
-      $container->get('config.factory'),
-      $container->get('settings'),
-      $container->get('http_client')
-    );
   }
 
   /**
