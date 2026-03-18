@@ -13,14 +13,13 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Plugin\Context\EntityContextDefinition;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\oe_newsroom\Newsroom;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Form\NodeSubscribeForm;
 use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Block to subscribe to node notifications.
@@ -28,35 +27,21 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 #[Block(
   id: 'oe_newsroom_node_subscription_block',
   admin_label: new TranslatableMarkup('Node subscription block'),
+  context_definitions: [
+    'node' => new EntityContextDefinition('entity:node', new TranslatableMarkup("Node")),
+  ]
 )]
 class NodeSubscriptionBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
-  /**
-   * {@inheritdoc}
-   */
   public function __construct(
     array $configuration,
-    $plugin_id,
-    $plugin_definition,
+    string $plugin_id,
+    array $plugin_definition,
     protected NewsroomClientInterface $newsroomClient,
     protected FormBuilderInterface $formBuilder,
     protected ConfigFactoryInterface $configFactory,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      NewsroomClient::create($container),
-      $container->get('form_builder'),
-      $container->get('config.factory'),
-    );
   }
 
   /**
@@ -85,7 +70,7 @@ class NodeSubscriptionBlock extends BlockBase implements ContainerFactoryPluginI
     $form['successful_subscription_message'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Successful subscription message'),
-      '#description' => $this->t('Text which will shown if the user successfully subscribed to the newsletters. Leave empty to use the message returned by the Newsroom API.'),
+      '#description' => $this->t('Text to show when a user successfully subscribes to a node. Leave empty to use the message returned by the Newsroom API.'),
       '#maxlength' => 255,
       '#default_value' => $this->configuration['successful_subscription_message'],
     ];
@@ -107,6 +92,9 @@ class NodeSubscriptionBlock extends BlockBase implements ContainerFactoryPluginI
    * {@inheritdoc}
    */
   public function build(): array {
+    /** @var \Drupal\node\NodeInterface $node */
+    $node = $this->getContextValue('node');
+
     $privacy_uri = $this->configFactory->get(NewsroomNewsletter::CONFIG_NAME)->get('privacy_uri');
     $sv_id = $this->configFactory->get(Newsroom::CONFIG_NAME)->get('sv_id');
 
@@ -116,6 +104,7 @@ class NodeSubscriptionBlock extends BlockBase implements ContainerFactoryPluginI
 
     return $this->formBuilder->getForm(
       NodeSubscribeForm::class,
+      $node,
       $this->configuration['intro_text'],
       $this->configuration['successful_subscription_message']
     );

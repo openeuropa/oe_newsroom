@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\oe_newsroom_newsletter\Form;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Link;
@@ -15,11 +16,9 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\Core\Utility\Error;
 use Drupal\oe_newsroom\Newsroom;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Exception\ClientException;
 use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Subscribe form.
@@ -30,39 +29,23 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class SubscribeForm extends NewsletterFormBase {
 
-  /**
-   * Language manager.
-   *
-   * @var \Drupal\Core\Language\LanguageManagerInterface
-   */
-  protected $languageManager;
+  use AutowireTrait;
 
   /**
    * Successful subscription message.
    *
-   * @var string
+   * This is initialized in ->buildForm().
    */
-  protected $successfulMessage;
+  protected string $successfulMessage;
 
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct(NewsroomClientInterface $newsroomClient, AccountProxyInterface $accountProxy, MessengerInterface $messenger, LoggerChannelFactoryInterface $logger, LanguageManagerInterface $languageManager) {
+  public function __construct(
+    NewsroomClientInterface $newsroomClient,
+    AccountProxyInterface $accountProxy,
+    MessengerInterface $messenger,
+    LoggerChannelFactoryInterface $logger,
+    protected LanguageManagerInterface $languageManager,
+  ) {
     parent::__construct($newsroomClient, $accountProxy, $messenger, $logger);
-    $this->languageManager = $languageManager;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      NewsroomClient::create($container),
-      $container->get('current_user'),
-      $container->get('messenger'),
-      $container->get('logger.factory'),
-      $container->get('language_manager')
-    );
   }
 
   /**
@@ -179,8 +162,6 @@ class SubscribeForm extends NewsletterFormBase {
     try {
       // Let's call the subscription service.
       $response = $this->newsroomClient->subscribe($values['email'], $distribution_lists, [], $values['newsletters_language']);
-      // Set response (if there is) into form state, if somebody need it.
-      $form_state->set('subscription', $response);
 
       $this->messenger->addStatus($this->successfulMessage ?: $response['feedbackMessage'] ?: $this->t('You have been successfully subscribed.'));
     }
@@ -206,7 +187,7 @@ class SubscribeForm extends NewsletterFormBase {
   protected function getPrivacyUri(string $language): string {
     $uri = $this->config(NewsroomNewsletter::CONFIG_NAME)->get('privacy_uri');
     if (parse_url($uri, PHP_URL_SCHEME) === NULL) {
-      if (strpos($uri, '<front>') === 0) {
+      if (str_starts_with($uri, '<front>')) {
         $uri = '/' . substr($uri, strlen('<front>'));
       }
       $uri = 'internal:' . $uri;

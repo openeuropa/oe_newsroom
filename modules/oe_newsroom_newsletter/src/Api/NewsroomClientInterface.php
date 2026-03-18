@@ -70,9 +70,7 @@ interface NewsroomClientInterface {
    * @return array
    *   The subscriptions list.
    */
-  public function subscriptions(
-    string $email,
-  );
+  public function subscriptions(string $email): array;
 
   /**
    * Create node notification.
@@ -115,7 +113,7 @@ interface NewsroomClientInterface {
    * Subscribe an e-mail to a node notification.
    *
    * @todo For the moment keep this as a separate method since method signature
-   * is quite different. Can we join both?
+   *   is quite different. Can we join both?
    *
    * @param string $node_id
    *   The node ID.
@@ -160,6 +158,9 @@ interface NewsroomClientInterface {
    *
    * @param string $node_id
    *   The node ID.
+   *
+   * @return array
+   *   Decoded response data.
    */
   public function nodeNotificationGet(string $node_id): array;
 

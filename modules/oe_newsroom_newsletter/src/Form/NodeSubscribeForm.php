@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace Drupal\oe_newsroom_newsletter\Form;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Url;
+use Drupal\node\NodeInterface;
 use Drupal\Core\Utility\Error;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Exception\ClientException;
 use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Subscribe form.
@@ -27,12 +27,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class NodeSubscribeForm extends FormBase {
 
+  use AutowireTrait;
+
   /**
-   * Successful subscription message.
+   * Message to show on successful subscription.
    *
-   * @var string
+   * This is initialized in ->buildForm().
    */
-  protected $successfulMessage;
+  protected string $successMessage;
 
   /**
    * {@inheritdoc}
@@ -40,19 +42,7 @@ class NodeSubscribeForm extends FormBase {
   public function __construct(
     protected NewsroomClientInterface $newsroomClient,
     protected LanguageManagerInterface $languageManager,
-  ) {
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    // Inject all required services.
-    return new static(
-      NewsroomClient::create($container),
-      $container->get('language_manager')
-    );
-  }
+  ) {}
 
   /**
    * {@inheritdoc}
@@ -64,11 +54,11 @@ class NodeSubscribeForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, string $intro_text = '', string $successful_message = ''): array {
-    $node = $this->getRouteMatch()->getParameter('node');
+  public function buildForm(array $form, FormStateInterface $form_state, NodeInterface $node = NULL, string $intro_text = '', string $success_message = ''): array {
     if ($node === NULL) {
       return [];
     }
+    assert($node instanceof NodeInterface);
 
     try {
       $notifications = \Drupal::service(NewsroomClientInterface::class)->nodeNotificationGet($node->id());
@@ -84,7 +74,7 @@ class NodeSubscribeForm extends FormBase {
       return [];
     }
 
-    $this->successfulMessage = $successful_message;
+    $this->successMessage = $success_message;
     $form_state->set('node_id', $node->id());
     $form['#id'] = Html::getUniqueId($this->getFormId());
 
@@ -149,26 +139,25 @@ class NodeSubscribeForm extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $values = $form_state->getValues();
     $node_id = $form_state->get('node_id');
-    // Default on publication.
-    $frequency = 2101;
 
     // Get user frequency and use if there is.
     // All node notifications share the same frequency.
-    $response = $this->newsroomClient->subscriptions($values['email']);
-    if (isset($response[0]['frequency'])) {
-      $frequency = match($response[0]["frequency"]) {
-        'On Publication' => 2101,
-        'Daily' => 2102,
-        'Weekly' => 2103,
-      };
-    }
+    $subscriptions_response = $this->newsroomClient->subscriptions($values['email']);
+
+    $frequency = match ($subscriptions_response[0]['frequency'] ?? NULL) {
+      'On Publication' => 2101,
+      'Daily' => 2102,
+      'Weekly' => 2103,
+      // Default on publication.
+      default => 2101,
+    };
 
     try {
       // @todo Add event here to allow to change parameters.
-      $response = $this->newsroomClient->nodeNotificationSubscribe($node_id, $values['email'], $frequency);
+      $subscribe_response = $this->newsroomClient->nodeNotificationSubscribe($node_id, $values['email'], $frequency);
       // Save the response (if there is) into form state just in case somebody
       // needs it.
-      $form_state->set('subscription', $response);
+      $form_state->set('subscription', $subscribe_response);
       // @todo Right now we prio the response message since it contains valuable
       // information, to see if there is any risk and reorder.
       $this->messenger()->addStatus($this->successfulMessage ?: $this->t('You have been successfully subscribed.'));
