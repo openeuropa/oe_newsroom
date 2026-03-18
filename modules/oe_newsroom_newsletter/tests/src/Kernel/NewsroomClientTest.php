@@ -193,8 +193,8 @@ class NewsroomClientTest extends KernelTestBase {
 
     $client->nodeNotificationUnsubscribe(
       node_id: '4',
-      request_authentication: TRUE,
       email: 'chuck@norris.com',
+      request_authentication: TRUE,
       redirect_to: 'Texas',
     );
     $this->assertEquals([
