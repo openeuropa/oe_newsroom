@@ -13,12 +13,10 @@ use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\oe_newsroom\Api\NewsroomConnection;
 use Drupal\oe_newsroom\Newsroom;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Form\SubscribeForm;
 use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a Newsletter subscription block.
@@ -42,42 +40,16 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
    */
   protected $privacyUri;
 
-  /**
-   * The Newsroom newsletter client.
-   *
-   * @var \Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface
-   */
-  protected $newsroomClient;
-
-  /**
-   * The form builder.
-   *
-   * @var \Drupal\Core\Form\FormBuilderInterface
-   */
-  private $formBuilder;
-
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, NewsroomClientInterface $newsroomClient, FormBuilderInterface $form_builder, ConfigFactoryInterface $configFactory) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    protected readonly NewsroomConnection $connection,
+    private readonly FormBuilderInterface $formBuilder,
+    ConfigFactoryInterface $configFactory,
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->privacyUri = $configFactory->get(NewsroomNewsletter::CONFIG_NAME)->get('privacy_uri');
-    $this->formBuilder = $form_builder;
-    $this->newsroomClient = $newsroomClient;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      NewsroomClient::create($container),
-      $container->get('form_builder'),
-      $container->get('config.factory'),
-    );
   }
 
   /**
@@ -193,7 +165,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
    * {@inheritdoc}
    */
   public function build(): array {
-    if (!$this->newsroomClient->isConfigured() || empty($this->configuration['distribution_lists']) || empty($this->privacyUri)) {
+    if (!$this->connection->isConfigured() || empty($this->configuration['distribution_lists']) || empty($this->privacyUri)) {
       return [];
     }
 

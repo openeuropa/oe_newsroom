@@ -6,6 +6,7 @@ namespace Drupal\oe_newsroom_newsletter\Api;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -14,7 +15,6 @@ use Drupal\oe_newsroom_newsletter\Exception\ClientException;
 use Drupal\oe_newsroom_newsletter\Exception\InvalidResponseException;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Client to access the Newsroom newsletter subscription API.
@@ -27,6 +27,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 final class NewsroomClient implements NewsroomClientInterface, ContainerInjectionInterface {
 
+  use AutowireTrait;
   use StringTranslationTrait;
 
   /**
@@ -65,11 +66,11 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
   protected $appId;
 
   /**
-   * Http client to send http messages.
+   * The service ID used for node notifications.
    *
-   * @var \GuzzleHttp\Client
+   * @var string
    */
-  protected $httpClient;
+  protected $svId;
 
   /**
    * Client constructor.
@@ -81,7 +82,11 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
    * @param \GuzzleHttp\ClientInterface $httpClient
    *   Http client to send requests to the API.
    */
-  protected function __construct(ConfigFactoryInterface $configFactory, Settings $settings, ClientInterface $httpClient) {
+  public function __construct(
+    ConfigFactoryInterface $configFactory,
+    Settings $settings,
+    protected readonly ClientInterface $httpClient,
+  ) {
     $config = $configFactory->get(Newsroom::CONFIG_NAME);
 
     $this->privateKey = $settings->get('oe_newsroom')['newsroom_api_key'] ?? NULL;
@@ -89,18 +94,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
     $this->normalised = $config->get('normalised');
     $this->universe = $config->get('universe');
     $this->appId = $config->get('app_id');
-    $this->httpClient = $httpClient;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container): NewsroomClient {
-    return new static(
-      $container->get('config.factory'),
-      $container->get('settings'),
-      $container->get('http_client')
-    );
+    $this->svId = $config->get('sv_id');
   }
 
   /**
@@ -116,6 +110,19 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
   }
 
   /**
+   * Generates a multiple parameters key.
+   *
+   * @param array $params
+   *   The parameters to be used for the key.
+   *
+   * @return string
+   *   Generated communication key.
+   */
+  protected function generateComposedKey(array $params): string {
+    return hash($this->hashMethod, implode($params) . $this->privateKey);
+  }
+
+  /**
    * Generates a key from the e-mail and from the private key.
    *
    * @param string $email
@@ -125,6 +132,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
    *   Generated communication key.
    */
   protected function generateKey(string $email): string {
+    // @todo handle type parameters for key the validation.
     if ($this->normalised) {
       return hash($this->hashMethod, mb_strtolower($email) . $this->privateKey);
     }
@@ -235,6 +243,203 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
 
     // If all were succeeded, we return true.
     return TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function subscriptions(string $email): array {
+    // @todo For the moment keep this clean only with the needed parameters to
+    // get the subscriptions, the endpoint allows more like subscribing to
+    // newsletters.
+    $query = [
+      'key' => $this->generateKey($email),
+      'app' => $this->appId,
+      // @todo Should this be the normalized email?
+      'user_email' => $email,
+    ];
+
+    try {
+      $result = $this->httpClient->request('GET', self::API_URL . '/subscriptions', ['query' => $query]);
+    }
+    catch (GuzzleException $exception) {
+      throw new ClientException('An error has occurred during the subscriptions request.', 0, $exception);
+    }
+
+    // @todo Handle different cases.
+    $data = Json::decode((string) $result->getBody());
+
+    return $data;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function nodeNotificationCreate(
+    string $section_id,
+    string $notification_title,
+    string $notification_description,
+    string $notification_url,
+    string $node_id,
+    string $node_title,
+    // Is this required and what is the expected format?
+    string $create_date = '',
+  ): void {
+    $payload = [
+      'key' => $this->generateComposedKey([
+        $this->svId,
+        $section_id,
+        $notification_title,
+        $notification_description,
+        $notification_url,
+        $node_id,
+      ]),
+      'app' => $this->appId,
+      'item' => [
+        'sv_id' => $this->svId,
+        'section_id' => $section_id,
+        'notification_title' => $notification_title,
+        'notification_description' => $notification_description,
+        'notification_URL' => $notification_url,
+        'node_id' => $node_id,
+        'node_title' => $node_title,
+        // Is this really mandatory?
+        'createDate' => $create_date,
+      ],
+    ];
+
+    try {
+      $this->httpClient->request('POST', self::API_URL . '/node-notification/create', ['json' => $payload]);
+    }
+    catch (GuzzleException $exception) {
+      throw new ClientException('An error has occurred during the node notification create request.', previous: $exception);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function nodeNotificationDelete(string $node_id): void {
+    $payload = [
+      'key' => $this->generateComposedKey([
+        $this->svId,
+        $node_id,
+      ]),
+      'app' => $this->appId,
+      'item' => [
+        'sv_id' => $this->svId,
+        'node_id' => $node_id,
+      ],
+    ];
+
+    try {
+      $this->httpClient->request('POST', self::API_URL . '/node-notification/delete', ['json' => $payload]);
+    }
+    catch (GuzzleException $exception) {
+      throw new ClientException('An error has occurred during the node notification delete request.', 0, $exception);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function nodeNotificationSubscribe(
+    string $node_id,
+    string $email,
+    // Add constants for the frequency?
+    int $frequency,
+    bool $nomail = FALSE,
+  ):array {
+    $payload = [
+      'key' => $this->generateKey(
+        $this->normalised ? mb_strtolower($email) : $email,
+      ),
+      'app' => $this->appId,
+      'subscription' => [
+        'sv_id' => $this->svId,
+        'email' => $email,
+        'frequency' => $frequency,
+        'node_id' => $node_id,
+        'nomail' => $nomail,
+      ],
+    ];
+
+    try {
+      $result = $this->httpClient->request('POST', self::API_URL . '/subscribe', ['json' => $payload]);
+    }
+    catch (GuzzleException $exception) {
+      throw new ClientException('An error has occurred during the node subscribe request.', 0, $exception);
+    }
+
+    // @todo Handle different cases.
+    $data = Json::decode((string) $result->getBody());
+
+    return $data;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function nodeNotificationUnsubscribe(
+    string $node_id,
+    string $email,
+    bool $request_authentication = FALSE,
+    ?string $redirect_to = '',
+  ): void {
+    $payload = [
+      'key' => $this->generateKey(
+        $this->normalised ? mb_strtolower($email) : $email,
+      ),
+      'app' => $this->appId,
+      'subscription' => [
+        'sv_id' => $this->svId,
+        'node_id' => $node_id,
+        // @todo Should this be the original or the normalized email?
+        'email' => $email,
+      ],
+    ];
+
+    if ($request_authentication) {
+      if ($redirect_to === NULL || empty($redirect_to)) {
+        throw new ClientException('Missing required parameter.');
+      }
+      $payload['subscription']['request_authentication'] = TRUE;
+      $payload['subscription']['redirect_to'] = $redirect_to;
+    }
+
+    try {
+      $this->httpClient->request('POST', self::API_URL . '/unsubscribe/node-notification', ['json' => $payload]);
+    }
+    catch (GuzzleException $exception) {
+      throw new ClientException('An error has occurred during the node unsubscribe request.', 0, $exception);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function nodeNotificationGet(string $node_id): array {
+    $query = [
+      'key' => $this->generateComposedKey([
+        $this->svId,
+        $node_id,
+      ]),
+      'app' => $this->appId,
+      'sv_id' => $this->svId,
+      'node_id' => $node_id,
+    ];
+
+    try {
+      $result = $this->httpClient->request('GET', self::API_URL . '/node-notification/get', ['query' => $query]);
+    }
+    catch (GuzzleException $exception) {
+      throw new ClientException('An error has occurred duting the get notifications request.', 0, $exception);
+    }
+
+    // @todo Handle different cases.
+    $data = Json::decode((string) $result->getBody());
+
+    return $data;
   }
 
 }

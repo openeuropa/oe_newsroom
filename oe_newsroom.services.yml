@@ -1,0 +1,16 @@
+services:
+  _defaults:
+    autowire: true
+  Drupal\oe_newsroom\Api\ApiClient: {}
+  Drupal\oe_newsroom\Api\NewsletterSubscriptionApi: {}
+  Drupal\oe_newsroom\Api\NewsroomConnection:
+    factory: ['Drupal\oe_newsroom\Api\NewsroomConnection', create]
+  Drupal\oe_newsroom\Api\NodeNotificationApi: {}
+  Drupal\oe_newsroom\Api\NodeSubscriptionApi: {}
+  Drupal\oe_newsroom\Domain\NodeNotificationService:
+    factory: ['Drupal\oe_newsroom\Domain\NodeNotificationService', create]
+  Drupal\oe_newsroom\Domain\NodeSubscriptionService: {}
+  Drupal\oe_newsroom\ExceptionLogger: {}
+  logger.channel.oe_newsroom:
+    parent: logger.channel_base
+    arguments: ['oe_newsroom']

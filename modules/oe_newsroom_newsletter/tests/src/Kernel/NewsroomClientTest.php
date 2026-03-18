@@ -61,6 +61,7 @@ class NewsroomClientTest extends KernelTestBase {
       'app_id' => $app_id,
       'hash_method' => 'md5',
       'normalised' => FALSE,
+      'sv_id' => '1234',
     ]);
 
     $client = NewsroomClient::create($this->container);
@@ -139,6 +140,88 @@ class NewsroomClientTest extends KernelTestBase {
       'sv_id' => '1111',
       'user_email' => 'fake@example.com',
     ], $this->getRequestQueryString($this->assertSingleRequestExecuted()));
+
+    $client->nodeNotificationCreate(
+      section_id: '4321',
+      notification_title: 'The title of the notification',
+      notification_description: 'The description of the notification',
+      notification_url: 'https://www.mytestsite.com',
+      node_id: '1',
+      node_title: 'The node title',
+      create_date: 'A date',
+    );
+    $this->assertEquals([
+      'key' => '3ba8329a798305978cddb6b0513b2b7649bdc2436b7716513fab786621daadfa',
+      'app' => $app_id,
+      'item' => [
+        'sv_id' => '1234',
+        'section_id' => '4321',
+        'notification_title' => 'The title of the notification',
+        'notification_description' => 'The description of the notification',
+        'notification_URL' => 'https://www.mytestsite.com',
+        'node_id' => '1',
+        'node_title' => 'The node title',
+        'createDate' => 'A date',
+      ],
+    ], $this->getRequestBody($this->assertSingleRequestExecuted()));
+
+    $client->nodeNotificationDelete(
+      node_id: '2',
+    );
+    $this->assertEquals([
+      'key' => 'f7bd1f7469ac90a4a901eb45f3f9da2f8f4ba776e971f0c1dbeff12477a4ee4a',
+      'app' => $app_id,
+      'item' => [
+        'sv_id' => '1234',
+        'node_id' => '2',
+      ],
+    ], $this->getRequestBody($this->assertSingleRequestExecuted()));
+
+    $client->nodeNotificationUnsubscribe(
+      node_id: '3',
+      email: 'fake@example.com',
+    );
+    $this->assertEquals([
+      'key' => '364adf954e870cf0eef2781fe6244643d67cc466b16c2b37276c257d9121bae2',
+      'app' => $app_id,
+      'subscription' => [
+        'sv_id' => '1234',
+        'node_id' => '3',
+        'email' => 'fake@example.com',
+      ],
+    ], $this->getRequestBody($this->assertSingleRequestExecuted()));
+
+    $client->nodeNotificationUnsubscribe(
+      node_id: '4',
+      email: 'chuck@norris.com',
+      request_authentication: TRUE,
+      redirect_to: 'Texas',
+    );
+    $this->assertEquals([
+      'key' => 'c52538f2670c3595e2df43e6c90e8549657af7245db10f371682bde8d01d86ab',
+      'app' => $app_id,
+      'subscription' => [
+        'sv_id' => '1234',
+        'node_id' => '4',
+        'request_authentication' => TRUE,
+        'email' => 'chuck@norris.com',
+        'redirect_to' => 'Texas',
+      ],
+    ], $this->getRequestBody($this->assertSingleRequestExecuted()));
+
+    $client->nodeNotificationGet(
+      node_id: '9',
+    );
+    $this->assertEquals(
+      implode([
+        'http://ec.europa.eu/newsroom/api/v1/node-notification/get?',
+        'key=0fe60f11de7f40e1ba84e879de5bbd2bb59fa36a89974651b413de2e3d3e816c&',
+        "app=$app_id&",
+        'sv_id=1234&',
+        'node_id=9',
+      ]),
+      $this->assertSingleRequestExecuted()->getUri()->__toString()
+    );
   }
 
   /**

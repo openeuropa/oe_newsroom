@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\oe_newsroom_newsletter\Form;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Link;
@@ -13,13 +14,10 @@ use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
-use Drupal\Core\Utility\Error;
-use Drupal\oe_newsroom\Newsroom;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
-use Drupal\oe_newsroom_newsletter\Exception\ClientException;
+use Drupal\oe_newsroom\Domain\NewsletterSubscribeService;
+use Drupal\oe_newsroom\Exception\Domain\OperationFailure;
+use Drupal\oe_newsroom\ExceptionLogger;
 use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Subscribe form.
@@ -30,39 +28,24 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class SubscribeForm extends NewsletterFormBase {
 
-  /**
-   * Language manager.
-   *
-   * @var \Drupal\Core\Language\LanguageManagerInterface
-   */
-  protected $languageManager;
+  use AutowireTrait;
 
   /**
    * Successful subscription message.
    *
-   * @var string
+   * This is initialized in ->buildForm().
    */
-  protected $successfulMessage;
+  protected string $successfulMessage;
 
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct(NewsroomClientInterface $newsroomClient, AccountProxyInterface $accountProxy, MessengerInterface $messenger, LoggerChannelFactoryInterface $logger, LanguageManagerInterface $languageManager) {
-    parent::__construct($newsroomClient, $accountProxy, $messenger, $logger);
-    $this->languageManager = $languageManager;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      NewsroomClient::create($container),
-      $container->get('current_user'),
-      $container->get('messenger'),
-      $container->get('logger.factory'),
-      $container->get('language_manager')
-    );
+  public function __construct(
+    protected NewsletterSubscribeService $newsletterSubscribeService,
+    AccountProxyInterface $accountProxy,
+    MessengerInterface $messenger,
+    LoggerChannelFactoryInterface $logger,
+    protected LanguageManagerInterface $languageManager,
+    protected ExceptionLogger $exceptionLogger,
+  ) {
+    parent::__construct($accountProxy, $messenger, $logger);
   }
 
   /**
@@ -178,19 +161,13 @@ class SubscribeForm extends NewsletterFormBase {
 
     try {
       // Let's call the subscription service.
-      $response = $this->newsroomClient->subscribe($values['email'], $distribution_lists, [], $values['newsletters_language']);
-      // Set response (if there is) into form state, if somebody need it.
-      $form_state->set('subscription', $response);
+      $response = $this->newsletterSubscribeService->subscribe($values['email'], $distribution_lists, $values['newsletters_language']);
 
-      $this->messenger->addStatus($this->successfulMessage ?: $response['feedbackMessage'] ?: $this->t('You have been successfully subscribed.'));
+      $this->messenger->addStatus($this->successfulMessage ?: $response->feedbackMessage ?: $this->t('You have been successfully subscribed.'));
     }
-    catch (ClientException $e) {
+    catch (OperationFailure $e) {
       $this->messenger->addError($this->t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
-      $this->logger->get('oe_newsroom_newsletter')->error('%type thrown while subscribing email %email to the newsletter(s) with ID(s) %sv_ids and universe %universe: @message in %function (line %line of %file).', [
-        '%email' => $values['email'],
-        '%universe' => $this->config(Newsroom::CONFIG_NAME)->get('universe'),
-        '%sv_ids' => implode(',', $distribution_lists),
-      ] + Error::decodeException($e));
+      $this->exceptionLogger->logException($e, 'Failed to subscribe to newsletters on form submit.');
     }
   }
 
@@ -206,7 +183,7 @@ class SubscribeForm extends NewsletterFormBase {
   protected function getPrivacyUri(string $language): string {
     $uri = $this->config(NewsroomNewsletter::CONFIG_NAME)->get('privacy_uri');
     if (parse_url($uri, PHP_URL_SCHEME) === NULL) {
-      if (strpos($uri, '<front>') === 0) {
+      if (str_starts_with($uri, '<front>')) {
         $uri = '/' . substr($uri, strlen('<front>'));
       }
       $uri = 'internal:' . $uri;
