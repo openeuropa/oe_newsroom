@@ -65,13 +65,6 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
   protected $appId;
 
   /**
-   * Http client to send http messages.
-   *
-   * @var \GuzzleHttp\Client
-   */
-  protected $httpClient;
-
-  /**
    * The service ID used for node notifications.
    *
    * @var string
@@ -88,7 +81,11 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
    * @param \GuzzleHttp\ClientInterface $httpClient
    *   Http client to send requests to the API.
    */
-  public function __construct(ConfigFactoryInterface $configFactory, Settings $settings, ClientInterface $httpClient) {
+  public function __construct(
+    ConfigFactoryInterface $configFactory,
+    Settings $settings,
+    protected readonly ClientInterface $httpClient,
+  ) {
     $config = $configFactory->get(Newsroom::CONFIG_NAME);
 
     $this->privateKey = $settings->get('oe_newsroom')['newsroom_api_key'] ?? NULL;
@@ -97,7 +94,6 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
     $this->universe = $config->get('universe');
     $this->appId = $config->get('app_id');
     $this->svId = $config->get('sv_id');
-    $this->httpClient = $httpClient;
   }
 
   /**
