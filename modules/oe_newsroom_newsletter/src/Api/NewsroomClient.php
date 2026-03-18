@@ -403,7 +403,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
   public function nodeNotificationUnsubscribe(
     string $node_id,
     string $email,
-    bool $request_authentication = TRUE,
+    bool $request_authentication = FALSE,
     ?string $redirect_to = '',
   ): void {
     $payload = [
