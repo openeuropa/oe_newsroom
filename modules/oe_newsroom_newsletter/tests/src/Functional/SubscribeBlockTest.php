@@ -10,6 +10,7 @@ use Drupal\Core\Url;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\oe_newsroom\GetSelectOptionsTrait;
+use Drupal\Tests\oe_newsroom\Helper\DbLog\DbLogTestReader;
 use Drupal\Tests\oe_newsroom\NewsroomConfigurationTestTrait;
 use Drupal\Tests\oe_newsroom\NewsroomTestTrait;
 use Drupal\Tests\oe_newsroom_newsletter\Traits\NewsroomClientMockTrait;
@@ -40,12 +41,27 @@ class SubscribeBlockTest extends BrowserTestBase {
   protected static $modules = [
     'language',
     'oe_newsroom_newsletter_mock',
+    'dblog',
   ];
 
   /**
    * {@inheritdoc}
    */
   protected $defaultTheme = 'stark';
+
+  protected DbLogTestReader $logReader;
+
+  protected function setUp(): void {
+    parent::setUp();
+
+    $this->logReader = new DbLogTestReader();
+  }
+
+  protected function tearDown(): void {
+    $this->logReader->assertNoUnreadFailures();
+
+    parent::tearDown();
+  }
 
   /**
    * Tests the block configuration form.
@@ -262,6 +278,9 @@ class SubscribeBlockTest extends BrowserTestBase {
 
     $page->fillField('Your e-mail', 'test@example.com');
     $block_wrapper->pressButton('Subscribe');
+
+    $this->logReader->assertNoUnreadFailures();
+
     // Since the block has no success message configured, the one contained in
     // the (mocked) Newsroom response is returned.
     $assert_session->pageTextContains('Thanks for signing up to the service: Test Newsletter Service');
