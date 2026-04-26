@@ -64,7 +64,7 @@ class NewsletterSubscribeService {
    * @throws \Drupal\oe_newsroom\Exception\Domain\OperationFailure
    *   Failed to unsubscribe.
    *
-   * @todo Distinguish results.
+   * @todo Detect "already unsubscribed" case.
    */
   public function unsubscribe(string $email, array $distribution_list_ids, string $language = NULL): void {
     foreach ($distribution_list_ids as $distribution_list_id) {
