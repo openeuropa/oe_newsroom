@@ -68,6 +68,8 @@ class NodeNotificationService {
       );
     }
     catch (ApiException $e) {
+      // This case also includes NotFoundException, which typically means that
+      // the service id is wrong, which counts as misconfiguration.
       throw new OperationError(sprintf('Failed to create notification for node %s.', $node->id()), previous: $e);
     }
   }
@@ -86,6 +88,8 @@ class NodeNotificationService {
       $this->nodeNotificationApi->nodeNotificationDelete($node->id());
     }
     catch (ApiException $e) {
+      // This case also includes NotFoundException, which typically means that
+      // the service id is wrong, which counts as misconfiguration.
       throw new OperationError(sprintf('Failed to forget notifications for node %d', $node->id()), previous: $e);
     }
   }
@@ -99,14 +103,18 @@ class NodeNotificationService {
    * @return array
    *
    * @throws \Drupal\oe_newsroom\Exception\Domain\OperationError
+   *
+   * @todo This is WIP, currently it is not used anywhere.
    */
   public function fetch(NodeInterface $node): array {
     try {
       $response = $this->nodeNotificationApi->nodeNotificationGet((int) $node->id());
     }
+    // @todo Handle NotFoundException separately.
     catch (ApiException $e) {
       throw new OperationError(sprintf('Failed to fetch notifications for node %d', $node->id()), previous: $e);
     }
+    // @todo Return a structured response object.
     return $response;
   }
 
