@@ -13,7 +13,6 @@ use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 
 /**
  * Base form for subscription and unsubscription operations.
@@ -27,7 +26,6 @@ abstract class NewsletterFormBase extends FormBase {
   use AutowireTrait;
 
   public function __construct(
-    protected readonly NewsroomClientInterface $newsroomClient,
     protected readonly AccountProxyInterface $accountProxy,
     MessengerInterface $messenger,
     protected readonly LoggerChannelFactoryInterface $logger,

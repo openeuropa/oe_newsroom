@@ -16,8 +16,8 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\Context\EntityContextDefinition;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\oe_newsroom\Api\NewsroomConnection;
 use Drupal\oe_newsroom\Newsroom;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Form\NodeSubscribeForm;
 use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
 
@@ -37,7 +37,7 @@ class NodeSubscriptionBlock extends BlockBase implements ContainerFactoryPluginI
     array $configuration,
     string $plugin_id,
     array $plugin_definition,
-    protected NewsroomClientInterface $newsroomClient,
+    protected readonly NewsroomConnection $connection,
     protected FormBuilderInterface $formBuilder,
     protected ConfigFactoryInterface $configFactory,
   ) {
@@ -98,7 +98,7 @@ class NodeSubscriptionBlock extends BlockBase implements ContainerFactoryPluginI
     $privacy_uri = $this->configFactory->get(NewsroomNewsletter::CONFIG_NAME)->get('privacy_uri');
     $sv_id = $this->configFactory->get(Newsroom::CONFIG_NAME)->get('sv_id');
 
-    if (!$this->newsroomClient->isConfigured() || empty($privacy_uri) || empty($sv_id)) {
+    if (!$this->connection->isConfigured() || empty($privacy_uri) || empty($sv_id)) {
       return [];
     }
 
