@@ -125,15 +125,15 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
         case '/newsroom/api/v1/node-notification/create':
         case '/newsroom/api/v1/node-notification/delete':
         case '/newsroom/api/v1/unsubscribe/node-notification':
-          $response = new Response();
+          $response = $this->createResponse();
           break;
 
         case '/newsroom/api/v1/node-notification/get':
-          $response = new Response(body: '[]');
+          $response = $this->createResponse();
           break;
 
         default:
-          $response = new Response(404);
+          $response = $this->createResponse(404);
       }
     }
 
@@ -143,6 +143,31 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
     $this->state->set(self::STATE_KEY_RESPONSES, $response_history);
 
     return $response;
+  }
+
+  /**
+   * Creates a json response object.
+   *
+   * @param int $status
+   *   The response status code.
+   * @param string|array $data
+   *   The data to encode as json.
+   * @param array $headers
+   *   Additional headers.
+   *
+   * @return \GuzzleHttp\Psr7\Response
+   *   A response object
+   *
+   * @throws \JsonException
+   *   Failure to encode the data as json.
+   *   This should never occur for the typical data sent to this method.
+   */
+  protected function createResponse(int $status = 200, string|array $data = [], array $headers = []) {
+    return new Response(
+      $status,
+      $headers + ['content-type' => 'application/json'],
+      json_encode($data, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR),
+    );
   }
 
   /**
@@ -287,7 +312,7 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
     $data = Json::decode((string) $request->getBody());
 
     if (isset($data['subscription']['node_id'])) {
-      return new Response();
+      return $this->createResponse();
     }
 
     $universe = $data['subscription']['universeAcronym'];
@@ -318,7 +343,7 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
     $this->state->set(self::STATE_KEY_SUBSCRIPTIONS, $subscriptions);
     $this->state->set(self::STATE_KEY_UNIVERSE, $universes);
 
-    return new Response(200, [], Json::encode($current_subs));
+    return $this->createResponse(200, $current_subs);
   }
 
   /**
