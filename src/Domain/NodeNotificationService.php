@@ -7,7 +7,7 @@ namespace Drupal\oe_newsroom\Domain;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
-use Drupal\oe_newsroom\Api\NodeNotificationApi;
+use Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints;
 use Drupal\oe_newsroom\Exception\Api\ApiException;
 use Drupal\oe_newsroom\Exception\Domain\OperationError;
 
@@ -17,13 +17,13 @@ use Drupal\oe_newsroom\Exception\Domain\OperationError;
 class NodeNotificationService {
 
   public function __construct(
-    protected readonly NodeNotificationApi $nodeNotificationApi,
+    protected readonly NodeNotificationEndpoints $nodeNotificationApi,
     protected readonly TimeInterface $time,
     protected readonly int $sectionId,
   ) {}
 
   public static function create(
-    NodeNotificationApi $nodeNotificationApi,
+    NodeNotificationEndpoints $nodeNotificationApi,
     TimeInterface $time,
   ): static {
     return new static(

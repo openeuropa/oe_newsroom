@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Drupal\oe_newsroom\Domain;
 
 use Drupal\node\NodeInterface;
-use Drupal\oe_newsroom\Api\NodeNotificationApi;
-use Drupal\oe_newsroom\Api\NodeSubscriptionApi;
+use Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints;
+use Drupal\oe_newsroom\Endpoint\NodeSubscriptionEndpoints;
 use Drupal\oe_newsroom\Exception\Api\ApiException;
 use Drupal\oe_newsroom\Exception\Domain\OperationDenied;
 use Drupal\oe_newsroom\Exception\Domain\OperationError;
@@ -19,8 +19,8 @@ use Drupal\oe_newsroom\Value\NotificationFrequency;
 class NodeSubscriptionService {
 
   public function __construct(
-    protected readonly NodeSubscriptionApi $nodeSubscriptionApi,
-    protected readonly NodeNotificationApi $nodeNotificationApi,
+    protected readonly NodeSubscriptionEndpoints $nodeSubscriptionApi,
+    protected readonly NodeNotificationEndpoints $nodeNotificationApi,
   ) {}
 
   /**

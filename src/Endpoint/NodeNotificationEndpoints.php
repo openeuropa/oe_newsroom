@@ -2,14 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Drupal\oe_newsroom\Api;
+namespace Drupal\oe_newsroom\Endpoint;
 
+use Drupal\oe_newsroom\Api\ApiClient;
 use Drupal\oe_newsroom\Exception\Api\ApiException;
 
 /**
  * Exposes endpoints related to node notifications.
  */
-class NodeNotificationApi {
+class NodeNotificationEndpoints {
 
   public function __construct(
     protected readonly ApiClient $apiClient,

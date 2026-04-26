@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Drupal\oe_newsroom\Api;
+namespace Drupal\oe_newsroom\Endpoint;
+
+use Drupal\oe_newsroom\Api\ApiClient;
 
 /**
  * Service to access the Newsroom newsletter subscription API.
  */
-final class NewsletterSubscriptionApi {
+final class NewsletterSubscriptionEndpoints {
 
   public function __construct(
     protected readonly ApiClient $apiClient,

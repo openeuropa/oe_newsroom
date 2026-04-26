@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\oe_newsroom\Domain;
 
-use Drupal\oe_newsroom\Api\NewsletterSubscriptionApi;
+use Drupal\oe_newsroom\Endpoint\NewsletterSubscriptionEndpoints;
 use Drupal\oe_newsroom\Exception\Api\ApiException;
 use Drupal\oe_newsroom\Exception\Domain\OperationError;
 use Drupal\oe_newsroom\Value\NewsletterSubscribeResult;
@@ -15,7 +15,7 @@ use Drupal\oe_newsroom\Value\NewsletterSubscribeResult;
 class NewsletterSubscribeService {
 
   public function __construct(
-    protected readonly NewsletterSubscriptionApi $apiClient,
+    protected readonly NewsletterSubscriptionEndpoints $apiClient,
   ) {}
 
   /**

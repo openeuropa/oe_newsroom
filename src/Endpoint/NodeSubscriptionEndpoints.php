@@ -2,14 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Drupal\oe_newsroom\Api;
+namespace Drupal\oe_newsroom\Endpoint;
 
+use Drupal\oe_newsroom\Api\ApiClient;
 use Drupal\oe_newsroom\Value\NotificationFrequency;
 
 /**
  * Exposes endpoints related to node subscriptions.
  */
-class NodeSubscriptionApi {
+class NodeSubscriptionEndpoints {
 
   public function __construct(
     protected readonly ApiClient $apiClient,
