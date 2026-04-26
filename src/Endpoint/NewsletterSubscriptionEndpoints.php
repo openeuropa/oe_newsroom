@@ -6,6 +6,8 @@ namespace Drupal\oe_newsroom\Endpoint;
 
 use Drupal\oe_newsroom\Api\ApiClient;
 
+use Drupal\oe_newsroom\Exception\Api\NotFoundException;
+
 /**
  * Service to access the Newsroom newsletter subscription API.
  */
@@ -63,7 +65,13 @@ final class NewsletterSubscriptionEndpoints {
       $payload['subscription']['topicExtId'] = implode(',', $topicExtId);
     }
 
-    return $this->apiClient->postJson('subscribe', $payload, [$normalized_email], FALSE);
+    try {
+      return $this->apiClient->postJson('subscribe', $payload, [$normalized_email], FALSE);
+    }
+    catch (NotFoundException $e) {
+      // @todo Detect if the newsletter id was not found, or something else was not found.
+      throw $e;
+    }
   }
 
   /**

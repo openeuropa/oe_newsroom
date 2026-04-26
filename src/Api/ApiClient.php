@@ -5,8 +5,13 @@ declare(strict_types=1);
 namespace Drupal\oe_newsroom\Api;
 
 use Drupal\Component\Serialization\Json;
-use Drupal\oe_newsroom\Exception\Api\ApiException;
-use Drupal\oe_newsroom\Exception\Api\ApiResponseException;
+use Drupal\Component\Serialization\Yaml;
+use Drupal\oe_newsroom\Exception\Api\ApiRequestException;
+use Drupal\oe_newsroom\Exception\Api\BadRequestException;
+use Drupal\oe_newsroom\Exception\Api\FailureResponseException;
+use Drupal\oe_newsroom\Exception\Api\MalformedResponseException;
+use Drupal\oe_newsroom\Exception\Api\NotFoundException;
+use Drupal\oe_newsroom\Exception\Api\UnauthorizedException;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -117,19 +122,8 @@ class ApiClient {
     $uri = $this->uriFactory->createUri($endpoint_url)
       ->withQuery(http_build_query($query));
     $request = $this->requestFactory->createRequest('GET', $uri);
-    try {
-      $response = $this->httpClient->sendRequest($request);
-    }
-    catch (ClientExceptionInterface $e) {
-      // @todo Handle different cases.
-      // @todo Does anything need to be sanitized for security?
-      throw new ApiException(sprintf(
-        'A GET request to %s failed with %s.',
-        $this->connection->url . '/' . $endpoint_path,
-        $e->getCode(),
-      ), previous: $e);
-    }
-    return $this->extractJsonFromResponse($response, $request, 'GET', $endpoint_url);
+    $response = $this->sendRequest($request, $endpoint_path);
+    return $this->processResponse($response, $request, $endpoint_url);
   }
 
   /**
@@ -157,6 +151,29 @@ class ApiClient {
    *   standardized.
    */
   public function postJson(string $endpoint_path, array $payload, array $signature_input, bool $pass_app_id = TRUE): array|string {
+    $request = $this->createPostRequest($endpoint_path, $payload, $signature_input, $pass_app_id);
+    $response = $this->sendRequest($request, $endpoint_path);
+    return $this->processResponse($response, $request, $endpoint_path);
+  }
+
+  /**
+   * Creates a POST request object.
+   *
+   * @param string $endpoint_path
+   *   The endpoint path.
+   * @param array $payload
+   *   The POST payload.
+   * @param array<string> $signature_input
+   *   Values that will be part of the signature key.
+   * @param bool $pass_app_id
+   *   TRUE to pass an 'app' parameter with the app id.
+   *   FALSE to not pass this parameter. This is to support endpoints with a
+   *   non-standard signature.
+   *
+   * @return \Psr\Http\Message\RequestInterface
+   *   The request object.
+   */
+  protected function createPostRequest(string $endpoint_path, array $payload, array $signature_input, bool $pass_app_id = TRUE): RequestInterface {
     $payload['key'] = $this->generateComposedKey($signature_input);
     if ($pass_app_id) {
       $payload['app'] = $this->connection->appId;
@@ -165,33 +182,50 @@ class ApiClient {
     $body = $this->streamFactory->createStream($json);
     $endpoint_url = $this->connection->url . '/' . $endpoint_path;
     $uri = $this->uriFactory->createUri($endpoint_url);
-    $request = $this->requestFactory->createRequest('POST', $uri)
+    return $this->requestFactory->createRequest('POST', $uri)
       ->withHeader('Content-Type', 'application/json')
       ->withBody($body);
-    try {
-      $response = $this->httpClient->sendRequest($request);
-    }
-    catch (ClientExceptionInterface $e) {
-      // @todo Handle different cases.
-      // @todo Does anything need to be sanitized for security?
-      throw new ApiException(sprintf(
-        'A POST request to %s failed with %s.',
-        $endpoint_url,
-        $e->getCode(),
-      ), previous: $e);
-    }
-    return $this->extractJsonFromResponse($response, $request, 'POST', $endpoint_url);
   }
 
   /**
-   * Parses a json response.
+   * Sends a request, and wraps the exception.
+   *
+   * @param \Psr\Http\Message\RequestInterface $request
+   *   The request.
+   * @param string $endpoint_path
+   *   The endpoint path, used in exception messages.
+   *
+   * @return \Psr\Http\Message\ResponseInterface
+   *   The response.
+   *
+   * @throws \Drupal\oe_newsroom\Exception\Api\ApiRequestException
+   *   A ClientException was thrown by the http client.
+   */
+  protected function sendRequest(RequestInterface $request, string $endpoint_path): ResponseInterface {
+    try {
+      return $this->httpClient->sendRequest($request);
+    }
+    catch (ClientExceptionInterface $e) {
+      // @todo Does anything need to be sanitized for security?
+      throw new ApiRequestException(sprintf(
+        'A %s request to %s failed with %s.',
+        $request->getMethod(),
+        $endpoint_path,
+        $e->getCode(),
+      ), $request, $e);
+    }
+  }
+
+  /**
+   * Processes a response.
    *
    * @param \Psr\Http\Message\ResponseInterface $response
    *   The response.
-   * @param string $method
-   *   The request method, used in exception messages.
-   * @param string $url
-   *   The request url, used in exception messages.
+   * @param \Psr\Http\Message\RequestInterface $request
+   *   The request, used in exceptions and messages.
+   * @param string $endpoint_path
+   *   The endpoint path, used in exception messages.
+   *   This is not the full url, to not reveal details.
    *
    * @return array|string
    *   Parsed json data.
@@ -199,39 +233,112 @@ class ApiClient {
    * @throws \Drupal\oe_newsroom\Exception\Api\ApiException
    *   The operation was denied or failed.
    */
-  protected function extractJsonFromResponse(ResponseInterface $response, RequestInterface $request, string $method, string $url): array|string {
-    if ($response->getStatusCode() !== 200) {
-      throw new ApiResponseException(  sprintf(
-        'A %s request to %s returned status code %s.',
-        $method,
-        var_export($url, TRUE),
-        $response->getStatusCode(),
-      ), $request, $response, $response->getStatusCode());
+  public function processResponse(ResponseInterface $response, RequestInterface $request, string $endpoint_path): array|string {
+    $create_exception = fn (string $message_part, ?\Throwable $previous = NULL): MalformedResponseException => new MalformedResponseException(sprintf(
+      "A %s request to %s returned a %s response with %s.\n%s",
+      $request->getMethod(),
+      var_export($endpoint_path, TRUE),
+      $response->getStatusCode(),
+      $message_part,
+      Yaml::encode([
+        'path' => $endpoint_path,
+        'status' => $response->getStatusCode(),
+        'body' => $response->getBody()->getContents(),
+        'headers' => $response->getHeaders(),
+      ]),
+    ), $request, $response, $previous);
+
+    $this->checkResponseJsonHeader($response, $create_exception);
+    $data = $this->readResponseJson($response, $create_exception);
+
+    if ($response->getStatusCode() === 200) {
+      // Successful responses should return array or string.
+      if (!is_array($data) && !is_string($data)) {
+        throw $create_exception(sprintf(
+          'unexpected json data %s.',
+          var_export($data, TRUE),
+        ));
+      }
+      return $data;
     }
-    // Unlike ->getContents(), ->__toString() is idempotent.
-    $json = $response->getBody()->__toString();
-    // @todo Is a response from a POST request always json format?
-    try {
-      // Drupal's Json::encode() is not consistent across Drupal versions.
-      $data = json_decode($json, TRUE, flags: JSON_THROW_ON_ERROR);
-    }
-    catch (\JsonException $e) {
-      throw new ApiException(sprintf(
-        'A %s request to %s returned invalid json %s.',
-        $method,
-        var_export($url, TRUE),
-        var_export($json, TRUE),
-      ), previous: $e);
-    }
-    if (!is_array($data) && !is_string($data)) {
-      throw new ApiException(sprintf(
-        'A %s request to %s returned unexpected json data %s.',
-        $method,
-        var_export($url, TRUE),
+
+    if (!is_string($data)) {
+      // Failure responses should have a json-encoded string message as body.
+      throw $create_exception(sprintf(
+        'unexpected json data %s.',
         var_export($data, TRUE),
       ));
     }
+
+    switch ($response->getStatusCode()) {
+      case 404:
+        // @todo Distinguish different cases of "Not found".
+        throw new NotFoundException($data, $request, $response, $data);
+
+      case 400:
+        throw new BadRequestException($data, $request, $response, $data);
+
+      case 401:
+        throw new UnauthorizedException($data, $request, $response, $data);
+
+      default:
+        throw new FailureResponseException($data, $request, $response, $data);
+    }
+  }
+
+  /**
+   * Reads json data from the response.
+   *
+   * @param \Psr\Http\Message\ResponseInterface $response
+   *   The response from Newsroom API.
+   * @param \Closure(string, ?\Throwable): MalformedResponseException $create_exception
+   *   A callback that will create an exception.
+   *
+   * @return mixed
+   *   Data parsed from json.
+   *
+   * @throws \Drupal\oe_newsroom\Exception\Api\MalformedResponseException
+   *   The response has invalid json.
+   */
+  protected function readResponseJson(ResponseInterface $response, \Closure $create_exception): mixed {
+    // Unlike ->getContents(), ->__toString() is idempotent.
+    $body = $response->getBody()->__toString();
+    if ($body === '') {
+      throw $create_exception('empty body in ' . var_export($response, TRUE));
+    }
+    try {
+      // Drupal's Json::encode() is not consistent across Drupal versions.
+      $data = json_decode($body, TRUE, flags: JSON_THROW_ON_ERROR);
+    }
+    catch (\JsonException $e) {
+      throw $create_exception(sprintf(
+        'invalid json %s.',
+        var_export($body, TRUE),
+      ), $e);
+    }
     return $data;
+  }
+
+  /**
+   * Checks that a response content type header says it's json.
+   *
+   * This is expected for all responses from Newsroom, even failure respones.
+   *
+   * @param \Psr\Http\Message\ResponseInterface $response
+   *   The response from Newsroom API.
+   * @param \Closure(string, ?\Throwable): MalformedResponseException $create_exception
+   *   A callback that will create an exception.
+   *
+   * @throws \Drupal\oe_newsroom\Exception\Api\MalformedResponseException
+   *   The response has an unexpected content-type header.
+   */
+  protected function checkResponseJsonHeader(ResponseInterface $response, \Closure $create_exception): void {
+    if ($response->getHeaderLine('content-type') !== 'application/json') {
+      throw $create_exception(sprintf(
+        'content-type header %s',
+        var_export($response->getHeaderLine('content-type'), TRUE),
+      ));
+    }
   }
 
   /**

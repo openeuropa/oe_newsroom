@@ -81,6 +81,9 @@ class NodeNotificationEndpoints {
    *   Decoded response data.
    *   Typically this is just a generic success message.
    *
+   * @throws \Drupal\oe_newsroom\Exception\Api\NotFoundException
+   *   The node service id was not found.
+   *   This still indicates a misconfiguration.
    * @throws \Drupal\oe_newsroom\Exception\Api\ApiException
    *   The operation failed.
    */

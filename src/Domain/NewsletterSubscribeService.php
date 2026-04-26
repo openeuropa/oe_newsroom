@@ -6,6 +6,8 @@ namespace Drupal\oe_newsroom\Domain;
 
 use Drupal\oe_newsroom\Endpoint\NewsletterSubscriptionEndpoints;
 use Drupal\oe_newsroom\Exception\Api\ApiException;
+use Drupal\oe_newsroom\Exception\Api\NotFoundException;
+use Drupal\oe_newsroom\Exception\Domain\OperationDenied;
 use Drupal\oe_newsroom\Exception\Domain\OperationError;
 use Drupal\oe_newsroom\Value\NewsletterSubscribeResult;
 
@@ -37,6 +39,11 @@ class NewsletterSubscribeService {
   public function subscribe(string $email, array $distribution_list_ids, ?string $language = NULL): NewsletterSubscribeResult {
     try {
       $data = $this->apiClient->subscribe($email, $distribution_list_ids, [], $language);
+    }
+    catch (NotFoundException $e) {
+      // @todo Detect if the newsletter id was not found, or something else was not found.
+      // @todo Handle the case where some subscriptions are successful, but others are not.
+      throw new OperationDenied('Some of the newsletters were not found.', previous: $e);
     }
     catch (ApiException $e) {
       throw new OperationError('Failed to subscribe', previous: $e);
