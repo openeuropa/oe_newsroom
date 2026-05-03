@@ -1,0 +1,7 @@
+oe_newsroom_api_explorer.explorer:
+  path: '/admin/config/system/newsroom-settings/api-explorer'
+  defaults:
+    _form: '\Drupal\oe_newsroom_api_explorer\Form\NewsroomApiExplorerForm'
+    _title: 'Newsroom API Explorer'
+  requirements:
+    _permission: 'use newsroom api explorer'
