@@ -9,7 +9,8 @@ services:
   # hash_method, ...
   # Adding a service only for the POC. @todo change this when the client it's
   # moved.
-  Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface:
+  Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface: '@Drupal\oe_newsroom_newsletter\Api\NewsroomClient'
+  Drupal\oe_newsroom_newsletter\Api\NewsroomClient:
     class: Drupal\oe_newsroom_newsletter\Api\NewsroomClient
   logger.channel.oe_newsroom_newsletter:
     parent: logger.channel_base
