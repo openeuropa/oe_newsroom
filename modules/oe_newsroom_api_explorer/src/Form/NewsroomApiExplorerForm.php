@@ -15,6 +15,15 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Serialization\Yaml;
+use Drupal\node\Entity\Node;
+use Drupal\node\NodeInterface;
+use Drupal\oe_newsroom\Domain\NewsletterSubscribeService;
+use Drupal\oe_newsroom\Domain\NodeNotificationService;
+use Drupal\oe_newsroom\Domain\NodeSubscriptionService;
+use Drupal\oe_newsroom\Endpoint\NewsletterSubscriptionEndpoints;
+use Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints;
+use Drupal\oe_newsroom\Endpoint\NodeSubscriptionEndpoints;
+use Drupal\oe_newsroom\Value\NotificationFrequency;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Promise\PromiseInterface;
@@ -300,6 +309,24 @@ class NewsroomApiExplorerForm extends FormBase {
           '#type' => 'textfield',
           '#description' => $this->t('Use json or separate by comma'),
         ],
+        NodeInterface::class => [
+          '#type' => 'entity_autocomplete',
+          '#target_type' => 'node',
+        ],
+        NotificationFrequency::class => [
+          '#type' => 'select',
+          '#options' => (function (): array {
+            $options = [];
+            foreach (NotificationFrequency::cases() as $case) {
+              $options[$case->value] = $case->value;
+            }
+            return $options;
+          })(),
+          ...($parameter->allowsNull()) ? [
+            '#empty_option' => $this->t('- None -'),
+            '#empty_value' => '',
+          ] : [],
+        ],
       };
     }
     catch (\UnhandledMatchError) {
@@ -498,6 +525,11 @@ class NewsroomApiExplorerForm extends FormBase {
         default => preg_split('#, *#', trim($value)),
       },
       'string' => (string) $value,
+        NotificationFrequency::class => NotificationFrequency::from($value),
+        NodeInterface::class => Node::load(match (TRUE) {
+          is_int($value) => $value,
+          (string) (int) $value === $value => (int) $value,
+        }),
       default => throw new \Exception(sprintf('Unsupported type %s for parameter %s', $parameter->getType()->__toString(), $parameter->name)),
     };
     if ($argument === $illegal_value) {
@@ -602,6 +634,12 @@ class NewsroomApiExplorerForm extends FormBase {
    */
   protected function getEndpointOptions(): array {
     $classes = [
+      NewsletterSubscriptionEndpoints::class,
+      NodeNotificationEndpoints::class,
+      NodeSubscriptionEndpoints::class,
+      NewsletterSubscribeService::class,
+      NodeNotificationService::class,
+      NodeSubscriptionService::class,
       NewsroomClient::class,
     ];
     $options = [];
