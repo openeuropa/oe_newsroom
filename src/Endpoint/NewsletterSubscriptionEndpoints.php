@@ -50,7 +50,6 @@ final class NewsletterSubscriptionEndpoints {
     $payload = [
       'subscription' => [
         'universeAcronym' => $this->apiClient->getUniverseAcronym(),
-        'topicExtWebsite' => $this->apiClient->getAppId(),
         'sv_id' => implode(',', $svIds),
         // @todo Should this be the normalized or original email?
         'email' => $normalized_email,
@@ -66,7 +65,7 @@ final class NewsletterSubscriptionEndpoints {
     }
 
     try {
-      return $this->apiClient->postJson('subscribe', $payload, [$normalized_email], FALSE);
+      return $this->apiClient->postJson('subscribe', $payload, [$normalized_email]);
     }
     catch (NotFoundException $e) {
       // @todo Detect if the newsletter id was not found, or something else was not found.
