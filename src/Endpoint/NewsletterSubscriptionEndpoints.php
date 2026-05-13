@@ -48,12 +48,17 @@ final class NewsletterSubscriptionEndpoints {
   ): array {
     $normalized_email = $this->apiClient->normalizeEmail($email);
     $payload = [
-      'subscription' => [
+      'subscription' => array_diff_assoc([
         'sv_id' => implode(',', $svIds),
         // @todo Should this be the normalized or original email?
         'email' => $normalized_email,
-        'language' => $language,
-      ],
+        'language' => $language ?? '',
+      ], [
+        // Remove empty 'sv_id' parameter to avoid '500 Internal Server Error'.
+        'sv_id' => '',
+        // Remove empty 'language' parameter to avoid '400 Bad request'.
+        'language' => '',
+      ]),
     ];
 
     if (!empty($relatedSvIds)) {
