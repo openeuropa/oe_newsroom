@@ -174,7 +174,9 @@ class ApiClient {
    *   The request object.
    */
   protected function createPostRequest(string $endpoint_path, array $payload, array $signature_input, bool $pass_app_id = TRUE): RequestInterface {
-    $payload['key'] = $this->generateComposedKey($signature_input);
+    if ($signature_input) {
+      $payload['key'] = $this->generateComposedKey($signature_input);
+    }
     if ($pass_app_id) {
       $payload['app'] = $this->connection->appId;
     }
