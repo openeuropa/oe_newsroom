@@ -151,7 +151,6 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
       'app' => $this->appId,
       'key' => $this->generateKey($email),
       'subscription' => array_diff_assoc([
-        'universeAcronym' => $this->universe,
         'sv_id' => implode(',', $svIds),
         'email' => $this->normalised ? mb_strtolower($email) : $email,
         'language' => $language ?? '',
