@@ -350,7 +350,7 @@ class ApiClient {
    * @return string
    *   Generated communication key.
    */
-  protected function generateComposedKey(array $signature_input): string {
+  public function generateComposedKey(array $signature_input): string {
     return hash($this->connection->hashMethod, implode($signature_input) . $this->connection->privateKey);
   }
 

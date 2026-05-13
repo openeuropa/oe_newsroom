@@ -20,6 +20,7 @@ use Drupal\node\NodeInterface;
 use Drupal\oe_newsroom\Domain\NewsletterSubscribeService;
 use Drupal\oe_newsroom\Domain\NodeNotificationService;
 use Drupal\oe_newsroom\Domain\NodeSubscriptionService;
+use Drupal\oe_newsroom\Endpoint\ExternalAuthEndpoints;
 use Drupal\oe_newsroom\Endpoint\NewsletterSubscriptionEndpoints;
 use Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints;
 use Drupal\oe_newsroom\Endpoint\NodeSubscriptionEndpoints;
@@ -634,6 +635,7 @@ class NewsroomApiExplorerForm extends FormBase {
    */
   protected function getEndpointOptions(): array {
     $classes = [
+      ExternalAuthEndpoints::class,
       NewsletterSubscriptionEndpoints::class,
       NodeNotificationEndpoints::class,
       NodeSubscriptionEndpoints::class,
