@@ -49,7 +49,6 @@ final class NewsletterSubscriptionEndpoints {
     $normalized_email = $this->apiClient->normalizeEmail($email);
     $payload = [
       'subscription' => [
-        'universeAcronym' => $this->apiClient->getUniverseAcronym(),
         'sv_id' => implode(',', $svIds),
         // @todo Should this be the normalized or original email?
         'email' => $normalized_email,
