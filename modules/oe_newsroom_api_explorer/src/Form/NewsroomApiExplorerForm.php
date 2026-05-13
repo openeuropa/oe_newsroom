@@ -24,6 +24,7 @@ use Drupal\oe_newsroom\Endpoint\ExternalAuthEndpoints;
 use Drupal\oe_newsroom\Endpoint\NewsletterSubscriptionEndpoints;
 use Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints;
 use Drupal\oe_newsroom\Endpoint\NodeSubscriptionEndpoints;
+use Drupal\oe_newsroom\Endpoint\StaticMailEndpoints;
 use Drupal\oe_newsroom\Value\NotificationFrequency;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use GuzzleHttp\HandlerStack;
@@ -643,6 +644,7 @@ class NewsroomApiExplorerForm extends FormBase {
       NodeNotificationService::class,
       NodeSubscriptionService::class,
       NewsroomClient::class,
+      StaticMailEndpoints::class,
     ];
     $options = [];
     foreach ($classes as $class) {

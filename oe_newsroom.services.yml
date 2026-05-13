@@ -8,6 +8,7 @@ services:
   Drupal\oe_newsroom\Endpoint\NewsletterSubscriptionEndpoints: {}
   Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints: {}
   Drupal\oe_newsroom\Endpoint\NodeSubscriptionEndpoints: {}
+  Drupal\oe_newsroom\Endpoint\StaticMailEndpoints: {}
   Drupal\oe_newsroom\Domain\NodeNotificationService:
     factory: ['Drupal\oe_newsroom\Domain\NodeNotificationService', create]
   Drupal\oe_newsroom\Domain\NodeSubscriptionService: {}
