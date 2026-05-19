@@ -1,0 +1,38 @@
+msgid ""
+msgstr ""
+
+msgid "Your e-mail"
+msgstr "Din e-mail"
+
+msgid "Select the language in which you want to receive the newsletters"
+msgstr "Vælg det sprog, du ønsker at modtage nyhedsbrevene på"
+
+msgid "By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link"
+msgstr "Ved at sætte hak i feltet bekræfter jeg, at jeg ønsker at modtage nyhedsbrevet, og at jeg accepterer @privacy_link"
+
+msgid "privacy statement"
+msgstr "databeskyttelseserklæringen"
+
+msgid "Subscribe"
+msgstr "Abonnér"
+
+msgid "You must agree with the privacy statement."
+msgstr "Du skal acceptere databeskyttelseserklæringen"
+
+msgid "You have been successfully subscribed."
+msgstr "Du er nu abonnent."
+
+msgid "An error occurred while processing your request, please try again later. If the error persists, contact the site owner."
+msgstr "Der er sket en fejl. Prøv igen senere. Hvis fejlen varer ved, skal du kontakte den webansvarlige."
+
+msgid "Please select the newsletter lists you want to subscribe to."
+msgstr "Vælg de nyhedsbreve, du vil abonnere på."
+
+msgid "Unsubscribe"
+msgstr "Afmeld dig"
+
+msgid "Successfully unsubscribed!"
+msgstr "Du har nu afmeldt dig!"
+
+msgid "Please select the newsletter lists you want to unsubscribe from."
+msgstr "Vælg de nyhedsbreve, du ikke længere vil abonnere på."

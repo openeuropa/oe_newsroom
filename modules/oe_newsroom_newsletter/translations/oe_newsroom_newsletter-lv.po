@@ -1,0 +1,38 @@
+msgid ""
+msgstr ""
+
+msgid "Your e-mail"
+msgstr "Jūsu e-pasta adrese"
+
+msgid "Select the language in which you want to receive the newsletters"
+msgstr "Atlasiet valodu, kurā vēlaties saņemt e-jaunumus"
+
+msgid "By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link"
+msgstr "Atzīmējot šo rūtiņu, apliecinu, ka vēlos reģistrēties šim pakalpojumam un piekrītu @privacy_link"
+
+msgid "privacy statement"
+msgstr "paziņojumam par privātumu"
+
+msgid "Subscribe"
+msgstr "Abonēt"
+
+msgid "You must agree with the privacy statement."
+msgstr "Norādiet, ka piekrītat paziņojumam par privātumu!"
+
+msgid "You have been successfully subscribed."
+msgstr "Jūs esat sekmīgi izveidojis abonementu."
+
+msgid "An error occurred while processing your request, please try again later. If the error persists, contact the site owner."
+msgstr "Apstrādājot jūsu pieprasījumu, radās kļūda. Lūdzu, mēģiniet vēlreiz vēlāk! Ja šī kļūda atkārtojas, sazinieties ar vietnes īpašnieku."
+
+msgid "Please select the newsletter lists you want to subscribe to."
+msgstr "Izvēlieties tos e-jaunumu sarakstus, kurus vēlaties abonēt."
+
+msgid "Unsubscribe"
+msgstr "Atteikties no abonementa"
+
+msgid "Successfully unsubscribed!"
+msgstr "Esat sekmīgi atteicies no abonēšanas!"
+
+msgid "Please select the newsletter lists you want to unsubscribe from."
+msgstr "Izvēlieties tos e-jaunumu sarakstus, no kuru abonementa vēlaties atteikties."

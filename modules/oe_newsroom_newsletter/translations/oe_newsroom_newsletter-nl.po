@@ -1,0 +1,38 @@
+msgid ""
+msgstr ""
+
+msgid "Your e-mail"
+msgstr "Uw e-mailadres"
+
+msgid "Select the language in which you want to receive the newsletters"
+msgstr "Kies de taal waarin u de nieuwsbrieven wilt ontvangen."
+
+msgid "By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link"
+msgstr "Ik bevestig dat ik me wil abonneren en ik ga akkoord met de @privacy_link"
+
+msgid "privacy statement"
+msgstr "privacyverklaring"
+
+msgid "Subscribe"
+msgstr "Abonneren"
+
+msgid "You must agree with the privacy statement."
+msgstr "U moet akkoord gaan met de privacyverklaring."
+
+msgid "You have been successfully subscribed."
+msgstr "U bent geabonneerd."
+
+msgid "An error occurred while processing your request, please try again later. If the error persists, contact the site owner."
+msgstr "Er is iets misgegaan bij het verwerken van uw verzoek. Probeer het later opnieuw. Als het opnieuw misgaat, neem dan contact op met de eigenaar van de website."
+
+msgid "Please select the newsletter lists you want to subscribe to."
+msgstr "Selecteer de nieuwsbrieven waarop u zich wilt abonneren."
+
+msgid "Unsubscribe"
+msgstr "Abonnement opzeggen"
+
+msgid "Successfully unsubscribed!"
+msgstr "U hebt uw abonnement opgezegd!"
+
+msgid "Please select the newsletter lists you want to unsubscribe from."
+msgstr "Selecteer de nieuwsbrieven die u niet meer wilt ontvangen."

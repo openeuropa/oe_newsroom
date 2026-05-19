@@ -1,0 +1,38 @@
+msgid ""
+msgstr ""
+
+msgid "Your e-mail"
+msgstr "Twój adres e-mail"
+
+msgid "Select the language in which you want to receive the newsletters"
+msgstr "Wybierz język, w którym chcesz otrzymywać biuletyny informacyjne"
+
+msgid "By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link"
+msgstr "Klikając to pole, potwierdzam, że chcę zarejestrować się do celów korzystania z tej usługi i że akceptuję @privacy_link"
+
+msgid "privacy statement"
+msgstr "oświadczenie o ochronie prywatności"
+
+msgid "Subscribe"
+msgstr "Subskrybuj"
+
+msgid "You must agree with the privacy statement."
+msgstr "Musisz zaakceptować oświadczenie o ochronie prywatności."
+
+msgid "You have been successfully subscribed."
+msgstr "Twoja subskrypcja jest aktywna."
+
+msgid "An error occurred while processing your request, please try again later. If the error persists, contact the site owner."
+msgstr "Przy przetwarzaniu Twojego polecenia wystąpił błąd. Spróbuj ponownie później. Jeżeli błąd będzie się powtarzał, skontaktuj się z administratorem strony."
+
+msgid "Please select the newsletter lists you want to subscribe to."
+msgstr "Wybierz listy biuletynów, które chcesz subskrybować."
+
+msgid "Unsubscribe"
+msgstr "Zrezygnuj z subskrypcji"
+
+msgid "Successfully unsubscribed!"
+msgstr "Twoja subskrypcja została anulowana."
+
+msgid "Please select the newsletter lists you want to unsubscribe from."
+msgstr "Wybierz listy biuletynów, z których chcesz zrezygnować."

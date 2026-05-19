@@ -1,0 +1,38 @@
+msgid ""
+msgstr ""
+
+msgid "Your e-mail"
+msgstr "Η ηλεκτρονική σας διεύθυνση"
+
+msgid "Select the language in which you want to receive the newsletters"
+msgstr "Επιλέξτε τη γλώσσα στην οποία θέλετε να λαμβάνετε ενημερωτικά δελτία"
+
+msgid "By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link"
+msgstr "Μαρκάροντας αυτό το τετραγωνίδιο, επιβεβαιώνω ότι επιθυμώ να εγγραφώ σε αυτή την υπηρεσία και συμφωνώ με τη @privacy_link"
+
+msgid "privacy statement"
+msgstr "δήλωση περί ιδιωτικότητας"
+
+msgid "Subscribe"
+msgstr "Εγγραφή"
+
+msgid "You must agree with the privacy statement."
+msgstr "Πρέπει να συμφωνήσετε με τη δήλωση περί ιδιωτικότητας."
+
+msgid "You have been successfully subscribed."
+msgstr "Έχετε εγγραφεί επιτυχώς."
+
+msgid "An error occurred while processing your request, please try again later. If the error persists, contact the site owner."
+msgstr "Σημειώθηκε σφάλμα κατά την επεξεργασία του αιτήματός σας. Ξαναδοκιμάστε αργότερα. Εάν το σφάλμα εξακολουθεί να εμφανίζεται, επικοινωνήστε με τον ιδιοκτήτη του ιστοτόπου."
+
+msgid "Please select the newsletter lists you want to subscribe to."
+msgstr "Επιλέξτε τους καταλόγους ενημερωτικών δελτίων στα οποία θέλετε να εγγραφείτε."
+
+msgid "Unsubscribe"
+msgstr "Απεγγραφή"
+
+msgid "Successfully unsubscribed!"
+msgstr "Απεγγραφήκατε με επιτυχία!"
+
+msgid "Please select the newsletter lists you want to unsubscribe from."
+msgstr "Επιλέξτε τους καταλόγους ενημερωτικών δελτίων από τα οποία θέλετε να απεγγραφείτε."

@@ -8,4 +8,6 @@ dependencies:
   - drupal:multivalue_form_element
   - oe_newsroom:oe_newsroom
 
+'interface translation project': oe_newsroom_newsletter
+
 type: module

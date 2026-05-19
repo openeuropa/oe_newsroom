@@ -1,0 +1,38 @@
+msgid ""
+msgstr ""
+
+msgid "Your e-mail"
+msgstr "Do sheoladh ríomhphoist"
+
+msgid "Select the language in which you want to receive the newsletters"
+msgstr "Roghnaigh an teanga inar mian leat na nuachtlitreacha a fháil"
+
+msgid "By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link"
+msgstr "Trí thic a chur sa bhosca seo, dearbhaím gur mian liom clárú le haghaidh na seirbhíse seo agus go n-aontaím leis an @privacy_link"
+
+msgid "privacy statement"
+msgstr "ráiteas príobháideachais"
+
+msgid "Subscribe"
+msgstr "Liostáil"
+
+msgid "You must agree with the privacy statement."
+msgstr "Caithfidh tú glacadh leis an ráiteas príobháideachais."
+
+msgid "You have been successfully subscribed."
+msgstr "D’éirigh leat liostáil."
+
+msgid "An error occurred while processing your request, please try again later. If the error persists, contact the site owner."
+msgstr "Tharla earráid agus d’iarraidh á próiseáil – bain triail eile as ar ball. Má tharlaíonn an earráid arís, déan teagmháil le húinéir an tsuímh gréasáin."
+
+msgid "Please select the newsletter lists you want to subscribe to."
+msgstr "Roghnaigh na liostaí nuachtlitreacha ar mian leat liostáil dóibh."
+
+msgid "Unsubscribe"
+msgstr "Díliostáil"
+
+msgid "Successfully unsubscribed!"
+msgstr "D’éirigh leat díliostáil!"
+
+msgid "Please select the newsletter lists you want to unsubscribe from."
+msgstr "Roghnaigh na liostaí nuachtlitreacha ar mian leat díliostáil dóibh."

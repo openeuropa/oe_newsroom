@@ -1,0 +1,38 @@
+msgid ""
+msgstr ""
+
+msgid "Your e-mail"
+msgstr "Din mejladress"
+
+msgid "Select the language in which you want to receive the newsletters"
+msgstr "Välj på vilket språk du vill få nyhetsbreven"
+
+msgid "By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link"
+msgstr "Genom att kryssa i rutan bekräftar jag att jag vill registrera mig för tjänsten och att jag godkänner @privacy_link"
+
+msgid "privacy statement"
+msgstr "behandlingen av personuppgifter"
+
+msgid "Subscribe"
+msgstr "Prenumerera"
+
+msgid "You must agree with the privacy statement."
+msgstr "Du måste godkänna behandlingen av personuppgifter."
+
+msgid "You have been successfully subscribed."
+msgstr "Du prenumererar nu på nyhetsbrevet!"
+
+msgid "An error occurred while processing your request, please try again later. If the error persists, contact the site owner."
+msgstr "Ett fel har inträffat. Försök igen senare. Kontakta den webbansvariga om felet kvarstår."
+
+msgid "Please select the newsletter lists you want to subscribe to."
+msgstr "Välj de nyhetsbrev du vill prenumerera på."
+
+msgid "Unsubscribe"
+msgstr "Avsluta prenumeration"
+
+msgid "Successfully unsubscribed!"
+msgstr "Din prenumeration har avslutats."
+
+msgid "Please select the newsletter lists you want to unsubscribe from."
+msgstr "Markera de nyhetsbrev du inte längre vill prenumerera på."

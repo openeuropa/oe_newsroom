@@ -1,0 +1,38 @@
+msgid ""
+msgstr ""
+
+msgid "Your e-mail"
+msgstr "Az Ön e-mail-címe"
+
+msgid "Select the language in which you want to receive the newsletters"
+msgstr "Válassza ki azt a nyelvet, amelyen a hírlevelet meg szeretné kapni"
+
+msgid "By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link"
+msgstr "E négyzet bejelölésével megerősítem, hogy igényt tartok erre a szolgáltatásra, és elfogadom az @privacy_link"
+
+msgid "privacy statement"
+msgstr "adatvédelmi nyilatkozatot"
+
+msgid "Subscribe"
+msgstr "Feliratkozás"
+
+msgid "You must agree with the privacy statement."
+msgstr "Kérjük, fogadja el az adatvédelmi nyilatkozatot."
+
+msgid "You have been successfully subscribed."
+msgstr "A feliratkozás sikeres volt."
+
+msgid "An error occurred while processing your request, please try again later. If the error persists, contact the site owner."
+msgstr "Hiba történt a kérelem feldolgozásakor. Kérjük, próbálja meg később. Ha a hiba továbbra is fennáll, vegye fel a kapcsolatot a webhely tulajdonosával."
+
+msgid "Please select the newsletter lists you want to subscribe to."
+msgstr "Kérjük, válassza ki azokat a hírleveleket, amelyekre fel kíván iratkozni."
+
+msgid "Unsubscribe"
+msgstr "Leiratkozás"
+
+msgid "Successfully unsubscribed!"
+msgstr "Ön sikeresen leiratkozott!"
+
+msgid "Please select the newsletter lists you want to unsubscribe from."
+msgstr "Kérjük, válassza ki azokat a hírleveleket, amelyekről le kíván iratkozni."

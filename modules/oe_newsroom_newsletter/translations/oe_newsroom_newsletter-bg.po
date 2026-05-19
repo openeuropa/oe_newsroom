@@ -1,0 +1,38 @@
+msgid ""
+msgstr ""
+
+msgid "Your e-mail"
+msgstr "Вашият електронен адрес"
+
+msgid "Select the language in which you want to receive the newsletters"
+msgstr "Изберете езика, на който желаете да получавате бюлетините"
+
+msgid "By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link"
+msgstr "С поставянето на отметка в тази кутийка потвърждавам, че искам да се регистрирам за тази услуга, и приемам @privacy_link"
+
+msgid "privacy statement"
+msgstr "декларацията за поверителност"
+
+msgid "Subscribe"
+msgstr "Абонирайте се"
+
+msgid "You must agree with the privacy statement."
+msgstr "Трябва да приемете декларацията за поверителност."
+
+msgid "You have been successfully subscribed."
+msgstr "Абонирахте се успешно."
+
+msgid "An error occurred while processing your request, please try again later. If the error persists, contact the site owner."
+msgstr "При обработването на заявката Ви възникна грешка. Моля, опитайте отново по-късно. Ако продължава да се появява съобщението за грешка, свържете се със собственика на сайта."
+
+msgid "Please select the newsletter lists you want to subscribe to."
+msgstr "Моля, изберете списъците с бюлетини, за които искате да се абонирате."
+
+msgid "Unsubscribe"
+msgstr "Прекратяване на абонамента"
+
+msgid "Successfully unsubscribed!"
+msgstr "Успешно прекратихте абонамента си!"
+
+msgid "Please select the newsletter lists you want to unsubscribe from."
+msgstr "Моля, изберете списъците с бюлетини, за които искате да прекратите абонамента."

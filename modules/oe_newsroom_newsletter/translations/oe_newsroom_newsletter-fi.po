@@ -1,0 +1,38 @@
+msgid ""
+msgstr ""
+
+msgid "Your e-mail"
+msgstr "Anna sähköpostiosoite"
+
+msgid "Select the language in which you want to receive the newsletters"
+msgstr "Valitse kieli, jolla haluat tilata uutiskirjeet."
+
+msgid "By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link"
+msgstr "Rastittamalla tämän ruudun vahvistan, että haluan rekisteröityä tämän palvelun tilaajaksi ja että hyväksyn sen @privacy_link"
+
+msgid "privacy statement"
+msgstr "tietosuojaperiaatteet"
+
+msgid "Subscribe"
+msgstr "Tilaa"
+
+msgid "You must agree with the privacy statement."
+msgstr "Sinun on hyväksyttävä tietosuojaseloste."
+
+msgid "You have been successfully subscribed."
+msgstr "Tilaus onnistui."
+
+msgid "An error occurred while processing your request, please try again later. If the error persists, contact the site owner."
+msgstr "Tilauksen tekemisessä tapahtui virhe, yritä myöhemmin uudelleen. Jos virhe toistuu, ota yhteyttä sivuston omistajaan."
+
+msgid "Please select the newsletter lists you want to subscribe to."
+msgstr "Valitse uutiskirjeluettelot, jotka haluat tilata."
+
+msgid "Unsubscribe"
+msgstr "Peruuta tilaus"
+
+msgid "Successfully unsubscribed!"
+msgstr "Tilauksen peruuttaminen onnistui."
+
+msgid "Please select the newsletter lists you want to unsubscribe from."
+msgstr "Valitse uutiskirjeluettelot, joiden tilauksen haluat peruuttaa."
