@@ -1,0 +1,38 @@
+msgid ""
+msgstr ""
+
+msgid "Your e-mail"
+msgstr "Váš e-mail"
+
+msgid "Select the language in which you want to receive the newsletters"
+msgstr "Vyberte jazyk, v ktorom chcete odoberať informačné bulletiny"
+
+msgid "By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link"
+msgstr "Zaškrtnutím tohto políčka potvrdzujem, že sa chcem na túto službu zaregistrovať a že súhlasím s @privacy_link"
+
+msgid "privacy statement"
+msgstr "vyhlásením o ochrane osobných údajov"
+
+msgid "Subscribe"
+msgstr "Prihlásiť sa na odber"
+
+msgid "You must agree with the privacy statement."
+msgstr "Musíte označiť, že súhlasíte s vyhlásením o ochrane osobných údajov."
+
+msgid "You have been successfully subscribed."
+msgstr "Úspešne ste sa prihlásili na odber."
+
+msgid "An error occurred while processing your request, please try again later. If the error persists, contact the site owner."
+msgstr "Pri spracovávaní vašej požiadavky došlo k chybe, skúste to znova neskôr. Ak chyba pretrváva, obráťte sa na vlastníka webovej lokality."
+
+msgid "Please select the newsletter lists you want to subscribe to."
+msgstr "Vyberte zoznamy informačných bulletinov, ktoré chcete odberať."
+
+msgid "Unsubscribe"
+msgstr "Zrušiť odber"
+
+msgid "Successfully unsubscribed!"
+msgstr "Úspešne ste sa odhlásili z odberu!"
+
+msgid "Please select the newsletter lists you want to unsubscribe from."
+msgstr "Vyberte zoznamy informačných bulletinov, v prípade ktorých chcete zrušiť odber."

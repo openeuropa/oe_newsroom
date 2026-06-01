@@ -1,0 +1,38 @@
+msgid ""
+msgstr ""
+
+msgid "Your e-mail"
+msgstr "Jūsų e. pašto adresas"
+
+msgid "Select the language in which you want to receive the newsletters"
+msgstr "Pasirinkite kalbą, kuria norite gauti naujienlaiškius"
+
+msgid "By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link"
+msgstr "Pažymėdamas (-a) šį langelį patvirtinu, kad noriu užsiregistruoti šiai paslaugai ir sutinku su @privacy_link"
+
+msgid "privacy statement"
+msgstr "pareiškimu dėl privatumo"
+
+msgid "Subscribe"
+msgstr "Prenumeruoti"
+
+msgid "You must agree with the privacy statement."
+msgstr "Turite sutikti su pareiškimu dėl privatumo."
+
+msgid "You have been successfully subscribed."
+msgstr "Užsiprenumeruota."
+
+msgid "An error occurred while processing your request, please try again later. If the error persists, contact the site owner."
+msgstr "Apdorojant jūsų prašymą, įvyko klaida. Bandykite dar kartą vėliau. Jei klaida kartojasi, susisiekite su svetainės savininku."
+
+msgid "Please select the newsletter lists you want to subscribe to."
+msgstr "Pasirinkite naujienlaiškių, kuriuos norite prenumeruoti, sąrašus."
+
+msgid "Unsubscribe"
+msgstr "Atsisakyti prenumeratos"
+
+msgid "Successfully unsubscribed!"
+msgstr "Prenumerata nutraukta"
+
+msgid "Please select the newsletter lists you want to unsubscribe from."
+msgstr "Pasirinkite naujienlaiškių, kurių prenumeratą norite nutraukti, sąrašus."

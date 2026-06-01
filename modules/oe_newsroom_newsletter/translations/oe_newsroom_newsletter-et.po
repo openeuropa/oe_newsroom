@@ -1,0 +1,38 @@
+msgid ""
+msgstr ""
+
+msgid "Your e-mail"
+msgstr "Teie e-posti aadress"
+
+msgid "Select the language in which you want to receive the newsletters"
+msgstr "Valige keel, milles soovite saada uudiskirju"
+
+msgid "By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link"
+msgstr "Seda kastikest märgistades kinnitan, et soovin selle teenuse tellida, ja nõustun @privacy_link"
+
+msgid "privacy statement"
+msgstr "isikuandmete kaitse põhimõtetega"
+
+msgid "Subscribe"
+msgstr "Telli"
+
+msgid "You must agree with the privacy statement."
+msgstr "Peate nõustuma isikuandmete kaitse põhimõtetega."
+
+msgid "You have been successfully subscribed."
+msgstr "Tellimus on edukalt esitatud."
+
+msgid "An error occurred while processing your request, please try again later. If the error persists, contact the site owner."
+msgstr "Teie päringu töötlemisel ilmnes viga, palun proovige hiljem uuesti. Kui viga püsib, võtke ühendust saidi omanikuga."
+
+msgid "Please select the newsletter lists you want to subscribe to."
+msgstr "Palun valige uudiskirjad, mida soovite tellida."
+
+msgid "Unsubscribe"
+msgstr "Tühista tellimus"
+
+msgid "Successfully unsubscribed!"
+msgstr "Tellimuse tühistamine õnnestus!"
+
+msgid "Please select the newsletter lists you want to unsubscribe from."
+msgstr "Palun valige uudiskirjad, mille tellimuse soovite tühistada."
