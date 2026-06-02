@@ -1,4 +1,15 @@
-# Change Log
+# Changelog
+
+## [1.1.0](https://github.com/openeuropa/oe_newsroom/tree/1.1.0) (2026-06-02)
+
+[Full Changelog](https://github.com/openeuropa/oe_newsroom/compare/1.0.0...1.1.0)
+
+**Merged pull requests:**
+
+- EWPP-6817: Translations for the newsletter submodule. [\#19](https://github.com/openeuropa/oe_newsroom/pull/19) ([intelektron](https://github.com/intelektron))
+- OEL-4515: Test with Drupal 11.3 [\#16](https://github.com/openeuropa/oe_newsroom/pull/16) ([donquixote](https://github.com/donquixote))
+- OEL-4174: Test with drupal/core:~11.2.0 in github actions. [\#13](https://github.com/openeuropa/oe_newsroom/pull/13) ([donquixote](https://github.com/donquixote))
+- OEL-4100: Move to github actions [\#12](https://github.com/openeuropa/oe_newsroom/pull/12) ([donquixote](https://github.com/donquixote))
 
 ## [1.0.0](https://github.com/openeuropa/oe_newsroom/tree/1.0.0) (2025-06-05)
 
@@ -6,6 +17,7 @@
 
 **Merged pull requests:**
 
+- Prepare changelog for release 1.0.0. [\#11](https://github.com/openeuropa/oe_newsroom/pull/11) ([piotrsmykaj](https://github.com/piotrsmykaj))
 - EWPP-4654: Support D11 [\#10](https://github.com/openeuropa/oe_newsroom/pull/10) ([msnassar](https://github.com/msnassar))
 - EWPP-4991: Ensure PHP8.3 compatibility. [\#9](https://github.com/openeuropa/oe_newsroom/pull/9) ([msnassar](https://github.com/msnassar))
 - OEL-3053 [\#8](https://github.com/openeuropa/oe_newsroom/pull/8) ([AaronGilMartinez](https://github.com/AaronGilMartinez))
