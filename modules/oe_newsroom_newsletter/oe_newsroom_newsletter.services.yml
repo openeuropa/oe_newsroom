@@ -1,0 +1,13 @@
+services:
+  _defaults:
+    autoconfigure: true
+    autowire: true
+
+  # The client should be created using data from site configuration, meaning the
+  # the service should extract this and create a new client object.
+  # The client should take the needed parameters to work like: app_id, universe,
+  # hash_method, ...
+  # Adding a service only for the POC. @todo change this when the client it's
+  # moved.
+  Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface:
+    class: Drupal\oe_newsroom_newsletter\Api\NewsroomClient

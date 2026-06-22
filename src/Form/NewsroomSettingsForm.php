@@ -50,6 +50,13 @@ class NewsroomSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('app_id'),
       '#required' => TRUE,
     ];
+    // Not required for now.
+    $form['sv_id'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Notification service ID'),
+      '#maxlength' => 64,
+      '#default_value' => $config->get('sv_id'),
+    ];
     $form['hash_method'] = [
       '#type' => 'select',
       '#title' => $this->t('Hash method'),
@@ -81,6 +88,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
       ->set('app_id', $form_state->getValue('app_id'))
       ->set('hash_method', $form_state->getValue('hash_method'))
       ->set('normalised', $form_state->getValue('normalised'))
+      ->set('sv_id', $form_state->getValue('sv_id'))
       ->save();
   }
 
