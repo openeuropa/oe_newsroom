@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\oe_newsroom_newsletter\Plugin\Block;
 
-use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Cache\Cache;
@@ -31,6 +30,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   dependencies on it.
  */
 class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactoryPluginInterface {
+
+  use NewsletterDistributionListsTrait;
 
   public function __construct(
     array $configuration,
@@ -70,26 +71,10 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
   public function blockForm($form, FormStateInterface $form_state): array {
     $form = parent::blockForm($form, $form_state);
 
-    $form['distribution_lists'] = [
-      '#type' => 'multivalue',
-      '#title' => $this->t('Newsletter distribution lists'),
-      '#description' => $this->t("If there's a single choice here, it will remain hidden on the (un)subscription form."),
-      '#cardinality' => 5,
-      '#required' => TRUE,
-      'sv_id' => [
-        '#type' => 'textfield',
-        '#title' => $this->t('Sv IDs'),
-        '#description' => $this->t('Comma-separated list of newsletter/distribution list IDs.'),
-        '#maxlength' => 128,
-      ],
-      'name' => [
-        '#type' => 'textfield',
-        '#title' => $this->t('Name of the distribution list'),
-        '#description' => $this->t('This is used to help the user identify which list they want to unsubscribe from.'),
-        '#maxlength' => 128,
-      ],
-      '#default_value' => $this->configuration['distribution_lists'],
-    ];
+    $form['distribution_lists'] = $this->distributionListsElement(
+      $this->t("If there's a single choice here, it will remain hidden on the (un)subscription form."),
+      $this->t('This is used to help the user identify which list they want to unsubscribe from.'),
+    );
 
     return $form;
   }
@@ -113,22 +98,7 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
       ]));
     }
 
-    // Since the distribution lists field is required, no need to run validation
-    // when less than two distributions exist.
-    if (count($distribution_lists) < 2) {
-      return;
-    }
-
-    // The multivalue element rekeys the items to have consecutive deltas.
-    // To set the validation, we need to access the original unprocessed deltas.
-    $user_input = $form_state->getUserInput();
-    $unprocessed_lists = NestedArray::getValue($user_input, $form['distribution_lists']['#parents']);
-    unset($unprocessed_lists[0]);
-    foreach ($unprocessed_lists as $delta => $list) {
-      if (empty($list['sv_id']) xor empty($list['name'])) {
-        $form_state->setError($form['distribution_lists'][$delta], $this->t('Both sv IDs and name are required.'));
-      }
-    }
+    $this->validateDistributionLists($form, $form_state);
   }
 
   /**
