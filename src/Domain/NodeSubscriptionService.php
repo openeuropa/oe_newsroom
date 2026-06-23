@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\oe_newsroom\Domain;
 
+use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
 use Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints;
 use Drupal\oe_newsroom\Endpoint\NodeSubscriptionEndpoints;
@@ -100,9 +101,14 @@ class NodeSubscriptionService {
     // Use default frequency.
     // @todo Make the default configurable.
     $frequency ??= NotificationFrequency::ON_PUBLICATION;
+    $redirect_to = Url::fromRoute(
+      'oe_newsroom.node.subscribe.landing',
+      ['node' => $node_id],
+      ['absolute' => TRUE],
+    )->toString();
     try {
       // @todo Add event here to allow to change parameters.
-      $this->nodeSubscriptionApi->subscribe($node_id, $email, $frequency);
+      $this->nodeSubscriptionApi->subscribe($node_id, $email, $frequency, $redirect_to);
     }
     catch (ApiException $e) {
       throw new OperationError('Failed to subscribe.', previous: $e);

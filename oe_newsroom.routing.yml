@@ -5,3 +5,9 @@ oe_newsroom.settings_form:
     _title: 'Newsroom settings'
   requirements:
     _permission: 'administer newsroom configuration'
+oe_newsroom.node.subscribe.landing:
+  path: '/node/{node}/newsroom-subscribe-landing'
+  defaults:
+    _controller: '\Drupal\oe_newsroom\Controller\NodeSubscribeLandingController::landing'
+  requirements:
+    _entity_access: 'node.view'

@@ -41,6 +41,10 @@ class NodeSubscriptionEndpoints {
    *   The user email.
    * @param \Drupal\oe_newsroom\Value\NotificationFrequency $frequency
    *   The subscription frequency.
+   * @param string|null $redirect_to
+   *   Redirect url for the hard opt-in consent email.
+   *   The hard opt-in needs to be enabled on universe level, it is not
+   *   controlled by a parameter.
    *
    * @return array
    *   The node subscription details.
@@ -49,8 +53,9 @@ class NodeSubscriptionEndpoints {
     int $node_id,
     string $email,
     NotificationFrequency $frequency,
+    ?string $redirect_to = NULL,
   ): array {
-    return $this->doSubscribe($node_id, $email, $frequency);
+    return $this->doSubscribe($node_id, $email, $frequency, $redirect_to);
   }
 
   /**
@@ -65,6 +70,10 @@ class NodeSubscriptionEndpoints {
    *   The user email.
    * @param \Drupal\oe_newsroom\Value\NotificationFrequency $frequency
    *   The subscription frequency.
+   * @param string|null $redirect_to
+   *   Redirect url for the hard opt-in consent email.
+   *   The hard opt-in needs to be enabled on universe level, it is not
+   *   controlled by a parameter.
    *
    * @return array
    *   The node subscription details.
@@ -75,8 +84,9 @@ class NodeSubscriptionEndpoints {
     int $node_id,
     string $email,
     NotificationFrequency $frequency,
+    ?string $redirect_to = NULL,
   ): array {
-    return $this->doSubscribe($node_id, $email, $frequency, TRUE);
+    return $this->doSubscribe($node_id, $email, $frequency, $redirect_to, TRUE);
   }
 
   /**
@@ -88,6 +98,8 @@ class NodeSubscriptionEndpoints {
    *   The user email.
    * @param \Drupal\oe_newsroom\Value\NotificationFrequency $frequency
    *   The subscription frequency.
+   * @param string|null $redirect_to
+   *   Redirect url on successful subscription.
    * @param bool $nomail
    *   TRUE to skip the email confirmation.
    *
@@ -97,10 +109,11 @@ class NodeSubscriptionEndpoints {
    * @todo Remove frequency from this.
    * @todo Is the $nomail really about confirm email or about success email?
    */
-  protected function doSubscribe(
+  public function doSubscribe(
     int $node_id,
     string $email,
     NotificationFrequency $frequency,
+    ?string $redirect_to = NULL,
     bool $nomail = FALSE,
   ): array {
     $normalized_email = $this->apiClient->normalizeEmail($email);
@@ -112,6 +125,7 @@ class NodeSubscriptionEndpoints {
         // The endpoint expects the node id as string, not integer.
         'node_id' => (string) $node_id,
         'nomail' => $nomail,
+        ...$redirect_to ? ['redirect_to' => $redirect_to] : [],
       ],
     ];
     return $this->apiClient->postJson('subscribe', $payload, [$normalized_email]);
