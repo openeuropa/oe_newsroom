@@ -33,7 +33,10 @@ class NodeSubscriptionEndpoints {
   }
 
   /**
-   * Subscribes an e-mail to a node notification, skipping email confirmation.
+   * Calls the /subscribe endpoint to subscribe to a node id.
+   *
+   * If hard opt-in is enabled, this will only send an email, and not subscribe
+   * anything yet.
    *
    * @param int $node_id
    *   The node ID.
@@ -45,71 +48,13 @@ class NodeSubscriptionEndpoints {
    *   Redirect url for the hard opt-in consent email.
    *   The hard opt-in needs to be enabled on universe level, it is not
    *   controlled by a parameter.
-   *
-   * @return array
-   *   The node subscription details.
-   */
-  public function subscribe(
-    int $node_id,
-    string $email,
-    NotificationFrequency $frequency,
-    ?string $redirect_to = NULL,
-  ): array {
-    return $this->doSubscribe($node_id, $email, $frequency, $redirect_to);
-  }
-
-  /**
-   * Requests to subscribe to a node, with email confirmation.
-   *
-   * This is suitable if the user is logged in, or if they already confirmed
-   * their consent.
-   *
-   * @param int $node_id
-   *   The node ID.
-   * @param string $email
-   *   The user email.
-   * @param \Drupal\oe_newsroom\Value\NotificationFrequency $frequency
-   *   The subscription frequency.
-   * @param string|null $redirect_to
-   *   Redirect url for the hard opt-in consent email.
-   *   The hard opt-in needs to be enabled on universe level, it is not
-   *   controlled by a parameter.
-   *
-   * @return array
-   *   The node subscription details.
-   *
-   * @todo Remove frequency from this.
-   */
-  public function requestToSubscribe(
-    int $node_id,
-    string $email,
-    NotificationFrequency $frequency,
-    ?string $redirect_to = NULL,
-  ): array {
-    return $this->doSubscribe($node_id, $email, $frequency, $redirect_to, TRUE);
-  }
-
-  /**
-   * Subscribes an e-mail to a node notification.
-   *
-   * @param int $node_id
-   *   The node ID.
-   * @param string $email
-   *   The user email.
-   * @param \Drupal\oe_newsroom\Value\NotificationFrequency $frequency
-   *   The subscription frequency.
-   * @param string|null $redirect_to
-   *   Redirect url on successful subscription.
    * @param bool $nomail
    *   TRUE to skip the email confirmation.
    *
    * @return array
    *   Decoded response data.
-   *
-   * @todo Remove frequency from this.
-   * @todo Is the $nomail really about confirm email or about success email?
    */
-  public function doSubscribe(
+  public function subscribe(
     int $node_id,
     string $email,
     NotificationFrequency $frequency,
