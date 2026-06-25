@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\oe_newsroom_newsletter\Form;
+namespace Drupal\oe_newsroom_node\Form;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\DependencyInjection\AutowireTrait;

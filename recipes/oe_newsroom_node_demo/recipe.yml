@@ -8,4 +8,5 @@ install:
   - oe_newsroom_api_explorer
   - oe_newsroom_management
   - oe_newsroom_newsletter
+  - oe_newsroom_node
   - oe_newsroom_notification_example

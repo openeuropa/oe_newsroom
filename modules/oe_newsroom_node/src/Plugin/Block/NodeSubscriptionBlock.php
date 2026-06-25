@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\oe_newsroom_newsletter\Plugin\Block;
+namespace Drupal\oe_newsroom_node\Plugin\Block;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
@@ -18,8 +18,8 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\oe_newsroom\Api\NewsroomConnection;
 use Drupal\oe_newsroom\Newsroom;
-use Drupal\oe_newsroom_newsletter\Form\NodeSubscribeForm;
 use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
+use Drupal\oe_newsroom_node\Form\NodeSubscribeForm;
 
 /**
  * Block to subscribe to node notifications.
@@ -115,7 +115,7 @@ class NodeSubscriptionBlock extends BlockBase implements ContainerFactoryPluginI
    */
   protected function blockAccess(AccountInterface $account): AccessResultInterface {
     // @todo This will require it's own permission.
-    return AccessResult::allowedIfHasPermission($account, 'subscribe to newsroom newsletters');
+    return AccessResult::allowedIfHasPermission($account, 'subscribe to newsroom nodes');
   }
 
   /**

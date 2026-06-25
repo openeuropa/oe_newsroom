@@ -1,0 +1,10 @@
+subscribe to newsroom nodes:
+  title: 'Subscribe to newsroom nodes'
+  description: 'Allows users to subscribe to newsroom nodes'
+unsubscribe from newsroom nodes:
+  title: 'Unsubscribe from newsroom nodes'
+  description: 'Allows users to unsubscribe from newsroom nodes'
+administer newsroom node configuration:
+  title: 'Administer newsroom node configuration'
+  description: 'Allows users to configure newsroom newsletter'
+  restrict access: true
