@@ -2,7 +2,7 @@ oe_newsroom_management.node_subscriptions_management_anonymous:
   path: '/oe-newsroom-management/subscriptions-management/{email}/{token}'
   defaults:
     _title: 'Subscriptions Management'
-    _controller: '\Drupal\oe_newsroom_management\Controller\NodeSubscriptions:anonymousManagementPage'
+    _controller: '\Drupal\oe_newsroom_management\Controller\NodeSubscriptions::anonymousManagementPage'
   requirements:
     _user_is_logged_in: 'FALSE'
   options:
@@ -12,7 +12,7 @@ oe_newsroom_management.node_subscriptions_management_authenticated:
   path: '/oe-newsroom-management/subscriptions-management'
   defaults:
     _title: 'Subscriptions Management'
-    _controller: '\Drupal\oe_newsroom_management\Controller\NodeSubscriptions:authenticatedManagementPage'
+    _controller: '\Drupal\oe_newsroom_management\Controller\NodeSubscriptions::authenticatedManagementPage'
   requirements:
     _permission: 'access content'
   options:
