@@ -15,6 +15,8 @@ use Drupal\Core\Utility\Error;
 use Drupal\oe_newsroom\Endpoint\ExternalAuthEndpoints;
 use Drupal\oe_newsroom\Exception\Api\ApiException;
 use Drupal\oe_newsroom_management\TokenManager;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Provides a oe_newsroom_management form.
@@ -27,6 +29,8 @@ final class RequestAccessForm extends FormBase {
   public function __construct(
     protected TokenManager $tokenManager,
     protected ExternalAuthEndpoints $externalAuthEndpoints,
+    #[Autowire(service: 'logger.channel.oe_newsroom')]
+    protected LoggerInterface $logger,
     TranslationInterface $translation,
     MessengerInterface $messenger,
   ) {
@@ -85,7 +89,7 @@ final class RequestAccessForm extends FormBase {
     }
     catch (ApiException $e) {
       Error::logException(
-        $this->getLogger('oe_newsroom_management'),
+        $this->logger,
         $e,
         "Failed external auth request for '@email'.<br>" .
         Error::DEFAULT_ERROR_MESSAGE . '<br>' .
