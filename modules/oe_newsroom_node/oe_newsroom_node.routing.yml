@@ -1,0 +1,6 @@
+oe_newsroom_node.subscribe.landing:
+  path: '/node/{node}/newsroom-subscribe-landing'
+  defaults:
+    _controller: '\Drupal\oe_newsroom_node\Controller\NodeSubscribeLandingController::landing'
+  requirements:
+    _entity_access: 'node.view'

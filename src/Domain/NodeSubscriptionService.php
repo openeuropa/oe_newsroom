@@ -102,7 +102,7 @@ class NodeSubscriptionService {
     // @todo Make the default configurable.
     $frequency ??= NotificationFrequency::ON_PUBLICATION;
     $redirect_to = Url::fromRoute(
-      'oe_newsroom.node.subscribe.landing',
+      'oe_newsroom_node.subscribe.landing',
       ['node' => $node_id],
       ['absolute' => TRUE],
     )->toString();
