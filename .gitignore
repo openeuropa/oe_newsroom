@@ -13,4 +13,3 @@ phpunit.xml
 runner.yml
 vendor
 yarn.lock
-/recipes/
