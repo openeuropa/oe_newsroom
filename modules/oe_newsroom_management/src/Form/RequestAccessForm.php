@@ -10,6 +10,8 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Mail\MailManagerInterface;
+use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\StringTranslation\TranslationInterface;
 
 /**
  * Provides a oe_newsroom_management form.
@@ -22,7 +24,12 @@ final class RequestAccessForm extends FormBase {
   public function __construct(
     protected MailManagerInterface $mailManager,
     protected LanguageManagerInterface $languageManager,
-  ) {}
+    TranslationInterface $translation,
+    MessengerInterface $messenger,
+  ) {
+    $this->setStringTranslation($translation);
+    $this->setMessenger($messenger);
+  }
 
   /**
    * {@inheritdoc}
@@ -70,7 +77,7 @@ final class RequestAccessForm extends FormBase {
       $this->logger('oe_newsroom_management')->error('There was a problem sending the email.');
     }
 
-    $this->messenger()->addWarning($this->t('An email has been sent to your email address.'));
+    $this->messenger->addWarning($this->t('An email has been sent to your email address.'));
   }
 
 }
