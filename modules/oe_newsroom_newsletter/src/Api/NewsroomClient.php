@@ -89,7 +89,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container): NewsroomClient {
+  public static function create(ContainerInterface $container): static {
     return new static(
       $container->get('config.factory'),
       $container->get('settings'),
