@@ -86,7 +86,8 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
    * {@inheritdoc}
    */
   public function applies(RequestInterface $request, array $options): bool {
-    return $request->getUri()->getHost() === 'ec.europa.eu' && strpos($request->getUri()->getPath(), '/newsroom/api/v1/') === 0;
+    return $request->getUri()->getHost() === 'ec.europa.eu' &&
+      str_starts_with($request->getUri()->getPath(), '/newsroom/api/v1/');
   }
 
   /**
