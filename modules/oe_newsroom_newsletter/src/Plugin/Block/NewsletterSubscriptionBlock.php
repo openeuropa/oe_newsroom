@@ -56,9 +56,6 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
    */
   private $formBuilder;
 
-  /**
-   * {@inheritdoc}
-   */
   public function __construct(
     array $configuration,
     $plugin_id,
