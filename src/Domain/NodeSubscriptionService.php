@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\oe_newsroom\Domain;
 
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
 use Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints;
@@ -19,10 +21,15 @@ use Drupal\oe_newsroom\Value\NotificationFrequency;
  */
 class NodeSubscriptionService {
 
+  use StringTranslationTrait;
+
   public function __construct(
     protected readonly NodeSubscriptionEndpoints $nodeSubscriptionApi,
     protected readonly NodeNotificationEndpoints $nodeNotificationApi,
-  ) {}
+    TranslationInterface $translation,
+  ) {
+    $this->setStringTranslation($translation);
+  }
 
   /**
    * Checks if a node is known in the notification system.
@@ -220,19 +227,14 @@ class NodeSubscriptionService {
   /**
    * Gets select options to choose a frequency.
    *
-   * @param callable(string): \Drupal\Component\Render\MarkupInterface $t
-   *   String translation function.
-   *   This should be passed in, so that this service does not depend on the
-   *   translation service.
-   *
    * @return array<string, \Drupal\Component\Render\MarkupInterface>
    *   Select options.
    */
-  public function getFrequencyOptions(callable $t) {
+  public function getFrequencyOptions() {
     return [
-      NotificationFrequency::ON_PUBLICATION->value => $t('On publication'),
-      NotificationFrequency::DAILY->value => $t('Daily'),
-      NotificationFrequency::WEEKLY->value => $t('Weekly'),
+      NotificationFrequency::ON_PUBLICATION->value => $this->t('On publication'),
+      NotificationFrequency::DAILY->value => $this->t('Daily'),
+      NotificationFrequency::WEEKLY->value => $this->t('Weekly'),
     ];
   }
 

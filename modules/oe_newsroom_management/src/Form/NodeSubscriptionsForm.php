@@ -85,7 +85,7 @@ final class NodeSubscriptionsForm extends FormBase {
     $form['frequency'] = [
       '#type' => 'select',
       '#title' => $this->t('Frequency to receive notifications for this site.'),
-      '#options' => $this->nodeSubscriptionService->getFrequencyOptions($this->t(...)),
+      '#options' => $this->nodeSubscriptionService->getFrequencyOptions(),
       '#default_value' => $frequency->value,
       '#weight' => 0,
     ];
