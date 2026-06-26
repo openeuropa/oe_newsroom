@@ -15,7 +15,6 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\Core\Utility\Error;
 use Drupal\oe_newsroom\Newsroom;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Exception\ClientException;
 use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
@@ -52,7 +51,7 @@ class SubscribeForm extends NewsletterFormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      NewsroomClient::create($container),
+      $container->get(NewsroomClientInterface::class),
       $container->get('current_user'),
       $container->get('messenger'),
       $container->get('logger.factory'),

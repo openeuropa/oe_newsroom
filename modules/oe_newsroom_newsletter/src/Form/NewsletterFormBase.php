@@ -12,7 +12,6 @@ use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -39,7 +38,7 @@ abstract class NewsletterFormBase extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      NewsroomClient::create($container),
+      $container->get(NewsroomClientInterface::class),
       $container->get('current_user'),
       $container->get('messenger'),
       $container->get('logger.factory'),

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\oe_newsroom_newsletter\Api;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Core\Config\ConfigEvents;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Site\Settings;
@@ -14,7 +15,9 @@ use Drupal\oe_newsroom_newsletter\Exception\ClientException;
 use Drupal\oe_newsroom_newsletter\Exception\InvalidResponseException;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Client to access the Newsroom newsletter subscription API.
@@ -64,14 +67,31 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
    */
   protected $appId;
 
-  protected function __construct(
-    ConfigFactoryInterface $configFactory,
+  public function __construct(
+    protected readonly ConfigFactoryInterface $configFactory,
     Settings $settings,
+    // This attribute is needed for drupal/core:10.5.x.
+    // @todo Remove the attribute when we drop support for core 10.5.
+    #[Autowire(service: 'event_dispatcher')]
+    EventDispatcherInterface $eventDispatcher,
     protected readonly ClientInterface $httpClient,
   ) {
-    $config = $configFactory->get(Newsroom::CONFIG_NAME);
-
+    // Listen to configuration updates.
+    // This is only needed after this object is constructed, therefore we use
+    // ->addListener() and do not register it as an event subscriber.
+    $eventDispatcher->addListener(ConfigEvents::SAVE, $this->reconfigure(...));
+    $this->reconfigure();
     $this->privateKey = $settings->get('oe_newsroom')['newsroom_api_key'] ?? NULL;
+  }
+
+  /**
+   * Updates values from configuration.
+   *
+   * This is called as an event listener when config changes.
+   * It is mostly relevant during tests.
+   */
+  protected function reconfigure() {
+    $config = $this->configFactory->get(Newsroom::CONFIG_NAME);
     $this->hashMethod = $config->get('hash_method');
     $this->normalised = $config->get('normalised');
     $this->universe = $config->get('universe');
@@ -80,6 +100,9 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
 
   /**
    * {@inheritdoc}
+   *
+   * @deprecated
+   *   Just use the service.
    */
   public static function create(ContainerInterface $container): static {
     return new static(
