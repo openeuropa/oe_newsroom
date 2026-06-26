@@ -230,9 +230,9 @@ class NodeSubscriptionService {
    */
   public function getFrequencyOptions(callable $t) {
     return [
-      NotificationFrequency::ON_PUBLICATION->getCode() => $t('On publication'),
-      NotificationFrequency::DAILY->getCode() => $t('Daily'),
-      NotificationFrequency::WEEKLY->getCode() => $t('Weekly'),
+      NotificationFrequency::ON_PUBLICATION->value => $t('On publication'),
+      NotificationFrequency::DAILY->value => $t('Daily'),
+      NotificationFrequency::WEEKLY->value => $t('Weekly'),
     ];
   }
 
