@@ -67,7 +67,7 @@ class UnsubscribeForm extends NewsletterFormBase {
       }
     }
     catch (ClientException $e) {
-      $this->logger->get('oe_newsroom_newsletter')->error('%type thrown while unsubscribing email %email to the newsletter(s) with ID(s) %sv_ids and universe %universe: @message in %function (line %line of %file).', [
+      $this->logger->error('%type thrown while unsubscribing email %email to the newsletter(s) with ID(s) %sv_ids and universe %universe: @message in %function (line %line of %file).', [
         '%email' => $values['email'],
         '%universe' => $this->config(Newsroom::CONFIG_NAME)->get('universe'),
         '%sv_ids' => implode(',', $distribution_lists),

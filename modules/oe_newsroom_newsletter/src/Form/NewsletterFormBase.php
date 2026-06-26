@@ -9,11 +9,12 @@ use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Base form for subscription and unsubscription operations.
@@ -30,7 +31,8 @@ abstract class NewsletterFormBase extends FormBase {
     protected readonly NewsroomClientInterface $newsroomClient,
     protected readonly AccountProxyInterface $accountProxy,
     MessengerInterface $messenger,
-    protected readonly LoggerChannelFactoryInterface $logger,
+    #[Autowire('logger.channel.oe_newsroom_newsletter')]
+    protected readonly LoggerInterface $logger,
   ) {
     $this->setMessenger($messenger);
   }

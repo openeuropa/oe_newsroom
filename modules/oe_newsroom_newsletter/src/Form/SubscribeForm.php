@@ -9,7 +9,6 @@ use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Link;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -19,6 +18,8 @@ use Drupal\oe_newsroom\Newsroom;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Exception\ClientException;
 use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Subscribe form.
@@ -42,7 +43,8 @@ class SubscribeForm extends NewsletterFormBase {
     NewsroomClientInterface $newsroomClient,
     AccountProxyInterface $accountProxy,
     MessengerInterface $messenger,
-    LoggerChannelFactoryInterface $logger,
+    #[Autowire('logger.channel.oe_newsroom_newsletter')]
+    LoggerInterface $logger,
     protected LanguageManagerInterface $languageManager,
   ) {
     parent::__construct($newsroomClient, $accountProxy, $messenger, $logger);
@@ -169,7 +171,7 @@ class SubscribeForm extends NewsletterFormBase {
     }
     catch (ClientException $e) {
       $this->messenger->addError($this->t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
-      $this->logger->get('oe_newsroom_newsletter')->error('%type thrown while subscribing email %email to the newsletter(s) with ID(s) %sv_ids and universe %universe: @message in %function (line %line of %file).', [
+      $this->logger->error('%type thrown while subscribing email %email to the newsletter(s) with ID(s) %sv_ids and universe %universe: @message in %function (line %line of %file).', [
         '%email' => $values['email'],
         '%universe' => $this->config(Newsroom::CONFIG_NAME)->get('universe'),
         '%sv_ids' => implode(',', $distribution_lists),
