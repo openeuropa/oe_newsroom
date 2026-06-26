@@ -64,17 +64,10 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
    */
   protected $appId;
 
-  /**
-   * Http client to send http messages.
-   *
-   * @var \GuzzleHttp\Client
-   */
-  protected $httpClient;
-
   protected function __construct(
     ConfigFactoryInterface $configFactory,
     Settings $settings,
-    ClientInterface $httpClient,
+    protected readonly ClientInterface $httpClient,
   ) {
     $config = $configFactory->get(Newsroom::CONFIG_NAME);
 
@@ -83,7 +76,6 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
     $this->normalised = $config->get('normalised');
     $this->universe = $config->get('universe');
     $this->appId = $config->get('app_id');
-    $this->httpClient = $httpClient;
   }
 
   /**

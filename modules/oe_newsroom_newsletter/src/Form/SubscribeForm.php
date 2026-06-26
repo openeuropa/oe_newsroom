@@ -31,13 +31,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class SubscribeForm extends NewsletterFormBase {
 
   /**
-   * Language manager.
-   *
-   * @var \Drupal\Core\Language\LanguageManagerInterface
-   */
-  protected $languageManager;
-
-  /**
    * Successful subscription message.
    *
    * @var string
@@ -49,10 +42,9 @@ class SubscribeForm extends NewsletterFormBase {
     AccountProxyInterface $accountProxy,
     MessengerInterface $messenger,
     LoggerChannelFactoryInterface $logger,
-    LanguageManagerInterface $languageManager,
+    protected LanguageManagerInterface $languageManager,
   ) {
     parent::__construct($newsroomClient, $accountProxy, $messenger, $logger);
-    $this->languageManager = $languageManager;
   }
 
   /**
