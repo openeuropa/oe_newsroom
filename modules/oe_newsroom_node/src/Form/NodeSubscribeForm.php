@@ -40,9 +40,6 @@ class NodeSubscribeForm extends FormBase {
    */
   protected ?string $successMessage;
 
-  /**
-   * {@inheritdoc}
-   */
   public function __construct(
     protected NodeSubscriptionService $nodeSubscriptionService,
     protected LanguageManagerInterface $languageManager,
