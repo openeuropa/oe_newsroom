@@ -65,7 +65,7 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
       $plugin_id,
       $plugin_definition,
       NewsroomClient::create($container),
-      $container->get('form_builder')
+      $container->get('form_builder'),
     );
   }
 
