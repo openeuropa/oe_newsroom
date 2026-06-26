@@ -7,6 +7,7 @@ namespace Drupal\oe_newsroom_newsletter\Api;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Config\ConfigEvents;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -30,6 +31,13 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 final class NewsroomClient implements NewsroomClientInterface, ContainerInjectionInterface {
 
+  // Rename the trait method to allow us to overwrite it.
+  // The only reason for the overwrite is to mark it as deprecated.
+  // @todo Use AutowiredInstanceTrait when we drop Drupal 10.
+  // @todo Drop this completely, when we remove the ::create() method.
+  use AutowireTrait {
+    create as private traitCreate;
+  }
   use StringTranslationTrait;
 
   /**
@@ -105,11 +113,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
    *   Just use the service.
    */
   public static function create(ContainerInterface $container): static {
-    return new static(
-      $container->get('config.factory'),
-      $container->get('settings'),
-      $container->get('http_client')
-    );
+    return self::traitCreate($container);
   }
 
   /**
