@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\oe_newsroom_newsletter\Form;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Link;
@@ -18,7 +19,6 @@ use Drupal\oe_newsroom\Newsroom;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Exception\ClientException;
 use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Subscribe form.
@@ -28,6 +28,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   dependencies on it.
  */
 class SubscribeForm extends NewsletterFormBase {
+
+  use AutowireTrait;
 
   /**
    * Successful subscription message.
@@ -44,19 +46,6 @@ class SubscribeForm extends NewsletterFormBase {
     protected LanguageManagerInterface $languageManager,
   ) {
     parent::__construct($newsroomClient, $accountProxy, $messenger, $logger);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get(NewsroomClientInterface::class),
-      $container->get('current_user'),
-      $container->get('messenger'),
-      $container->get('logger.factory'),
-      $container->get('language_manager')
-    );
   }
 
   /**

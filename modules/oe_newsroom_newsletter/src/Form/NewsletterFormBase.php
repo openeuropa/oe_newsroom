@@ -6,6 +6,7 @@ namespace Drupal\oe_newsroom_newsletter\Form;
 
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
@@ -13,7 +14,6 @@ use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Base form for subscription and unsubscription operations.
@@ -24,6 +24,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 abstract class NewsletterFormBase extends FormBase {
 
+  use AutowireTrait;
+
   public function __construct(
     protected readonly NewsroomClientInterface $newsroomClient,
     protected readonly AccountProxyInterface $accountProxy,
@@ -31,18 +33,6 @@ abstract class NewsletterFormBase extends FormBase {
     protected readonly LoggerChannelFactoryInterface $logger,
   ) {
     $this->setMessenger($messenger);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get(NewsroomClientInterface::class),
-      $container->get('current_user'),
-      $container->get('messenger'),
-      $container->get('logger.factory'),
-    );
   }
 
   /**
