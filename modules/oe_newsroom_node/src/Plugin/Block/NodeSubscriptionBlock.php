@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\oe_newsroom_node\Plugin\Block;
 
+use Drupal\Component\Serialization\Json;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Block\Attribute\Block;
@@ -16,10 +17,10 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\Context\EntityContextDefinition;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Url;
 use Drupal\oe_newsroom\Api\NewsroomConnection;
 use Drupal\oe_newsroom\Newsroom;
 use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
-use Drupal\oe_newsroom_node\Form\NodeSubscribeForm;
 
 /**
  * Block to subscribe to node notifications.
@@ -49,8 +50,7 @@ class NodeSubscriptionBlock extends BlockBase implements ContainerFactoryPluginI
    */
   public function defaultConfiguration(): array {
     return [
-      'intro_text' => '',
-      'successful_subscription_message' => '',
+      'button_text' => 'Subscribe',
     ];
   }
 
@@ -61,18 +61,12 @@ class NodeSubscriptionBlock extends BlockBase implements ContainerFactoryPluginI
     $form = parent::blockForm($form, $form_state);
 
     // Should intro text be a rich text field?
-    $form['intro_text'] = [
-      '#type' => 'textarea',
-      '#title' => $this->t('Introduction text'),
-      '#description' => $this->t('Text which will show on top of the form.'),
-      '#default_value' => $this->configuration['intro_text'],
-    ];
-    $form['successful_subscription_message'] = [
+    $form['button_text'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Successful subscription message'),
-      '#description' => $this->t('Text to show when a user successfully subscribes to a node. Leave empty to use the message returned by the Newsroom API.'),
+      '#title' => $this->t('Button text'),
+      '#description' => $this->t('Text on the button that opens the subscribe form dialog.'),
       '#maxlength' => 255,
-      '#default_value' => $this->configuration['successful_subscription_message'],
+      '#default_value' => $this->configuration['button_text'],
     ];
 
     return $form;
@@ -84,8 +78,7 @@ class NodeSubscriptionBlock extends BlockBase implements ContainerFactoryPluginI
   public function blockSubmit($form, FormStateInterface $form_state): void {
     parent::blockSubmit($form, $form_state);
 
-    $this->configuration['intro_text'] = $form_state->getValue('intro_text');
-    $this->configuration['successful_subscription_message'] = $form_state->getValue('successful_subscription_message');
+    $this->configuration['button_text'] = $form_state->getValue('button_text');
   }
 
   /**
@@ -95,19 +88,32 @@ class NodeSubscriptionBlock extends BlockBase implements ContainerFactoryPluginI
     /** @var \Drupal\node\NodeInterface $node */
     $node = $this->getContextValue('node');
 
-    $privacy_uri = $this->configFactory->get(NewsroomNewsletter::CONFIG_NAME)->get('privacy_uri');
-    $sv_id = $this->configFactory->get(Newsroom::CONFIG_NAME)->get('sv_id');
+    $url = Url::fromRoute('oe_newsroom_node.subscribe', [
+      'node' => (string) $node->id(),
+    ]);
 
-    if (!$this->connection->isConfigured() || empty($privacy_uri) || empty($sv_id)) {
-      return [];
-    }
-
-    return $this->formBuilder->getForm(
-      NodeSubscribeForm::class,
-      $node,
-      $this->configuration['intro_text'],
-      $this->configuration['successful_subscription_message']
-    );
+    return [
+      'button' => [
+        '#type' => 'link',
+        '#title' => $this->t('Subscribe'),
+        '#url' => $url,
+        '#attributes' => [
+          'class' => [
+            'use-ajax',
+            'button',
+          ],
+          'data-dialog-type' => 'modal',
+          'data-dialog-options' => Json::encode([
+            'width' => 600,
+          ]),
+        ],
+      ],
+      '#attached' => [
+        'library' => [
+          'core/drupal.dialog.ajax',
+        ],
+      ],
+    ];
   }
 
   /**

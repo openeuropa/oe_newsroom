@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\oe_newsroom_node\Form;
 
+use Drupal\Component\Render\MarkupInterface;
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -12,6 +15,7 @@ use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Url;
+use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Drupal\oe_newsroom\Domain\NodeSubscriptionService;
 use Drupal\oe_newsroom\Exception\Domain\OperationError;
@@ -34,7 +38,7 @@ class NodeSubscribeForm extends FormBase {
    *
    * This is initialized in ->buildForm().
    */
-  protected string $successMessage;
+  protected ?string $successMessage;
 
   /**
    * {@inheritdoc}
@@ -53,9 +57,22 @@ class NodeSubscribeForm extends FormBase {
   }
 
   /**
+   * A page title callback.
+   *
+   * @param \Drupal\node\NodeInterface $node
+   *   The node object from url.
+   *
+   * @return \Drupal\Component\Render\MarkupInterface
+   *   The page title.
+   */
+  public function title(NodeInterface $node): MarkupInterface {
+    return t('Subscribe to @title', ['@title' => $node->label()]);
+  }
+
+  /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, ?NodeInterface $node = NULL, string $intro_text = '', string $success_message = ''): array {
+  public function buildForm(array $form, FormStateInterface $form_state, ?NodeInterface $node = NULL, ?string $intro_text = NULL, string $success_message = ''): array {
     if ($node === NULL) {
       return [];
     }
@@ -81,6 +98,8 @@ class NodeSubscribeForm extends FormBase {
     $this->successMessage = $success_message;
     $form_state->set('node_id', $node->id());
     $form['#id'] = Html::getUniqueId($this->getFormId());
+
+    $intro_text ??= $this->t('By subscribing to the updates of @title, you will be notified whenever changes are made.', ['@title' => $node->getTitle()]);
 
     // Start building up form.
     $form['intro_text'] = [
@@ -111,9 +130,22 @@ class NodeSubscribeForm extends FormBase {
     ];
     $form['actions'] = [
       '#type' => 'actions',
-      'submit' => [
-        '#type' => 'submit',
-        '#value' => $this->t('Subscribe'),
+    ];
+
+    $form['actions']['submit'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Subscribe me'),
+    ];
+
+    $form['actions']['cancel'] = [
+      '#type' => 'link',
+      '#title' => $this->t('No, thanks'),
+      '#attributes' => ['class' => ['button', 'dialog-cancel']],
+      '#url' => $node->toUrl('canonical'),
+      '#cache' => [
+        'contexts' => [
+          'url.query_args:destination',
+        ],
       ],
     ];
 
@@ -138,11 +170,40 @@ class NodeSubscribeForm extends FormBase {
   }
 
   /**
+   * Cancel button ajax callback.
+   *
+   * @param array $form
+   *   The complete form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   The ajax response.
+   */
+  public function cancel(array &$form, FormStateInterface $form_state) {
+    $response = new AjaxResponse();
+    $response->addCommand(new CloseModalDialogCommand());
+
+    return $response;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $values = $form_state->getValues();
     $node_id = $form_state->get('node_id');
+    $node = Node::load($node_id);
+
+    if (!$node) {
+      $this->messenger()->addWarning($this->t(
+        'The content no longer exists.',
+      ));
+      $form_state->setRedirectUrl(Url::fromRoute('<front>'));
+      return;
+    }
+
+    $form_state->setRedirectUrl($node->toUrl('canonical'));
 
     try {
       $this->nodeSubscriptionService->subscribe((int) $node_id, $values['email']);
@@ -156,7 +217,7 @@ class NodeSubscribeForm extends FormBase {
       return;
     }
 
-    $success_message = $this->successMessage ?: $this->t('You have been successfully subscribed.');
+    $success_message = $this->successMessage ?: $this->t('A confirmation email has been sent to your email address.');
     $this->messenger()->addStatus($success_message);
   }
 
