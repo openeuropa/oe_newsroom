@@ -53,9 +53,6 @@ abstract class NewsletterFormBase extends FormBase {
    */
   protected $logger;
 
-  /**
-   * Constructs a NewsletterFormBase object.
-   */
   public function __construct(
     NewsroomClientInterface $newsroomClient,
     AccountProxyInterface $accountProxy,

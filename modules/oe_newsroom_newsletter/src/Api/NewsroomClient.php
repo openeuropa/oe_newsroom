@@ -71,16 +71,6 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
    */
   protected $httpClient;
 
-  /**
-   * Client constructor.
-   *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   Configuration factory to automatically load configurations.
-   * @param \Drupal\Core\Site\Settings $settings
-   *   Required for API private key.
-   * @param \GuzzleHttp\ClientInterface $httpClient
-   *   Http client to send requests to the API.
-   */
   protected function __construct(
     ConfigFactoryInterface $configFactory,
     Settings $settings,

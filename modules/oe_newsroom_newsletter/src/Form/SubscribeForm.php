@@ -44,9 +44,6 @@ class SubscribeForm extends NewsletterFormBase {
    */
   protected $successfulMessage;
 
-  /**
-   * {@inheritdoc}
-   */
   public function __construct(
     NewsroomClientInterface $newsroomClient,
     AccountProxyInterface $accountProxy,
