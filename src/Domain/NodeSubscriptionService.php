@@ -115,6 +115,7 @@ class NodeSubscriptionService {
     )->toString();
     try {
       // @todo Add event here to allow to change parameters.
+      // @todo Make the 'nomail' configurable.
       $this->nodeSubscriptionApi->subscribe($node_id, $email, $frequency, $redirect_to);
     }
     catch (ApiException $e) {
