@@ -47,7 +47,13 @@ class SubscribeForm extends NewsletterFormBase {
   /**
    * {@inheritdoc}
    */
-  public function __construct(NewsroomClientInterface $newsroomClient, AccountProxyInterface $accountProxy, MessengerInterface $messenger, LoggerChannelFactoryInterface $logger, LanguageManagerInterface $languageManager) {
+  public function __construct(
+    NewsroomClientInterface $newsroomClient,
+    AccountProxyInterface $accountProxy,
+    MessengerInterface $messenger,
+    LoggerChannelFactoryInterface $logger,
+    LanguageManagerInterface $languageManager,
+  ) {
     parent::__construct($newsroomClient, $accountProxy, $messenger, $logger);
     $this->languageManager = $languageManager;
   }

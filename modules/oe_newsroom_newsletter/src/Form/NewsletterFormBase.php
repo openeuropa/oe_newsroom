@@ -56,7 +56,12 @@ abstract class NewsletterFormBase extends FormBase {
   /**
    * Constructs a NewsletterFormBase object.
    */
-  public function __construct(NewsroomClientInterface $newsroomClient, AccountProxyInterface $accountProxy, MessengerInterface $messenger, LoggerChannelFactoryInterface $logger) {
+  public function __construct(
+    NewsroomClientInterface $newsroomClient,
+    AccountProxyInterface $accountProxy,
+    MessengerInterface $messenger,
+    LoggerChannelFactoryInterface $logger,
+  ) {
     $this->newsroomClient = $newsroomClient;
     $this->accountProxy = $accountProxy;
     $this->messenger = $messenger;

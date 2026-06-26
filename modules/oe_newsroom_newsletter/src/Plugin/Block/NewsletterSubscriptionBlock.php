@@ -59,7 +59,14 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, NewsroomClientInterface $newsroomClient, FormBuilderInterface $form_builder, ConfigFactoryInterface $configFactory) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    NewsroomClientInterface $newsroomClient,
+    FormBuilderInterface $form_builder,
+    ConfigFactoryInterface $configFactory,
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->privacyUri = $configFactory->get(NewsroomNewsletter::CONFIG_NAME)->get('privacy_uri');
     $this->formBuilder = $form_builder;

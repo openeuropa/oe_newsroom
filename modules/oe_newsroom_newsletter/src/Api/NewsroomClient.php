@@ -81,7 +81,11 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
    * @param \GuzzleHttp\ClientInterface $httpClient
    *   Http client to send requests to the API.
    */
-  protected function __construct(ConfigFactoryInterface $configFactory, Settings $settings, ClientInterface $httpClient) {
+  protected function __construct(
+    ConfigFactoryInterface $configFactory,
+    Settings $settings,
+    ClientInterface $httpClient,
+  ) {
     $config = $configFactory->get(Newsroom::CONFIG_NAME);
 
     $this->privateKey = $settings->get('oe_newsroom')['newsroom_api_key'] ?? NULL;

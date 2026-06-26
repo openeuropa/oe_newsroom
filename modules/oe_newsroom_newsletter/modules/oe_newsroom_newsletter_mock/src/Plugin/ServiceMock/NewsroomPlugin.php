@@ -68,7 +68,12 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
   /**
    * {@inheritDoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, State $state) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    State $state,
+  ) {
     $this->state = $state;
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }

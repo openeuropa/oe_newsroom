@@ -50,7 +50,13 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, NewsroomClientInterface $newsroomClient, FormBuilderInterface $form_builder) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    NewsroomClientInterface $newsroomClient,
+    FormBuilderInterface $form_builder,
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->formBuilder = $form_builder;
     $this->newsroomClient = $newsroomClient;
