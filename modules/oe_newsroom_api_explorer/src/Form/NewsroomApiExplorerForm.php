@@ -13,6 +13,7 @@ use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\DependencyInjection\ClassResolverInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
@@ -35,6 +36,7 @@ class NewsroomApiExplorerForm extends FormBase {
   public function __construct(
     protected ClassResolverInterface $classResolver,
     protected HandlerStack $handlerStack,
+    protected ModuleHandlerInterface $moduleHandler,
   ) {}
 
   /**
@@ -449,8 +451,14 @@ class NewsroomApiExplorerForm extends FormBase {
       $report[]['raw_arguments'] = $submitted_arguments;
       throw $e;
     }
+    // Insert a http client middleware to record requests and responses.
     $reporting_middleware_handler = $this->createReportingMiddleware($report);
-    $this->handlerStack->push($reporting_middleware_handler);
+    if ($this->moduleHandler->moduleExists('http_request_mock')) {
+      $this->handlerStack->before('http_request_mock.client_middleware', $reporting_middleware_handler);
+    }
+    else {
+      $this->handlerStack->push($reporting_middleware_handler);
+    }
     try {
       $report = [
         ['return' => $service->$method_name(...$arguments)],
