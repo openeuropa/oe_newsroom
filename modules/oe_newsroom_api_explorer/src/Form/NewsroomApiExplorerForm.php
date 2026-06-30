@@ -381,7 +381,7 @@ class NewsroomApiExplorerForm extends FormBase {
       $this->invokeEndpoint($endpoint_name, $submitted_arguments, $report);
       $this->messenger()->addStatus($this->t(
         // Add a time to make subsequent submissions distinguishable.
-        '<h3>Submission successful (%time).</h3><br><pre>@report</pre>',
+        '<h3>Submission successful (%time).</h3><br>@report',
         [
           '%time' => date('H:i:s', \Drupal::time()->getRequestTime()),
           '@report' => $this->renderReport($report),
