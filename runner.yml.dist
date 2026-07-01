@@ -20,6 +20,12 @@ drupal:
     - "./vendor/bin/drush config-set node.settings use_admin_theme 1 -y"
     # Enable the modules.
     - "./vendor/bin/drush en oe_newsroom_newsletter -y"
+    # Enable newer submodules that require a higher Drupal core version.
+    - |
+      core_version=$(./vendor/bin/drush status --fields=drupal-version --format=string)
+      if php -r "exit(version_compare('$core_version', '11.3.0', '>=' ) ? 0 : 1);"; then
+        ./vendor/bin/drush en oe_newsroom_api_explorer -y
+      fi
     - "./vendor/bin/drush cr"
   settings:
     settings:
