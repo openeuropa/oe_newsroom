@@ -1,8 +1,9 @@
 name: OpenEuropa Newsroom API Explorer
 description: Helper module for developers to explore and test the Newsroom API.
 package: OpenEuropa
-core_version_requirement: ^11
 type: module
+# Newly added submodules start with a higher minimum version for Drupal core.
+core_version_requirement: ^11.3
 
 dependencies:
   - oe_newsroom:oe_newsroom
