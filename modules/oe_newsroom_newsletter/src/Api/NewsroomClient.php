@@ -13,6 +13,7 @@ use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\oe_newsroom\Newsroom;
 use Drupal\oe_newsroom_newsletter\Exception\ClientException;
+use Drupal\oe_newsroom_newsletter\Exception\ClientMisconfigurationException;
 use Drupal\oe_newsroom_newsletter\Exception\InvalidResponseException;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
@@ -143,12 +144,28 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
   }
 
   /**
-   * {@inheritdoc}
+   * Makes a request to the '/subscribe' endpoint.
    *
-   * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-   * @SuppressWarnings(PHPMD.NPathComplexity)
+   * @param string $email
+   *   Subscriber e-mail address.
+   * @param array $svIds
+   *   An array of distribution list IDs. The user will get notification when
+   *   they are subscribing for these list(s).
+   * @param array $relatedSvIds
+   *   An array of distribution list IDs. The user will NOT get notification
+   *   when they are subscribing for these list(s).
+   * @param string|null $language
+   *   Specify the language of the subscription (for all services).
+   * @param array $topicExtId
+   *   An array of Topic IDs, only used for notifications.
+   *
+   * @return array
+   *   Raw decoded response data.
+   *
+   * @throws \Drupal\oe_newsroom_newsletter\Exception\ClientException
+   *   Something went wrong.
    */
-  public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], ?string $language = NULL, array $topicExtId = []): array {
+  protected function doSubscribe(string $email, array $svIds = [], array $relatedSvIds = [], ?string $language = NULL, array $topicExtId = []): array {
     $payload = [
       'key' => $this->generateKey($email),
       'subscription' => array_filter(
@@ -193,6 +210,19 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
       throw new InvalidResponseException('Empty response returned by Newsroom newsletter API.');
     }
 
+    return $data;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], ?string $language = NULL, array $topicExtId = []): array {
+    $data = $this->doSubscribe($email, $svIds, $relatedSvIds, $language, $topicExtId);
+
+    if (isset($data['status'])) {
+      throw new ClientMisconfigurationException('The newsletter service has hard opt-in enabled, but this method is meant for immediate subscription.');
+    }
+
     $response = NULL;
     // This is necessary to split separately newsletters distribution lists.
     $sv_ids_separated = explode(',', implode(',', $svIds));
@@ -209,6 +239,21 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
     }
 
     throw new InvalidResponseException('Newsroom API returned a 200 response but subscription items were found in it.');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function requestToSubscribe(string $email, array $svIds = [], array $relatedSvIds = [], ?string $language = NULL, array $topicExtId = []): void {
+    $data = $this->doSubscribe($email, $svIds, $relatedSvIds, $language, $topicExtId);
+
+    if (!isset($data['status'])) {
+      throw new ClientMisconfigurationException('This method assumes that hard opt-in is enabled for this newsletter service.');
+    }
+
+    if ($data['status'] !== 'pending_verification') {
+      throw new ClientMisconfigurationException(sprintf("Expected status 'pending_verification', found '%s'.", $data['status']));
+    }
   }
 
   /**
