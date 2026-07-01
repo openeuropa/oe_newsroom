@@ -32,6 +32,16 @@ class NewsroomApiExplorerTest extends WebDriverTestBase {
   protected $defaultTheme = 'stark';
 
   /**
+   * {@inheritdoc}
+   */
+  public function setUp(): void {
+    if (version_compare(\Drupal::VERSION, '11.3.0', '<')) {
+      $this->markTestSkipped('This test only runs with Drupal 11.3 and higher.');
+    }
+    parent::setUp();
+  }
+
+  /**
    * Tests the API Explorer page/form.
    */
   public function testApiExplorer(): void {
