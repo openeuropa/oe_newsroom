@@ -151,13 +151,20 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
   public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], ?string $language = NULL, array $topicExtId = []): array {
     $payload = [
       'key' => $this->generateKey($email),
-      'subscription' => [
-        'universeAcronym' => $this->universe,
-        'topicExtWebsite' => $this->appId,
-        'sv_id' => implode(',', $svIds),
-        'email' => $this->normalised ? mb_strtolower($email) : $email,
-        'language' => $language,
-      ],
+      'subscription' => array_filter(
+        [
+          'universeAcronym' => $this->universe,
+          'topicExtWebsite' => $this->appId,
+          'sv_id' => implode(',', $svIds),
+          'email' => $this->normalised ? mb_strtolower($email) : $email,
+          'language' => $language,
+        ],
+        fn ($value, $key) => match ($key) {
+          'sv_id', 'language' => $value !== NULL && $value !== '',
+          default => TRUE,
+        },
+        ARRAY_FILTER_USE_BOTH,
+      ),
     ];
 
     if (!empty($relatedSvIds)) {
