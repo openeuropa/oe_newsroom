@@ -28,6 +28,8 @@ interface NewsroomClientInterface {
   /**
    * Subscribe an email to the newsletters.
    *
+   * This assumes that hard opt-in is disabled.
+   *
    * @param string $email
    *   Subscriber e-mail address.
    * @param array $svIds
@@ -50,6 +52,31 @@ interface NewsroomClientInterface {
    *   Thrown when the response is not valid.
    */
   public function subscribe(string $email, array $svIds = [], array $relatedSvIds = [], ?string $language = NULL, array $topicExtId = []): array;
+
+  /**
+   * Requests to subscribe an email to newsletters.
+   *
+   * This assumes that hard opt-in is enabled.
+   *
+   * @param string $email
+   *   Subscriber e-mail address.
+   * @param array $svIds
+   *   An array of distribution list IDs. The user will get notification when
+   *   they are subscribing for these list(s).
+   * @param array $relatedSvIds
+   *   An array of distribution list IDs. The user will NOT get notification
+   *   when they are subscribing for these list(s).
+   * @param string|null $language
+   *   Specify the language of the subscription (for all services).
+   * @param array $topicExtId
+   *   An array of Topic IDs, only used for notifications.
+   *
+   * @throws \GuzzleHttp\Exception\GuzzleException
+   *   Thrown by the Guzzle client.
+   * @throws \Drupal\oe_newsroom_newsletter\Exception\InvalidResponseException
+   *   Thrown when the response is not valid.
+   */
+  public function requestToSubscribe(string $email, array $svIds = [], array $relatedSvIds = [], ?string $language = NULL, array $topicExtId = []): void;
 
   /**
    * Unsubscribe an email from the newsletters.
