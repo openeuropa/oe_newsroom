@@ -683,7 +683,7 @@ class NewsroomApiExplorerForm extends FormBase {
         return new TaggedValue('enum', get_class($input) . '::' . $input->name);
       }
       if (is_a($input, EntityInterface::class)) {
-        return new TaggedValue('entity', get_class($input) . ' ' . $input->id() ?? '#new');
+        return new TaggedValue('entity', get_class($input) . ' ' . ($input->id() ?? '#new'));
       }
       return new TaggedValue('object', get_class($input));
     }
