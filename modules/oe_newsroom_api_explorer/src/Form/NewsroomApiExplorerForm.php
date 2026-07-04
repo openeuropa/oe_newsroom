@@ -18,6 +18,7 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Promise\Create;
 use GuzzleHttp\Promise\PromiseInterface;
 use phpDocumentor\Reflection\DocBlock\Tag;
 use phpDocumentor\Reflection\DocBlock\Tags\Param;
@@ -562,6 +563,7 @@ class NewsroomApiExplorerForm extends FormBase {
           },
           function ($reason) use (&$report) {
             $report[]['failure reason'] = $reason;
+            return Create::rejectionFor($reason);
           }
         );
       };
