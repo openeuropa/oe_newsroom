@@ -23,6 +23,8 @@ use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints;
+use Drupal\oe_newsroom\Endpoint\NodeSubscriptionEndpoints;
+use Drupal\oe_newsroom\Value\NotificationFrequency;
 use Drupal\oe_newsroom_api_explorer\Helper\ReflectionHelper;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_vcr\Explorer\VcrApiExplorerOperations;
@@ -285,6 +287,20 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
           '#type' => 'textfield',
           '#description' => $this->t('Use json or separate by comma'),
         ],
+        NotificationFrequency::class => [
+          '#type' => 'select',
+          '#options' => (function (): array {
+            $options = [];
+            foreach (NotificationFrequency::cases() as $case) {
+              $options[$case->value] = $case->value;
+            }
+            return $options;
+          })(),
+          ...($parameter->allowsNull()) ? [
+            '#empty_option' => $this->t('- None -'),
+            '#empty_value' => '',
+          ] : [],
+        ],
       };
     }
     catch (\UnhandledMatchError) {
@@ -490,6 +506,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
         default => preg_split('#, *#', trim($value)),
       },
       'string', 'string|int', 'int|string' => (string) $value,
+      NotificationFrequency::class => NotificationFrequency::from($value),
       default => throw new \Exception(sprintf('Unsupported type %s for parameter %s', $parameter->getType()->__toString(), $parameter->name)),
     };
     if ($argument === $illegal_value) {
@@ -597,6 +614,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
     $classes = [
       NewsroomClient::class,
       NodeNotificationEndpoints::class,
+      NodeSubscriptionEndpoints::class,
       // Allow developers to play with the VCR in the API explorer.
       VcrStore::class,
       VcrApiExplorerOperations::class,
