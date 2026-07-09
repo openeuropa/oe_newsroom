@@ -11,3 +11,4 @@ services:
   Drupal\oe_newsroom\Endpoint\ExternalAuthEndpoints: {}
   Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints: {}
   Drupal\oe_newsroom\Endpoint\NodeSubscriptionEndpoints: {}
+  Drupal\oe_newsroom\Endpoint\StaticMailEndpoints: {}
