@@ -13,6 +13,7 @@ services:
   Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints: {}
   Drupal\oe_newsroom\Endpoint\NodeSubscriptionEndpoints: {}
   Drupal\oe_newsroom\Endpoint\StaticMailEndpoints: {}
+  Drupal\oe_newsroom\ExceptionLogger: {}
   logger.channel.oe_newsroom:
     parent: logger.channel_base
     arguments: ['oe_newsroom']
