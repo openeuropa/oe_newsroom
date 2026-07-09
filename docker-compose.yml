@@ -16,6 +16,12 @@ services:
       # Enable step debugging for all PHP request. See ./README.md#step-debugging for more information.
       # XDEBUG_SESSION: 1
       NEWSROOM_API_PRIVATE_KEY:
+
+      # Mailhog
+      SMTP_FROM: "oe_newsroom@mail.com"
+      SMTP_SERVER: mailhog
+      SMTP_PORT: 1025
+
   mysql:
     image: percona/percona-server:8.0
     command: --innodb-log-file-size=1G --max_allowed_packet=1G --innodb-buffer-pool-size=512M --wait_timeout=3000 --net_write_timeout=3000 --log_error_verbosity=3 --skip-log-bin --innodb-flush-log-at-trx-commit=2 --innodb-read-io-threads=16 --innodb-write-io-threads=16
@@ -36,6 +42,14 @@ services:
       - '4444:4444'
       - '5900:5900'
     shm_size: 2g
+
+  mailhog:
+    image: mailhog/mailhog
+    logging:
+      driver: 'none' # (Optionaly disable saving logs)
+    ports:
+      - 1025:1025 # smtp server
+      - 8025:8025 # web ui
 
 #### Mac users: uncomment the "volumes" key to enable the NFS file sharing. You can find more information about Docker for Mac here: https://github.com/openeuropa/openeuropa/blob/master/docs/starting/tooling.md#using-docker-on-macos
 
