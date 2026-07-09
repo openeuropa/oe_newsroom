@@ -120,6 +120,16 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
           $response = $this->unsubscribe($request);
           break;
 
+        case '/newsroom/api/v1/node-notification/create':
+        case '/newsroom/api/v1/node-notification/delete':
+        case '/newsroom/api/v1/unsubscribe/node-notification':
+          $response = $this->createResponse();
+          break;
+
+        case '/newsroom/api/v1/node-notification/get':
+          $response = $this->createResponse();
+          break;
+
         default:
           $response = $this->createResponse(404);
       }
@@ -297,6 +307,11 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
    */
   protected function subscribe(RequestInterface $request): ResponseInterface {
     $data = Json::decode((string) $request->getBody());
+
+    if (isset($data['subscription']['node_id'])) {
+      return $this->createResponse();
+    }
+
     $universe = $data['subscription']['universeAcronym'];
     $app_id = $data['subscription']['topicExtWebsite'];
     $email = $data['subscription']['email'];
