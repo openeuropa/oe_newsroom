@@ -8,4 +8,5 @@ services:
   Drupal\oe_newsroom\Api\ApiClient: {}
   Drupal\oe_newsroom\Api\NewsroomConnection:
     factory: ['Drupal\oe_newsroom\Api\NewsroomConnection', create]
+  Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints: {}
   Drupal\oe_newsroom\Endpoint\NodeSubscriptionEndpoints: {}
