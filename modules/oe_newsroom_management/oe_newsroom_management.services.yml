@@ -1,0 +1,3 @@
+services:
+  Drupal\oe_newsroom_management\TokenManager:
+    arguments: ['@database', '@datetime.time']

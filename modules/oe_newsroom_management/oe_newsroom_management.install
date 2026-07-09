@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * @file
+ * OE newsroom management module install.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Render\Element\Email;
+
+/**
+ * Implements function hook_schema().
+ */
+function oe_newsroom_management_schema() {
+  $schema['oe_newsroom_management_access_tokens'] = [
+    'description' => 'Stores tokens to validate e-mails from anonymous users.',
+    'fields' => [
+      'mail' => [
+        'description' => 'The e-mail the token is generated for.',
+        'length' => Email::EMAIL_MAX_LENGTH,
+        'type' => 'varchar_ascii',
+        'not null' => TRUE,
+      ],
+      'hash' => [
+        'description' => 'The token.',
+        'length' => 255,
+        'type' => 'varchar_ascii',
+        'not null' => TRUE,
+      ],
+      'changed' => [
+        'description' => 'Last time the token was changed.',
+        'type' => 'int',
+        'not null' => TRUE,
+      ],
+    ],
+    'primary key' => [
+      'mail',
+    ],
+  ];
+  return $schema;
+}
