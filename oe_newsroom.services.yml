@@ -1,6 +1,11 @@
 services:
   _defaults:
     autowire: true
+    tags:
+      # The service tag marks all services as candidates for the API explorer.
+      # Only those which have the attribute will actually be explorable.
+      - { name: oe_newsroom_api_explorer }
   Drupal\oe_newsroom\Api\ApiClient: {}
   Drupal\oe_newsroom\Api\NewsroomConnection:
     factory: ['Drupal\oe_newsroom\Api\NewsroomConnection', create]
+  Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints: {}
