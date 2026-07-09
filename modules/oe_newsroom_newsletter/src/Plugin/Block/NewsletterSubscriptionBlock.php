@@ -13,8 +13,8 @@ use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\oe_newsroom\Api\NewsroomConnection;
 use Drupal\oe_newsroom\Newsroom;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Form\SubscribeForm;
 use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -45,7 +45,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
     array $configuration,
     $plugin_id,
     $plugin_definition,
-    protected readonly NewsroomClientInterface $newsroomClient,
+    protected readonly NewsroomConnection $connection,
     private readonly FormBuilderInterface $formBuilder,
     ConfigFactoryInterface $configFactory,
   ) {
@@ -61,7 +61,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get(NewsroomClientInterface::class),
+      $container->get(NewsroomConnection::class),
       $container->get('form_builder'),
       $container->get('config.factory'),
     );
@@ -181,7 +181,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
    * {@inheritdoc}
    */
   public function build(): array {
-    if (!$this->newsroomClient->isConfigured() || empty($this->configuration['distribution_lists']) || empty($this->privacyUri)) {
+    if (!$this->connection->isConfigured() || empty($this->configuration['distribution_lists']) || empty($this->privacyUri)) {
       return [];
     }
 
