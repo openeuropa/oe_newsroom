@@ -6,10 +6,13 @@ namespace Drupal\oe_newsroom_newsletter\Form;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Utility\Error;
-use Drupal\oe_newsroom\Newsroom;
-use Drupal\oe_newsroom_newsletter\Exception\ClientException;
+use Drupal\oe_newsroom_newsletter\Domain\NewsletterSubscribeService;
+use Drupal\oe_newsroom\Exception\Domain\OperationFailure;
+use Drupal\oe_newsroom\ExceptionLogger;
 
 /**
  * Unsubscribe form.
@@ -19,6 +22,16 @@ use Drupal\oe_newsroom_newsletter\Exception\ClientException;
  *   dependencies on it.
  */
 class UnsubscribeForm extends NewsletterFormBase {
+
+  public function __construct(
+    protected NewsletterSubscribeService $newsletterSubscribeService,
+    AccountProxyInterface $accountProxy,
+    MessengerInterface $messenger,
+    LoggerChannelFactoryInterface $logger,
+    protected ExceptionLogger $exceptionLogger,
+  ) {
+    parent::__construct($accountProxy, $messenger, $logger);
+  }
 
   /**
    * {@inheritdoc}
@@ -61,20 +74,13 @@ class UnsubscribeForm extends NewsletterFormBase {
 
     try {
       // Let's call the unsubscription service.
-      if ($this->newsroomClient->unsubscribe($values['email'], $distribution_lists)) {
-        $this->messenger->addStatus($this->t('Successfully unsubscribed!'));
-        return;
-      }
+      $this->newsletterSubscribeService->unsubscribe($values['email'], $distribution_lists);
+      $this->messenger->addStatus($this->t('Successfully unsubscribed!'));
     }
-    catch (ClientException $e) {
-      $this->logger->error('%type thrown while unsubscribing email %email to the newsletter(s) with ID(s) %sv_ids and universe %universe: @message in %function (line %line of %file).', [
-        '%email' => $values['email'],
-        '%universe' => $this->config(Newsroom::CONFIG_NAME)->get('universe'),
-        '%sv_ids' => implode(',', $distribution_lists),
-      ] + Error::decodeException($e));
+    catch (OperationFailure $e) {
+      $this->exceptionLogger->logException($e, 'Failed to unsubscribe in form submit.');
+      $this->messenger->addError($this->t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
     }
-
-    $this->messenger->addError($this->t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
   }
 
   /**
