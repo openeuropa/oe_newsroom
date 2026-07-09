@@ -1,0 +1,22 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - oe_newsroom_node
+  theme:
+    - olivero
+id: olivero_nodesubscriptionblock
+theme: olivero
+region: content_above
+weight: 0
+provider: null
+plugin: oe_newsroom_node_subscription_block
+settings:
+  id: oe_newsroom_node_subscription_block
+  label: 'Node subscription block'
+  label_display: visible
+  provider: oe_newsroom_node
+  context_mapping:
+    node: '@node.node_route_context:node'
+  button_text: Subscribe
+visibility: {  }

@@ -27,6 +27,8 @@ drupal:
         ./vendor/bin/drush en oe_newsroom_api_explorer -y
       fi
     - "./vendor/bin/drush cr"
+    # Apply recipes, if in Drupal 11.x.
+    - "./vendor/bin/drush recipe ../recipes/oe_newsroom_node_demo"
   settings:
     settings:
       file_scan_ignore_directories:
