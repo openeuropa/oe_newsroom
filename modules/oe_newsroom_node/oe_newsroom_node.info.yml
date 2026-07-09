@@ -1,5 +1,5 @@
-name: OpenEuropa Newsroom Node
-description: OpenEuropa Newsroom Node module, provides a block to subscribe to node notifications.
+name: OpenEuropa Newsroom Node Subscription
+description: Allows anonymous users to subscribe to nodes via Newsroom.
 package: OpenEuropa
 core_version_requirement: ^11.3
 
