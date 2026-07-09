@@ -22,6 +22,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
+use Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints;
 use Drupal\oe_newsroom_api_explorer\Helper\ReflectionHelper;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use GuzzleHttp\HandlerStack;
@@ -593,6 +594,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
   protected function getEndpointOptions(): array {
     $classes = [
       NewsroomClient::class,
+      NodeNotificationEndpoints::class,
     ];
     $options = [];
     foreach ($classes as $class) {
