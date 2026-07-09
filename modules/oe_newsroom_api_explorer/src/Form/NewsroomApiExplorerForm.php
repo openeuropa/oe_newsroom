@@ -21,6 +21,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
+use Drupal\oe_newsroom\Value\NotificationFrequency;
 use Drupal\oe_newsroom_api_explorer\ApiExplorerMethodRegistry;
 use Drupal\oe_newsroom_api_explorer\Helper\ReflectionHelper;
 use GuzzleHttp\HandlerStack;
@@ -289,6 +290,20 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
           '#type' => 'textfield',
           '#description' => $this->t('Use json or separate by comma'),
         ],
+        NotificationFrequency::class => [
+          '#type' => 'select',
+          '#options' => (function (): array {
+            $options = [];
+            foreach (NotificationFrequency::cases() as $case) {
+              $options[$case->value] = $case->value;
+            }
+            return $options;
+          })(),
+          ...($parameter->allowsNull()) ? [
+            '#empty_option' => $this->t('- None -'),
+            '#empty_value' => '',
+          ] : [],
+        ],
       };
     }
     catch (\UnhandledMatchError) {
@@ -495,6 +510,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
         default => preg_split('#, *#', trim($value)),
       },
       'string' => (string) $value,
+      NotificationFrequency::class => NotificationFrequency::from($value),
       default => throw new \Exception(sprintf('Unsupported type %s for parameter %s', $parameter->getType()->__toString(), $parameter->name)),
     };
     if ($argument === $illegal_value) {
