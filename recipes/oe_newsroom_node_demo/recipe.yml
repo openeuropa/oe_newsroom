@@ -1,0 +1,12 @@
+name: 'OpenEuropa Newsroom node subscribe demo'
+description: "Demonstrates the Newsroom node subscribe functionality with an example node type."
+type: 'Content type'
+recipes:
+  - core/recipes/page_content_type
+install:
+  - oe_newsroom
+  - oe_newsroom_api_explorer
+  - oe_newsroom_management
+  - oe_newsroom_newsletter
+  - oe_newsroom_node
+  - oe_newsroom_notification_example
