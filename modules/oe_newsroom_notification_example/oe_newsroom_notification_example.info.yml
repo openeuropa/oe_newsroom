@@ -1,0 +1,7 @@
+name: 'oe_newsroom_notification_example'
+type: module
+description: 'Example module with a node notification.'
+package: OpenEuropa
+core_version_requirement: ^10 || ^11
+dependencies:
+  - oe_newsroom_newsletter:oe_newsroom_newsletter
