@@ -7,7 +7,8 @@ services:
       - { name: oe_newsroom_api_explorer }
   # The registered service is a default instance of the newsroom client, based
   # on the module's global configuration.
-  Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface:
+  Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface: '@Drupal\oe_newsroom_newsletter\Api\NewsroomClient'
+  Drupal\oe_newsroom_newsletter\Api\NewsroomClient:
     class: Drupal\oe_newsroom_newsletter\Api\NewsroomClient
   Drupal\oe_newsroom_newsletter\Domain\NewsletterSubscribeService: {}
   logger.channel.oe_newsroom_newsletter:
