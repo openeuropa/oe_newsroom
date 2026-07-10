@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\oe_newsroom_api_explorer\Form;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Render\MarkupInterface;
 use Drupal\Component\Serialization\Yaml;
@@ -12,10 +13,15 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\DependencyInjection\ClassResolverInterface;
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Promise\Create;
@@ -30,15 +36,22 @@ use Symfony\Component\Yaml\Tag\TaggedValue;
 /**
  * A form to test API endpoints.
  */
-class NewsroomApiExplorerForm extends FormBase {
+class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterface {
 
   use AutowireTrait;
+  use DependencySerializationTrait;
+  use StringTranslationTrait;
 
   public function __construct(
     protected ClassResolverInterface $classResolver,
     protected HandlerStack $handlerStack,
     protected ModuleHandlerInterface $moduleHandler,
-  ) {}
+    protected TimeInterface $time,
+    protected MessengerInterface $messenger,
+    TranslationInterface $translation,
+  ) {
+    $this->setStringTranslation($translation);
+  }
 
   /**
    * {@inheritdoc}
@@ -382,11 +395,11 @@ class NewsroomApiExplorerForm extends FormBase {
     $report = [];
     try {
       $this->invokeEndpoint($endpoint_name, $submitted_arguments, $report);
-      $this->messenger()->addStatus($this->t(
+      $this->messenger->addStatus($this->t(
         // Add a time to make subsequent submissions distinguishable.
         '<h3>Submission successful (%time).</h3><br>@report',
         [
-          '%time' => date('H:i:s', \Drupal::time()->getRequestTime()),
+          '%time' => date('H:i:s', $this->time->getRequestTime()),
           '@report' => $this->renderReport($report),
         ],
       ));
@@ -409,11 +422,11 @@ class NewsroomApiExplorerForm extends FormBase {
         ...$exception_report,
         ...$report,
       ];
-      $this->messenger()->addWarning($this->t(
+      $this->messenger->addWarning($this->t(
         '<h3>Submission failed (%time).</h3><br><pre>@report</pre>',
         [
           '@report' => $this->renderReport($report),
-          '%time' => date('H:i:s', \Drupal::time()->getRequestTime()),
+          '%time' => date('H:i:s', $this->time->getRequestTime()),
         ],
       ));
     }
@@ -691,6 +704,13 @@ class NewsroomApiExplorerForm extends FormBase {
       return new TaggedValue('resource', get_resource_type($input));
     }
     return $input;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state): void {
+    // No validation needed.
   }
 
 }
