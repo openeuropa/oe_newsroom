@@ -422,7 +422,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
         ...$exception_report,
         ...$report,
       ];
-      $this->messenger->addWarning($this->t(
+      $this->messenger->addError($this->t(
         '<h3>Submission failed (%time).</h3><br><pre>@report</pre>',
         [
           '@report' => $this->renderReport($report),
