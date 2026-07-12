@@ -258,7 +258,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
    */
   protected function findMethodDocComment(\ReflectionMethod $method): ?string {
     $doc = $method->getDocComment();
-    if ($doc !== NULL && !str_contains($doc, '@inheritdoc')) {
+    if ($doc !== FALSE && !str_contains($doc, '@inheritdoc')) {
       return $doc;
     }
     $parent_class = $method->getDeclaringClass();
