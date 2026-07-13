@@ -692,10 +692,10 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
       return array_map($this->formatForYaml(...), $input);
     }
     if (is_object($input)) {
-      if (is_a($input, \UnitEnum::class)) {
+      if ($input instanceof \UnitEnum) {
         return new TaggedValue('enum', get_class($input) . '::' . $input->name);
       }
-      if (is_a($input, EntityInterface::class)) {
+      if ($input instanceof EntityInterface) {
         return new TaggedValue('entity', get_class($input) . ' ' . ($input->id() ?? '#new'));
       }
       return new TaggedValue('object', get_class($input));
