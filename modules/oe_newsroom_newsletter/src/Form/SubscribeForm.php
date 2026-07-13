@@ -146,7 +146,7 @@ class SubscribeForm extends NewsletterFormBase {
    * This allows to show a custom message instead of the standard
    * "field is required" one.
    */
-  public function validatePrivacyElement($element, FormStateInterface $form_state, $form): void {
+  public function validatePrivacyElement(array $element, FormStateInterface $form_state, array $form): void {
     if (empty($element['#value'])) {
       $form_state->setError($form['agree_privacy_statement'], $this->t('You must agree with the privacy statement.'));
     }

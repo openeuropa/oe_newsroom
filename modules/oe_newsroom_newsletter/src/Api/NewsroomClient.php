@@ -98,7 +98,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
    * This is called as an event listener when config changes.
    * It is mostly relevant during tests.
    */
-  protected function reconfigure() {
+  protected function reconfigure(): void {
     $config = $this->configFactory->get(Newsroom::CONFIG_NAME);
     $this->hashMethod = $config->get('hash_method');
     $this->normalised = $config->get('normalised');
