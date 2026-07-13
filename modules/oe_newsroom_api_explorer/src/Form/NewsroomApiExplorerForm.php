@@ -636,6 +636,10 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
     ];
     $options = [];
     foreach ($classes as $class) {
+      if (!class_exists($class)) {
+        $options[$class . ' (not available)'] = [];
+        continue;
+      }
       $reflection = new \ReflectionClass($class);
       $methods = $reflection->getMethods(\ReflectionMethod::IS_PUBLIC);
       foreach ($methods as $method) {
