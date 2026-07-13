@@ -636,6 +636,13 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
     ];
     $options = [];
     foreach ($classes as $class) {
+      // Don't add methods for unknown classes.
+      // This is relevant if one of the classes in the list is defined in a
+      // submodule which is currently not installed.
+      if (!class_exists($class)) {
+        $options[$class . ' (not available)'] = [];
+        continue;
+      }
       $reflection = new \ReflectionClass($class);
       $methods = $reflection->getMethods(\ReflectionMethod::IS_PUBLIC);
       foreach ($methods as $method) {
