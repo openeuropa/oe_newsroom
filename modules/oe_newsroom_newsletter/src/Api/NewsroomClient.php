@@ -226,7 +226,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
 
       // Send the request.
       try {
-        $response = $this->httpClient->get(self::API_URL . '/unsubscribe', $payload);
+        $response = $this->httpClient->request('GET', self::API_URL . '/unsubscribe', $payload);
       }
       catch (GuzzleException $exception) {
         throw new ClientException('An error has occurred during an unsubscribe request.', 0, $exception);
