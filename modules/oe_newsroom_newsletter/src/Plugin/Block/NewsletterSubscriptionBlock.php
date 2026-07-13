@@ -154,7 +154,8 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
 
     // The multivalue element rekeys the items to have consecutive deltas.
     // To set the validation, we need to access the original unprocessed deltas.
-    $unprocessed_lists = NestedArray::getValue($form_state->getUserInput(), $form['distribution_lists']['#parents']);
+    $user_input = $form_state->getUserInput();
+    $unprocessed_lists = NestedArray::getValue($user_input, $form['distribution_lists']['#parents']);
     unset($unprocessed_lists[0]);
     foreach ($unprocessed_lists as $delta => $list) {
       if (empty($list['sv_id']) xor empty($list['name'])) {
