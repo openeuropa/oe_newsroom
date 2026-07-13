@@ -7,7 +7,7 @@ namespace Drupal\Tests\oe_newsroom_newsletter\Kernel;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Site\Settings;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
+use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter_mock\Plugin\ServiceMock\NewsroomPlugin;
 use Drupal\Tests\oe_newsroom\NewsroomConfigurationTestTrait;
 use Drupal\Tests\oe_newsroom_newsletter\Traits\NewsroomClientMockTrait;
@@ -63,7 +63,7 @@ class NewsroomClientTest extends KernelTestBase {
       'normalised' => FALSE,
     ]);
 
-    $client = NewsroomClient::create($this->container);
+    $client = $this->container->get(NewsroomClientInterface::class);
     $client->subscribe('Test@example.com', ['1111', '2222'], [], 'it');
     $this->assertEquals([
       'key' => 'a9402011c5d7620615d4d1d95568e9f6',
@@ -91,7 +91,7 @@ class NewsroomClientTest extends KernelTestBase {
       'hash_method' => 'md5',
       'normalised' => TRUE,
     ]);
-    $client = NewsroomClient::create($this->container);
+    $client = $this->container->get(NewsroomClientInterface::class);
     $client->subscribe('Test@example.com', ['1111', '2222'], [], 'it');
     $this->assertEquals([
       'key' => '2283cafb8c33c5d2be3c1db74199513c',
@@ -119,7 +119,7 @@ class NewsroomClientTest extends KernelTestBase {
       'hash_method' => 'sha256',
       'normalised' => TRUE,
     ]);
-    $client = NewsroomClient::create($this->container);
+    $client = \Drupal::service(NewsroomClientInterface::class);
     $client->subscribe('Test@example.com', ['1111'], [], 'de');
     $this->assertEquals([
       'key' => 'fe8d226fd629a8bc62305e702fa2af147ad6603838d556053eed2ac8b3c920f7',

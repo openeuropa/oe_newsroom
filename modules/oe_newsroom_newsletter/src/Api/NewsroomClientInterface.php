@@ -17,6 +17,15 @@ interface NewsroomClientInterface {
   public const API_URL = 'https://ec.europa.eu/newsroom/api/v1';
 
   /**
+   * Checks if all required configuration is present.
+   *
+   * @return bool
+   *   True if the client has all the configuration values it needs to
+   *   communicate with the Newsroom API.
+   */
+  public function isConfigured(): bool;
+
+  /**
    * Subscribe an email to the newsletters.
    *
    * @param string $email

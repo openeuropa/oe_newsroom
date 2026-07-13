@@ -45,5 +45,11 @@ commands:
       text: |
         // NEWSROOM settings.
         $settings['oe_newsroom']['newsroom_api_key'] = getenv('NEWSROOM_API_PRIVATE_KEY');
+
+        // Full error reporting.
+        error_reporting(E_ALL);
+        ini_set('display_errors', TRUE);
+        ini_set('display_startup_errors', TRUE);
+        $config['system.logging']['error_level'] = 'verbose';
   setup:phpunit:
     - { task: "process", source: "phpunit.xml.dist", destination: "phpunit.xml" }

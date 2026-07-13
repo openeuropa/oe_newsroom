@@ -1,0 +1,10 @@
+services:
+  _defaults:
+    autowire: true
+  # The registered service is a default instance of the newsroom client, based
+  # on the module's global configuration.
+  Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface:
+    class: Drupal\oe_newsroom_newsletter\Api\NewsroomClient
+  logger.channel.oe_newsroom_newsletter:
+    parent: logger.channel_base
+    arguments: ['oe_newsroom_newsletter']

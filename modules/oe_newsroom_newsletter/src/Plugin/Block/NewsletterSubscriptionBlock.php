@@ -14,7 +14,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\oe_newsroom\Newsroom;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Form\SubscribeForm;
 use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
@@ -42,28 +41,16 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
    */
   protected $privacyUri;
 
-  /**
-   * The Newsroom newsletter client.
-   *
-   * @var \Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface
-   */
-  protected $newsroomClient;
-
-  /**
-   * The form builder.
-   *
-   * @var \Drupal\Core\Form\FormBuilderInterface
-   */
-  private $formBuilder;
-
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, NewsroomClientInterface $newsroomClient, FormBuilderInterface $form_builder, ConfigFactoryInterface $configFactory) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    protected readonly NewsroomClientInterface $newsroomClient,
+    private readonly FormBuilderInterface $formBuilder,
+    ConfigFactoryInterface $configFactory,
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->privacyUri = $configFactory->get(NewsroomNewsletter::CONFIG_NAME)->get('privacy_uri');
-    $this->formBuilder = $form_builder;
-    $this->newsroomClient = $newsroomClient;
   }
 
   /**
@@ -74,7 +61,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
       $configuration,
       $plugin_id,
       $plugin_definition,
-      NewsroomClient::create($container),
+      $container->get(NewsroomClientInterface::class),
       $container->get('form_builder'),
       $container->get('config.factory'),
     );
@@ -167,7 +154,8 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
 
     // The multivalue element rekeys the items to have consecutive deltas.
     // To set the validation, we need to access the original unprocessed deltas.
-    $unprocessed_lists = NestedArray::getValue($form_state->getUserInput(), $form['distribution_lists']['#parents']);
+    $user_input = $form_state->getUserInput();
+    $unprocessed_lists = NestedArray::getValue($user_input, $form['distribution_lists']['#parents']);
     unset($unprocessed_lists[0]);
     foreach ($unprocessed_lists as $delta => $list) {
       if (empty($list['sv_id']) xor empty($list['name'])) {

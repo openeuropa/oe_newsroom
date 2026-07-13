@@ -5,21 +5,21 @@ declare(strict_types=1);
 namespace Drupal\oe_newsroom_newsletter\Form;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Link;
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\Core\Utility\Error;
 use Drupal\oe_newsroom\Newsroom;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Exception\ClientException;
 use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Subscribe form.
@@ -30,39 +30,24 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class SubscribeForm extends NewsletterFormBase {
 
-  /**
-   * Language manager.
-   *
-   * @var \Drupal\Core\Language\LanguageManagerInterface
-   */
-  protected $languageManager;
+  use AutowireTrait;
 
   /**
    * Successful subscription message.
    *
-   * @var string
+   * This is initialized in ->buildForm().
    */
-  protected $successfulMessage;
+  protected string $successfulMessage;
 
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct(NewsroomClientInterface $newsroomClient, AccountProxyInterface $accountProxy, MessengerInterface $messenger, LoggerChannelFactoryInterface $logger, LanguageManagerInterface $languageManager) {
+  public function __construct(
+    NewsroomClientInterface $newsroomClient,
+    AccountProxyInterface $accountProxy,
+    MessengerInterface $messenger,
+    #[Autowire('logger.channel.oe_newsroom_newsletter')]
+    LoggerInterface $logger,
+    protected LanguageManagerInterface $languageManager,
+  ) {
     parent::__construct($newsroomClient, $accountProxy, $messenger, $logger);
-    $this->languageManager = $languageManager;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      NewsroomClient::create($container),
-      $container->get('current_user'),
-      $container->get('messenger'),
-      $container->get('logger.factory'),
-      $container->get('language_manager')
-    );
   }
 
   /**
@@ -128,14 +113,16 @@ class SubscribeForm extends NewsletterFormBase {
       ];
     }
 
-    $options['attributes']['class'][] = 'oe-newsroom__privacy-url';
+    $privacy_link_options = [
+      'attributes' => ['class' => ['oe-newsroom__privacy-url']],
+    ];
     $form['agree_privacy_statement'] = [
       '#type' => 'checkbox',
       // @todo Confirm if it's the correct way of translating text with a link.
       '#title' => $this->t('By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link', [
         '@privacy_link' => Link::fromTextAndUrl(
           $this->t('privacy statement'),
-          Url::fromUri($this->getPrivacyUri($ui_language), $options),
+          Url::fromUri($this->getPrivacyUri($ui_language), $privacy_link_options),
         )->toString(),
       ]),
       '#element_validate' => ['::validatePrivacyElement'],
@@ -161,7 +148,7 @@ class SubscribeForm extends NewsletterFormBase {
    * This allows to show a custom message instead of the standard
    * "field is required" one.
    */
-  public function validatePrivacyElement($element, FormStateInterface $form_state, $form): void {
+  public function validatePrivacyElement(array $element, FormStateInterface $form_state, array $form): void {
     if (empty($element['#value'])) {
       $form_state->setError($form['agree_privacy_statement'], $this->t('You must agree with the privacy statement.'));
     }
@@ -186,7 +173,7 @@ class SubscribeForm extends NewsletterFormBase {
     }
     catch (ClientException $e) {
       $this->messenger->addError($this->t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
-      $this->logger->get('oe_newsroom_newsletter')->error('%type thrown while subscribing email %email to the newsletter(s) with ID(s) %sv_ids and universe %universe: @message in %function (line %line of %file).', [
+      $this->logger->error('%type thrown while subscribing email %email to the newsletter(s) with ID(s) %sv_ids and universe %universe: @message in %function (line %line of %file).', [
         '%email' => $values['email'],
         '%universe' => $this->config(Newsroom::CONFIG_NAME)->get('universe'),
         '%sv_ids' => implode(',', $distribution_lists),
@@ -206,7 +193,7 @@ class SubscribeForm extends NewsletterFormBase {
   protected function getPrivacyUri(string $language): string {
     $uri = $this->config(NewsroomNewsletter::CONFIG_NAME)->get('privacy_uri');
     if (parse_url($uri, PHP_URL_SCHEME) === NULL) {
-      if (strpos($uri, '<front>') === 0) {
+      if (str_starts_with($uri, '<front>')) {
         $uri = '/' . substr($uri, strlen('<front>'));
       }
       $uri = 'internal:' . $uri;

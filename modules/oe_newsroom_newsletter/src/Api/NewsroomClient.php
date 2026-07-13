@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Drupal\oe_newsroom_newsletter\Api;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Core\Config\ConfigEvents;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -14,7 +16,9 @@ use Drupal\oe_newsroom_newsletter\Exception\ClientException;
 use Drupal\oe_newsroom_newsletter\Exception\InvalidResponseException;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Client to access the Newsroom newsletter subscription API.
@@ -27,6 +31,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 final class NewsroomClient implements NewsroomClientInterface, ContainerInjectionInterface {
 
+  // Rename the trait method to allow us to overwrite it.
+  // The only reason for the overwrite is to mark it as deprecated.
+  // @todo Use AutowiredInstanceTrait when we drop Drupal 10.
+  // @todo Drop this completely, when we remove the ::create() method.
+  use AutowireTrait {
+    create as private traitCreate;
+  }
   use StringTranslationTrait;
 
   /**
@@ -64,50 +75,49 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
    */
   protected $appId;
 
-  /**
-   * Http client to send http messages.
-   *
-   * @var \GuzzleHttp\Client
-   */
-  protected $httpClient;
-
-  /**
-   * Client constructor.
-   *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   Configuration factory to automatically load configurations.
-   * @param \Drupal\Core\Site\Settings $settings
-   *   Required for API private key.
-   * @param \GuzzleHttp\ClientInterface $httpClient
-   *   Http client to send requests to the API.
-   */
-  protected function __construct(ConfigFactoryInterface $configFactory, Settings $settings, ClientInterface $httpClient) {
-    $config = $configFactory->get(Newsroom::CONFIG_NAME);
-
+  public function __construct(
+    protected readonly ConfigFactoryInterface $configFactory,
+    Settings $settings,
+    // This attribute is needed for drupal/core:10.5.x.
+    // @todo Remove the attribute when we drop support for core 10.5.
+    #[Autowire(service: 'event_dispatcher')]
+    EventDispatcherInterface $eventDispatcher,
+    protected readonly ClientInterface $httpClient,
+  ) {
+    // Listen to configuration updates.
+    // This is only needed after this object is constructed, therefore we use
+    // ->addListener() and do not register it as an event subscriber.
+    $eventDispatcher->addListener(ConfigEvents::SAVE, $this->reconfigure(...));
+    $this->reconfigure();
     $this->privateKey = $settings->get('oe_newsroom')['newsroom_api_key'] ?? NULL;
+  }
+
+  /**
+   * Updates values from configuration.
+   *
+   * This is called as an event listener when config changes.
+   * It is mostly relevant during tests.
+   */
+  protected function reconfigure(): void {
+    $config = $this->configFactory->get(Newsroom::CONFIG_NAME);
     $this->hashMethod = $config->get('hash_method');
     $this->normalised = $config->get('normalised');
     $this->universe = $config->get('universe');
     $this->appId = $config->get('app_id');
-    $this->httpClient = $httpClient;
   }
 
   /**
    * {@inheritdoc}
+   *
+   * @deprecated
+   *   Just use the service.
    */
-  public static function create(ContainerInterface $container): NewsroomClient {
-    return new static(
-      $container->get('config.factory'),
-      $container->get('settings'),
-      $container->get('http_client')
-    );
+  public static function create(ContainerInterface $container): static {
+    return self::traitCreate($container);
   }
 
   /**
-   * Checks if the class is functional.
-   *
-   * @return bool
-   *   True if the class is functional.
+   * {@inheritdoc}
    */
   public function isConfigured(): bool {
     // These fields should be filled up and have no default value. Without them,
@@ -216,7 +226,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
 
       // Send the request.
       try {
-        $response = $this->httpClient->get(self::API_URL . '/unsubscribe', $payload);
+        $response = $this->httpClient->request('GET', self::API_URL . '/unsubscribe', $payload);
       }
       catch (GuzzleException $exception) {
         throw new ClientException('An error has occurred during an unsubscribe request.', 0, $exception);

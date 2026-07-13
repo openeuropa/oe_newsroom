@@ -7,7 +7,7 @@ namespace Drupal\oe_newsroom_newsletter_mock\Plugin\ServiceMock;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
-use Drupal\Core\State\State;
+use Drupal\Core\State\StateInterface;
 use Drupal\http_request_mock\ServiceMockPluginInterface;
 use GuzzleHttp\Psr7\Message;
 use GuzzleHttp\Psr7\Response;
@@ -59,17 +59,14 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
   public const STAKE_KEY_VALIDATE_UNSUBSCRIPTIONS = 'oe_newsroom_newsletter_mock.validate_unsubscriptions';
 
   /**
-   * The state service.
-   *
-   * @var \Drupal\Core\State\StateInterface
-   */
-  protected $state;
-
-  /**
    * {@inheritDoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, State $state) {
-    $this->state = $state;
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    protected readonly StateInterface $state,
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
@@ -89,7 +86,8 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
    * {@inheritdoc}
    */
   public function applies(RequestInterface $request, array $options): bool {
-    return $request->getUri()->getHost() === 'ec.europa.eu' && strpos($request->getUri()->getPath(), '/newsroom/api/v1/') === 0;
+    return $request->getUri()->getHost() === 'ec.europa.eu' &&
+      str_starts_with($request->getUri()->getPath(), '/newsroom/api/v1/');
   }
 
   /**
