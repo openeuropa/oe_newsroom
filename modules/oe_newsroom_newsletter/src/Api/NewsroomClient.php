@@ -117,10 +117,7 @@ final class NewsroomClient implements NewsroomClientInterface, ContainerInjectio
   }
 
   /**
-   * Checks if the class is functional.
-   *
-   * @return bool
-   *   True if the class is functional.
+   * {@inheritdoc}
    */
   public function isConfigured(): bool {
     // These fields should be filled up and have no default value. Without them,
