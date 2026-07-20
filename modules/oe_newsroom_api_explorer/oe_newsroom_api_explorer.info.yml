@@ -1,0 +1,12 @@
+name: OpenEuropa Newsroom API Explorer
+description: Helper module for developers to explore and test the Newsroom API. Do not use on production.
+package: Development
+type: module
+# Newly added submodules start with a higher minimum version for Drupal core.
+core_version_requirement: ^11.3
+
+dependencies:
+  - oe_newsroom:oe_newsroom
+  # For now, newsletter client is the only client that exists.
+  # Therefore require that submodule.
+  - oe_newsroom:oe_newsroom_newsletter
