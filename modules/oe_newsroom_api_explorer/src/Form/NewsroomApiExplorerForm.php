@@ -22,6 +22,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
+use Drupal\oe_newsroom_api_explorer\Helper\ReflectionHelper;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Promise\Create;
@@ -155,7 +156,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
     $param_tags = [];
     // Use phpDocumentor if available.
     if (class_exists(DocBlockFactory::class)) {
-      $doc_comment = $this->findMethodDocComment($method);
+      $doc_comment = ReflectionHelper::findOriginalMethodDocComment($method);
       if ($doc_comment !== NULL) {
         $phpdoc = DocBlockFactory::createInstance()->create($doc_comment);
         foreach ($phpdoc->getTagsByName('param') as $tag) {
@@ -213,7 +214,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
     [$class, $method_name] = explode('::', $endpoint_name);
     $method = new \ReflectionMethod($class, $method_name);
     $subform = [];
-    $doc_comment = $this->findMethodDocComment($method);
+    $doc_comment = ReflectionHelper::findOriginalMethodDocComment($method);
     $doc_description = $doc_comment;
 
     // Use phpDocumentor if available.
@@ -245,43 +246,6 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
       ];
     }
     return $subform;
-  }
-
-  /**
-   * Finds a method doc comment, also looking at inheritance.
-   *
-   * @param \ReflectionMethod $method
-   *   The method.
-   *
-   * @return string|null
-   *   The doc comment on the method or one of its parents.
-   */
-  protected function findMethodDocComment(\ReflectionMethod $method): ?string {
-    $doc = $method->getDocComment();
-    if ($doc !== FALSE && !str_contains($doc, '@inheritdoc')) {
-      return $doc;
-    }
-    $parent_class = $method->getDeclaringClass();
-    while ($parent_class = $parent_class->getParentClass()) {
-      if (!$parent_class->hasMethod($method->name)) {
-        break;
-      }
-      $parent_method = $parent_class->getMethod($method->name);
-      $doc = $this->findMethodDocComment($parent_method);
-      if ($doc !== NULL) {
-        return $doc;
-      }
-    }
-    foreach ($method->getDeclaringClass()->getInterfaces() as $interface) {
-      if (!$interface->hasMethod($method->name)) {
-        continue;
-      }
-      $doc = $interface->getMethod($method->name)->getDocComment();
-      if ($doc !== FALSE && !str_contains($doc, '@inheritdoc')) {
-        return $doc;
-      }
-    }
-    return NULL;
   }
 
   /**
