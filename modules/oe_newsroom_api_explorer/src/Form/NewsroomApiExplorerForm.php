@@ -308,7 +308,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
       ];
     }
     $element['#title'] = $parameter->name;
-    $element['#required'] = !$parameter->isOptional();
+    $element['#required'] = !$parameter->isOptional() && $type_name !== 'bool';
     $description_parts = [];
     if ($param_tag !== NULL) {
       $description_parts[] = Html::escape($param_tag->getDescription()->render());
