@@ -638,6 +638,9 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
       if ($input instanceof EntityInterface) {
         return new TaggedValue('entity', get_class($input) . ' ' . ($input->id() ?? '#new'));
       }
+      if ($input instanceof TaggedValue) {
+        return new TaggedValue('TaggedValue.' . $input->getTag(), $input->getValue());
+      }
       return new TaggedValue('object', get_class($input));
     }
     if (is_resource($input)) {
