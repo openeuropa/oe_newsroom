@@ -59,4 +59,20 @@ class ReflectionHelper {
     }
   }
 
+  /**
+   * Gets a ReflectionMethod object from a method closure.
+   *
+   * @param \Closure $method
+   *   A closure of a method.
+   *
+   * @return \ReflectionMethod|null
+   *   The reflection object, or NULL if the closure was not from a method.
+   */
+  public static function getReflectionMethodFromClosure(\Closure $method): ?\ReflectionMethod {
+    $reflection_function = new \ReflectionFunction($method);
+    return $reflection_function
+      ->getClosureScopeClass()
+      ?->getMethod($reflection_function->name);
+  }
+
 }
