@@ -21,6 +21,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
+use Drupal\node\Entity\Node;
+use Drupal\node\NodeInterface;
 use Drupal\oe_newsroom\Value\NotificationFrequency;
 use Drupal\oe_newsroom_api_explorer\ApiExplorerMethodRegistry;
 use Drupal\oe_newsroom_api_explorer\Helper\ReflectionHelper;
@@ -290,6 +292,10 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
           '#type' => 'textfield',
           '#description' => $this->t('Use json or separate by comma'),
         ],
+        NodeInterface::class => [
+          '#type' => 'entity_autocomplete',
+          '#target_type' => 'node',
+        ],
         NotificationFrequency::class => [
           '#type' => 'select',
           '#options' => (function (): array {
@@ -511,6 +517,10 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
       },
       'string' => (string) $value,
       NotificationFrequency::class => NotificationFrequency::from($value),
+      NodeInterface::class => Node::load(match (TRUE) {
+        is_int($value) => $value,
+        (string) (int) $value === $value => (int) $value,
+      }),
       default => throw new \Exception(sprintf('Unsupported type %s for parameter %s', $parameter->getType()->__toString(), $parameter->name)),
     };
     if ($argument === $illegal_value) {
