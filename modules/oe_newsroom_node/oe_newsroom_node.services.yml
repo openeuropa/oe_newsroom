@@ -5,4 +5,6 @@ services:
     parent: logger.channel_base
     arguments: ['oe_newsroom_node']
   Drupal\oe_newsroom_node\Explorer\ApiExplorerNodeOperations: {}
+  Drupal\oe_newsroom_node\Domain\NodeNotificationService:
+    factory: ['Drupal\oe_newsroom_node\Domain\NodeNotificationService', create]
   Drupal\oe_newsroom_node\Domain\NodeSubscriptionService: {}
