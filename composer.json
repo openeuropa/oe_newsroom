@@ -19,8 +19,7 @@
         "guzzlehttp/psr7": "^2.5",
         "openeuropa/code-review-drupal": "^1.0.0-alpha",
         "openeuropa/task-runner-drupal-project-symlink": "^1.0",
-        "phpdocumentor/reflection-docblock": "^5.0 || ^6.0",
-        "symfony/psr-http-message-bridge": "^7.4"
+        "phpdocumentor/reflection-docblock": "^5.0 || ^6.0"
     },
     "scripts": {
         "drupal-scaffold": "DrupalComposer\\DrupalScaffold\\Plugin::scaffold",
