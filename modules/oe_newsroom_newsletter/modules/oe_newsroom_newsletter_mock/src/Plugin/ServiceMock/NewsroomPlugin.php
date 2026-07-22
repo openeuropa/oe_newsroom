@@ -275,7 +275,7 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
     $universe = $data['subscription']['universeAcronym'];
     $app_id = $data['subscription']['topicExtWebsite'];
     $email = $data['subscription']['email'];
-    $sv_ids = explode(',', $data['subscription']['sv_id']);
+    $sv_ids = explode(',', $data['subscription']['sv_id'] ?? '');
     $related_sv_ids = isset($data['subscription']['relatedSv_Id']) ? explode(',', $data['subscription']['relatedSv_Id']) : [];
     $language = $data['subscription']['language'] ?? 'en';
     $topic_ext_id = isset($data['subscription']['topicExtId']) ? explode(',', $data['subscription']['topicExtId']) : [];
