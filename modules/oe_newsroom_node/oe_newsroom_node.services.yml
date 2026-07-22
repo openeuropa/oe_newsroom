@@ -5,4 +5,6 @@ services:
       # The service tag marks all services as candidates for the API explorer.
       # Only those which have the attribute will actually be explorable.
       - { name: oe_newsroom_api_explorer }
+  Drupal\oe_newsroom_node\Domain\NodeNotificationService:
+    factory: ['Drupal\oe_newsroom_node\Domain\NodeNotificationService', create]
   Drupal\oe_newsroom_node\Domain\NodeSubscriptionService: {}
