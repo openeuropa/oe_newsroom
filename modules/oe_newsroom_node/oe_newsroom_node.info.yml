@@ -1,0 +1,11 @@
+name: OpenEuropa Newsroom Node Subscription
+description: Allows anonymous users to subscribe to nodes via Newsroom.
+package: OpenEuropa
+type: module
+core_version_requirement: ^11
+
+dependencies:
+  - drupal:block
+  - oe_newsroom:oe_newsroom
+  # For now, we need some settings from the newsletter submodule.
+  - oe_newsroom:oe_newsroom_newsletter

@@ -1,10 +1,16 @@
 services:
   _defaults:
     autowire: true
+    tags:
+      # The service tag marks all services as candidates for the API explorer.
+      # Only those which have the attribute will actually be explorable.
+      - { name: oe_newsroom_api_explorer }
   # The registered service is a default instance of the newsroom client, based
   # on the module's global configuration.
-  Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface:
+  Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface: '@Drupal\oe_newsroom_newsletter\Api\NewsroomClient'
+  Drupal\oe_newsroom_newsletter\Api\NewsroomClient:
     class: Drupal\oe_newsroom_newsletter\Api\NewsroomClient
+  Drupal\oe_newsroom_newsletter\Domain\NewsletterSubscribeService: {}
   logger.channel.oe_newsroom_newsletter:
     parent: logger.channel_base
     arguments: ['oe_newsroom_newsletter']

@@ -12,8 +12,8 @@ use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\oe_newsroom\Api\NewsroomConnection;
 use Drupal\oe_newsroom\Newsroom;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Form\UnsubscribeForm;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -36,7 +36,7 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
     array $configuration,
     $plugin_id,
     $plugin_definition,
-    protected readonly NewsroomClientInterface $newsroomClient,
+    protected readonly NewsroomConnection $connection,
     private readonly FormBuilderInterface $formBuilder,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
@@ -50,7 +50,7 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get(NewsroomClientInterface::class),
+      $container->get(NewsroomConnection::class),
       $container->get('form_builder'),
     );
   }
@@ -143,7 +143,7 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
    * {@inheritdoc}
    */
   public function build(): array {
-    if (!$this->newsroomClient->isConfigured() || empty($this->configuration['distribution_lists'])) {
+    if (!$this->connection->isConfigured() || empty($this->configuration['distribution_lists'])) {
       return [];
     }
 

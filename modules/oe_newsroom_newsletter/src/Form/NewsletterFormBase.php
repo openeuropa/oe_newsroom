@@ -12,7 +12,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
@@ -28,7 +27,6 @@ abstract class NewsletterFormBase extends FormBase {
   use AutowireTrait;
 
   public function __construct(
-    protected readonly NewsroomClientInterface $newsroomClient,
     protected readonly AccountProxyInterface $accountProxy,
     MessengerInterface $messenger,
     #[Autowire('logger.channel.oe_newsroom_newsletter')]

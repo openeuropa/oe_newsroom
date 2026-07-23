@@ -120,8 +120,18 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
           $response = $this->unsubscribe($request);
           break;
 
+        case '/newsroom/api/v1/node-notification/create':
+        case '/newsroom/api/v1/node-notification/delete':
+        case '/newsroom/api/v1/unsubscribe/node-notification':
+          $response = $this->createResponse();
+          break;
+
+        case '/newsroom/api/v1/node-notification/get':
+          $response = $this->createResponse();
+          break;
+
         default:
-          $response = new Response(404);
+          $response = $this->createResponse(404);
       }
     }
 
@@ -131,6 +141,31 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
     $this->state->set(self::STATE_KEY_RESPONSES, $response_history);
 
     return $response;
+  }
+
+  /**
+   * Creates a json response object.
+   *
+   * @param int $status
+   *   The response status code.
+   * @param string|array $data
+   *   The data to encode as json.
+   * @param array $headers
+   *   Additional headers.
+   *
+   * @return \GuzzleHttp\Psr7\Response
+   *   A response object
+   *
+   * @throws \JsonException
+   *   Failure to encode the data as json.
+   *   This should never occur for the typical data sent to this method.
+   */
+  protected function createResponse(int $status = 200, string|array $data = [], array $headers = []) {
+    return new Response(
+      $status,
+      $headers + ['content-type' => 'application/json'],
+      json_encode($data, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR),
+    );
   }
 
   /**
@@ -272,10 +307,15 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
    */
   protected function subscribe(RequestInterface $request): ResponseInterface {
     $data = Json::decode((string) $request->getBody());
+
+    if (isset($data['subscription']['node_id'])) {
+      return $this->createResponse();
+    }
+
     $universe = $data['subscription']['universeAcronym'];
     $app_id = $data['subscription']['topicExtWebsite'];
     $email = $data['subscription']['email'];
-    $sv_ids = explode(',', $data['subscription']['sv_id']);
+    $sv_ids = explode(',', $data['subscription']['sv_id'] ?? '');
     $related_sv_ids = isset($data['subscription']['relatedSv_Id']) ? explode(',', $data['subscription']['relatedSv_Id']) : [];
     $language = $data['subscription']['language'] ?? 'en';
     $topic_ext_id = isset($data['subscription']['topicExtId']) ? explode(',', $data['subscription']['topicExtId']) : [];
@@ -300,7 +340,7 @@ class NewsroomPlugin extends PluginBase implements ServiceMockPluginInterface, C
     $this->state->set(self::STATE_KEY_SUBSCRIPTIONS, $subscriptions);
     $this->state->set(self::STATE_KEY_UNIVERSE, $universes);
 
-    return new Response(200, [], Json::encode($current_subs));
+    return $this->createResponse(200, $current_subs);
   }
 
   /**

@@ -1,0 +1,20 @@
+oe_newsroom_node.subscribe.landing:
+  path: '/node/{node}/newsroom-subscribe-landing'
+  defaults:
+    _controller: '\Drupal\oe_newsroom_node\Controller\NodeSubscribeLandingController::landing'
+  requirements:
+    _entity_access: 'node.view'
+oe_newsroom_node.subscribe:
+  path: '/node/{node}/newsroom-subscribe'
+  defaults:
+    _form: '\Drupal\oe_newsroom_node\Form\NodeSubscribeForm'
+    _title_callback: '\Drupal\oe_newsroom_node\Form\NodeSubscribeForm::title'
+  requirements:
+    # @todo More fine-grained access management.
+    _entity_access: 'node.view'
+    _permission: 'subscribe to newsroom nodes'
+    node: \d+
+  options:
+    parameters:
+      node:
+        type: entity:node

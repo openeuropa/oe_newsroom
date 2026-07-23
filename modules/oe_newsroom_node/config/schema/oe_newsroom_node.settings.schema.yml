@@ -1,0 +1,7 @@
+block.settings.oe_newsroom_node_subscription_block:
+  type: block_settings
+  label: 'Newsroom node subscription block'
+  mapping:
+    button_text:
+      type: label
+      label: 'Button text'
