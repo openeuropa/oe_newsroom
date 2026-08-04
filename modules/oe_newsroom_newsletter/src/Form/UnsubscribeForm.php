@@ -21,10 +21,15 @@ use Drupal\oe_newsroom_newsletter\Exception\ClientException;
 class UnsubscribeForm extends NewsletterFormBase {
 
   /**
+   * The form ID.
+   */
+  public const FORM_ID = 'oe_newsroom_newsletter_unsubscribe_form';
+
+  /**
    * {@inheritdoc}
    */
   public function getFormId(): string {
-    return 'oe_newsroom_newsletter_unsubscribe_form';
+    return self::FORM_ID;
   }
 
   /**

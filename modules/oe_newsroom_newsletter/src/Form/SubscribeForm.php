@@ -33,6 +33,11 @@ class SubscribeForm extends NewsletterFormBase {
   use AutowireTrait;
 
   /**
+   * The form ID.
+   */
+  public const FORM_ID = 'oe_newsroom_newsletter_subscribe_form';
+
+  /**
    * Successful subscription message.
    *
    * This is initialized in ->buildForm().
@@ -54,7 +59,7 @@ class SubscribeForm extends NewsletterFormBase {
    * {@inheritdoc}
    */
   public function getFormId(): string {
-    return 'oe_newsroom_newsletter_subscribe_form';
+    return self::FORM_ID;
   }
 
   /**

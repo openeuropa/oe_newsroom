@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\oe_newsroom_newsletter\Plugin\Block;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Cache\Cache;
@@ -155,7 +156,7 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
       return [];
     }
 
-    return $this->formBuilder->getForm(
+    $build = $this->formBuilder->getForm(
       SubscribeForm::class,
       $this->configuration['distribution_lists'],
       $this->configuration['newsletters_language'],
@@ -163,6 +164,13 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
       $this->configuration['intro_text'],
       $this->configuration['successful_subscription_message']
     );
+
+    // Since Drupal 11.4 the block wrapper no longer inherits the form's
+    // #attributes, so add the form-id class via #wrapper_attributes (a no-op
+    // on older core, which still copies the class from #attributes).
+    $build['#wrapper_attributes']['class'][] = Html::getClass(SubscribeForm::FORM_ID);
+
+    return $build;
   }
 
   /**
