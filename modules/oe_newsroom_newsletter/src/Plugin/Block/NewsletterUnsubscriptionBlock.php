@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\oe_newsroom_newsletter\Plugin\Block;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Cache\Cache;
@@ -117,7 +118,14 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
       return [];
     }
 
-    return $this->formBuilder->getForm(UnsubscribeForm::class, $this->configuration['distribution_lists']);
+    $build = $this->formBuilder->getForm(UnsubscribeForm::class, $this->configuration['distribution_lists']);
+
+    // Since Drupal 11.4 the block wrapper no longer inherits the form's
+    // #attributes, so add the form-id class via #wrapper_attributes (a no-op
+    // on older core, which still copies the class from #attributes).
+    $build['#wrapper_attributes']['class'][] = Html::getClass(UnsubscribeForm::FORM_ID);
+
+    return $build;
   }
 
   /**
