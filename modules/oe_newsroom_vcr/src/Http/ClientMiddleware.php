@@ -180,7 +180,6 @@ class ClientMiddleware {
    *   A promise for a failure response.
    */
   protected function handleFailure(string $failure): PromiseInterface {
-    throw new \RuntimeException($failure);
     return Create::promiseFor(new Response(
       500,
       ['Content-Type' => 'application/json'],
