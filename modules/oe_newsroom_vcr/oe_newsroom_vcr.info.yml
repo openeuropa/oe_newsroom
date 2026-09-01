@@ -3,7 +3,7 @@ description: Intercepts outgoing http requests to replay pre-recorded requests a
 package: Development
 type: module
 # Newly added submodules start with a higher minimum version for Drupal core.
-core_version_requirement: ^11.3
+core_version_requirement: ^11.3 || ^10
 
 dependencies:
   - oe_newsroom:oe_newsroom
