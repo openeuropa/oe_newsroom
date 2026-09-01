@@ -50,8 +50,14 @@ class BlockFormsAjaxTest extends WebDriverTestBase {
    * Tests the AJAX integration of the subscribe form.
    */
   public function testSubscribeFormAjax(): void {
-    $this->placeNewsletterSubscriptionBlock(['id' => 'subscribe_one']);
-    $this->placeNewsletterSubscriptionBlock(['id' => 'subscribe_two']);
+    $this->placeNewsletterSubscriptionBlock([
+      'id' => 'subscribe_one',
+      'label' => 'Subscribe block one',
+    ]);
+    $this->placeNewsletterSubscriptionBlock([
+      'id' => 'subscribe_two',
+      'label' => 'Subscribe block two',
+    ]);
     $this->drupalLogin($this->createUser(['subscribe to newsroom newsletters']));
     $this->drupalget('<front>');
 
@@ -62,6 +68,8 @@ class BlockFormsAjaxTest extends WebDriverTestBase {
     $block_one->pressButton('Subscribe');
     $assert_session->assertWaitOnAjaxRequest();
     $assert_session->elementTextContains('css', '#block-subscribe-one', 'You must agree with the privacy statement.');
+    // The block title is still rendered when validation fails.
+    $assert_session->elementTextContains('css', '#block-subscribe-one', 'Subscribe block one');
     // The other block wasn't impacted. This is to cover that the ID generated
     // in the form is unique.
     $assert_session->elementTextNotContains('css', '#block-subscribe-two', 'You must agree with the privacy statement.');
@@ -69,9 +77,15 @@ class BlockFormsAjaxTest extends WebDriverTestBase {
     $block_one->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
     $block_one->pressButton('Subscribe');
     $assert_session->assertWaitOnAjaxRequest();
-    $assert_session->elementTextContains('css', '#block-subscribe-one', 'Thanks for signing up to the service: Test Newsletter Service');
-    // The whole form has been removed.
-    $assert_session->elementNotExists('css', 'form', $block_one);
+    $assert_session->pageTextContains('Thanks for signing up to the service: Test Newsletter Service');
+    // The message was announced to assistive technology.
+    $this->assertJsCondition('document.getElementById("drupal-live-announce").textContent.includes("Thanks for signing up to the service: Test Newsletter Service")');
+    // The success message replaced the whole block, so neither the form nor
+    // the block title are rendered anymore.
+    $assert_session->pageTextNotContains('Subscribe block one');
+    $assert_session->elementNotExists('css', '#block-subscribe-one');
+    // The other block, along with its title, wasn't impacted.
+    $assert_session->elementTextContains('css', '#block-subscribe-two', 'Subscribe block two');
 
     // Simulate that the next response contains an error.
     $this->setNextNewsroomClientResponse(new Response(500));
@@ -80,9 +94,11 @@ class BlockFormsAjaxTest extends WebDriverTestBase {
     $block_two->checkField('By checking this box, I confirm that I want to register for this service, and I agree with the privacy statement');
     $block_two->pressButton('Subscribe');
     $assert_session->assertWaitOnAjaxRequest();
-    $assert_session->elementTextContains('css', '#block-subscribe-two', 'An error occurred while processing your request, please try again later. If the error persists, contact the site owner.');
-    // The whole form has been removed.
-    $assert_session->elementNotExists('css', 'form', $block_two);
+    $assert_session->pageTextContains('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.');
+    // The error message replaced the whole block as well, removing both the
+    // form and the block title.
+    $assert_session->pageTextNotContains('Subscribe block two');
+    $assert_session->elementNotExists('css', '#block-subscribe-two');
   }
 
   /**
@@ -91,8 +107,14 @@ class BlockFormsAjaxTest extends WebDriverTestBase {
   public function testUnsubscribeFormAjax(): void {
     \Drupal::state()->set(NewsroomPlugin::STAKE_KEY_VALIDATE_UNSUBSCRIPTIONS, FALSE);
 
-    $this->placeNewsletterUnsubscriptionBlock(['id' => 'unsubscribe_one']);
-    $this->placeNewsletterUnsubscriptionBlock(['id' => 'unsubscribe_two']);
+    $this->placeNewsletterUnsubscriptionBlock([
+      'id' => 'unsubscribe_one',
+      'label' => 'Unsubscribe block one',
+    ]);
+    $this->placeNewsletterUnsubscriptionBlock([
+      'id' => 'unsubscribe_two',
+      'label' => 'Unsubscribe block two',
+    ]);
     $this->grantPermissions(Role::load(Role::ANONYMOUS_ID), [
       'unsubscribe from newsroom newsletters',
     ]);
@@ -105,6 +127,8 @@ class BlockFormsAjaxTest extends WebDriverTestBase {
     $block_one->pressButton('Unsubscribe');
     $assert_session->assertWaitOnAjaxRequest();
     $assert_session->elementTextContains('css', '#block-unsubscribe-one', 'Your e-mail field is required.');
+    // The block title is still rendered when validation fails.
+    $assert_session->elementTextContains('css', '#block-unsubscribe-one', 'Unsubscribe block one');
     // The other block wasn't impacted. This is to cover that the ID generated
     // in the form is unique.
     $assert_session->elementTextNotContains('css', '#block-unsubscribe-two', 'Your e-mail field is required.');
@@ -112,9 +136,15 @@ class BlockFormsAjaxTest extends WebDriverTestBase {
     $block_one->fillField('Your e-mail', 'test@example.com');
     $block_one->pressButton('Unsubscribe');
     $assert_session->assertWaitOnAjaxRequest();
-    $assert_session->elementTextContains('css', '#block-unsubscribe-one', 'Successfully unsubscribed!');
-    // The whole form has been removed.
-    $assert_session->elementNotExists('css', 'form', $block_one);
+    $assert_session->pageTextContains('Successfully unsubscribed!');
+    // The message was announced to assistive technology.
+    $this->assertJsCondition('document.getElementById("drupal-live-announce").textContent.includes("Successfully unsubscribed!")');
+    // The success message replaced the whole block, so neither the form nor
+    // the block title are rendered anymore.
+    $assert_session->pageTextNotContains('Unsubscribe block one');
+    $assert_session->elementNotExists('css', '#block-unsubscribe-one');
+    // The other block, along with its title, wasn't impacted.
+    $assert_session->elementTextContains('css', '#block-unsubscribe-two', 'Unsubscribe block two');
 
     // Simulate that the next response contains an error.
     $this->setNextNewsroomClientResponse(new Response(500));
@@ -123,9 +153,11 @@ class BlockFormsAjaxTest extends WebDriverTestBase {
     $block_two->fillField('Your e-mail', 'test@example.com');
     $block_two->pressButton('Unsubscribe');
     $assert_session->assertWaitOnAjaxRequest();
-    $assert_session->elementTextContains('css', '#block-unsubscribe-two', 'An error occurred while processing your request, please try again later. If the error persists, contact the site owner.');
-    // The whole form has been removed.
-    $assert_session->elementNotExists('css', 'form', $block_two);
+    $assert_session->pageTextContains('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.');
+    // The error message replaced the whole block as well, removing both the
+    // form and the block title.
+    $assert_session->pageTextNotContains('Unsubscribe block two');
+    $assert_session->elementNotExists('css', '#block-unsubscribe-two');
   }
 
 }

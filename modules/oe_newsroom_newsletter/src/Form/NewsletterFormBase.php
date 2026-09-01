@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\oe_newsroom_newsletter\Form;
 
+use Drupal\Component\Render\PlainTextOutput;
 use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\AnnounceCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Form\FormBase;
@@ -12,6 +14,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\oe_newsroom_newsletter\Ajax\ReplaceFormWrapperCommand;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -41,6 +44,8 @@ abstract class NewsletterFormBase extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, array $distribution_lists = []): array {
+    // Provides the AJAX command used by ::submitFormCallback().
+    $form['#attached']['library'][] = 'oe_newsroom_newsletter/newsletter_form';
     $form['email'] = [
       '#type' => 'email',
       '#title' => $this->t('Your e-mail'),
@@ -86,8 +91,21 @@ abstract class NewsletterFormBase extends FormBase {
       $response->addCommand(new ReplaceCommand(NULL, $form));
     }
     else {
+      // Collect the message texts before the status_messages element renders,
+      // as rendering consumes the messenger messages.
+      $announcement = [];
+      foreach ($this->messenger->all() as $type_messages) {
+        foreach ($type_messages as $message) {
+          $announcement[] = PlainTextOutput::renderFromHtml((string) $message);
+        }
+      }
       $messages = ['#type' => 'status_messages'];
-      $response->addCommand(new ReplaceCommand(NULL, $messages));
+      $response->addCommand(new ReplaceFormWrapperCommand($messages));
+      // Screen readers do not reliably pick up AJAX-inserted status messages,
+      // so announce them explicitly.
+      if ($announcement) {
+        $response->addCommand(new AnnounceCommand(implode(' ', $announcement)));
+      }
     }
 
     return $response;

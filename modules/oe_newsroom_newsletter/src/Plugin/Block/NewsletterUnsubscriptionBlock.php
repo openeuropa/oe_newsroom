@@ -13,6 +13,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\oe_newsroom\Newsroom;
+use Drupal\oe_newsroom_newsletter\Ajax\ReplaceFormWrapperCommand;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Form\UnsubscribeForm;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -124,8 +125,9 @@ class NewsletterUnsubscriptionBlock extends BlockBase implements ContainerFactor
     // #attributes, so add the form-id class via #wrapper_attributes (a no-op
     // on older core, which still copies the class from #attributes).
     $build['#wrapper_attributes']['class'][] = Html::getClass(UnsubscribeForm::FORM_ID);
-
-    return $build;
+    // Mark the block wrapper so a successful submission replaces it as a
+    // whole, block title included.
+    return ReplaceFormWrapperCommand::markFormWrapper($build);
   }
 
   /**
