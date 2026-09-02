@@ -8,3 +8,8 @@ services:
   Drupal\oe_newsroom_vcr\Vcr\VcrStore: {}
   Drupal\oe_newsroom_vcr\Vcr\VcrApiExplorerOperations: {}
   Drupal\oe_newsroom_vcr\Vcr\VcrRuntimeInterface: '@Drupal\oe_newsroom_vcr\Vcr\VcrStore'
+  Drupal\oe_newsroom_vcr\DataMapper\RequestMapper: {}
+  Drupal\oe_newsroom_vcr\DataMapper\ResponseMapper: {}
+  Drupal\oe_newsroom_vcr\ClientMiddleware:
+    tags:
+      - { name: http_client_middleware }
