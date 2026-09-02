@@ -266,11 +266,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
    *   Form element array.
    */
   protected function buildArgumentWidget(\ReflectionParameter $parameter, ?Param $param_tag, bool &$unsupported): array {
-    $reflection_type = $parameter->getType();
-    // Currently, all relevant parameters have simple named types.
-    $type_name = $reflection_type instanceof \ReflectionNamedType
-      ? $reflection_type->getName()
-      : NULL;
+    $type_name = ltrim($parameter->getType()->__toString(), '?');
     try {
       // If $type_name is NULL, it will trigger the `UnhandledMatchError` that
       // is handled in the catch branch below.
@@ -279,7 +275,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
           '#type' => 'number',
           '#step' => 1,
         ],
-        'string' => [
+        'string', 'string|int', 'int|string' => [
           '#type' => 'textfield',
         ],
         'bool' => [
@@ -494,7 +490,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
         str_starts_with($value, '{') || str_starts_with($value, '[') => json_decode($value, TRUE, flags: JSON_THROW_ON_ERROR),
         default => preg_split('#, *#', trim($value)),
       },
-      'string' => (string) $value,
+      'string', 'string|int', 'int|string' => (string) $value,
       default => throw new \Exception(sprintf('Unsupported type %s for parameter %s', $parameter->getType()->__toString(), $parameter->name)),
     };
     if ($argument === $illegal_value) {
