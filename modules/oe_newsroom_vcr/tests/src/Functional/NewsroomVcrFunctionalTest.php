@@ -3,6 +3,7 @@
 namespace Drupal\Tests\oe_newsroom_vcr\Functional;
 
 use Drupal\Core\Extension\ModuleInstallerInterface;
+use Drupal\oe_newsroom_vcr\Capture\CaptureStore;
 use Drupal\oe_newsroom_vcr\Vcr\VcrMode;
 use Drupal\oe_newsroom_vcr\Vcr\VcrStore;
 use Drupal\Tests\BrowserTestBase;
@@ -112,6 +113,19 @@ EOT,
     );
     $vcr->endReplay();
 
+    // Insert a capture placeholder in the recorded request.
+    $request['host'] = new TaggedValue('Capture', 'placeholder for host');
+    $records[0] = new TaggedValue('Request', $request);
+
+    // Start the replay with the manipulated recording, visit the page again.
+    $vcr->startReplay($records);
+    $this->drupalGet('oe-newsroom-vcr-test/page');
+    $vcr->endReplay();
+    $this->assertSame(
+      ['placeholder for host' => 'web'],
+      \Drupal::service(CaptureStore::class)->getCapturedValues(),
+    );
+
     // Manipulate the recorded query, so it no longer matches the actual query.
     $request['query'] = ['x' => 'y'];
     $records[0] = new TaggedValue('Request', $request);
@@ -129,7 +143,7 @@ EOT,
 Request does not match recording at position 0.
 expected:
   scheme: http
-  host: web
+  host: !Capture 'placeholder for host'
   port: 8080
   path: /build/oe-newsroom-vcr-test/api
   query:
