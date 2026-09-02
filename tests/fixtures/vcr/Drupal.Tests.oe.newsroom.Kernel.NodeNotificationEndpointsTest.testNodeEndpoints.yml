@@ -1,0 +1,197 @@
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/node-notification/delete
+  data:
+    item:
+      sv_id: !Default node_service_id
+      node_id: test.1
+      deleteTopic: true
+    key: !Capture '<signature key 0>'
+    app: !Default app_id
+- !Response
+  data: 'Node and all associated data deleted successfully'
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/get
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data: {  }
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/count
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data:
+    count: 0
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/exists
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data:
+    exists: false
+- !Comment 'Create a node notification.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/node-notification/create
+  data:
+    item:
+      sv_id: !Default node_service_id
+      section_id: !Default node_notification_section_id
+      notification_title: 'The title of the notification'
+      notification_description: 'The description of the notification'
+      notification_URL: 'https://www.example.com'
+      node_id: test.1
+      node_title: 'The node title'
+    key: !Capture '<signature key 2>'
+    app: !Default app_id
+- !Response
+  data: 'Node notification created successfully'
+- !Comment 'Load node notifications.'
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/get
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data:
+    -
+      id: !Replaced '10000'
+      title: 'The title of the notification'
+      date: !Replaced '2005-02-15 13:00:00'
+      dateTo: null
+      publicationDate: !Replaced '2005-02-15 13:00:00'
+      publicationDateTo: null
+      validationDate: !Replaced '2005-02-15 13:00:00'
+      author: 'Newsroom System'
+      statusBy: 'Newsroom System'
+      topics:
+        -
+          id: !Replaced '20000'
+          name: !Replaced 'Topic name (0)'
+          status: Validated
+          submittedBy: 'Newsroom System'
+          service: !Replaced 'Service name (0)'
+        -
+          id: !Replaced '20001'
+          name: !Replaced 'Topic name (1)'
+          status: Valid
+          submittedBy: 'Newsroom System'
+          service: !Replaced 'Service name (1)'
+      pinnedTopic: null
+      pictureId: null
+      status: 'Accepted centrally'
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/count
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data:
+    count: 1
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/exists
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data:
+    exists: true
+- !Comment 'Delete pending node notifications.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/node-notification/delete
+  data:
+    item:
+      sv_id: !Default node_service_id
+      node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data: 'All unsent node notifications deleted successfully'
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/get
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data: {  }
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/count
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data:
+    count: 0
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/exists
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data:
+    exists: true
+- !Comment 'Fully delete the node notification topic.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/node-notification/delete
+  data:
+    item:
+      sv_id: !Default node_service_id
+      node_id: test.1
+      deleteTopic: true
+    key: !Capture '<signature key 0>'
+    app: !Default app_id
+- !Response
+  data: 'Node and all associated data deleted successfully'
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/get
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data: {  }
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/count
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data:
+    count: 0
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/exists
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data:
+    exists: false
