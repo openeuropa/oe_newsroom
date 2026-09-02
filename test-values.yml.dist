@@ -1,0 +1,22 @@
+# This is a template for a file to provide details to phpunit tests in 'recording' mode.
+# It is only needed for local development.
+
+# Newsroom settings.
+oe_newsroom_settings:
+  # This should typically be sha256 for the real service.
+  hash_method: md5  # Please replace.
+  normalised: true  # Please replace.
+  universe: 'test-universe'  # Please replace.
+  app_id: 'test-app-id'  # Please replace.
+  node_service_id: '1234'  # Please replace.
+
+# The secret API key.
+# If NULL, the value from an env variable will be used.
+newsroom_api_private_key: 'phpunit-test-private-key'  # Please replace.
+# The name of an environment variable that contains the API key.
+# If NULL, the same env variable will be used as for the local installation.
+# See runner.yml.dist.
+newsroom_api_private_key_env_name:
+
+# Additional values for testing.
+node_notification_section_id: '77744'  # Please replace.
