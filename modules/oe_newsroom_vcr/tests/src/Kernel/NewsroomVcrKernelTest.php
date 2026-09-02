@@ -19,6 +19,16 @@ class NewsroomVcrKernelTest extends KernelTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected function setUp(): void {
+    if (version_compare(\Drupal::VERSION, '11.3', '<')) {
+      $this->markTestSkipped('This test only runs in Drupal >= 11.3');
+    }
+    parent::setUp();
+  }
+
+  /**
    * Tests the VCR.
    */
   public function testVcr(): void {
