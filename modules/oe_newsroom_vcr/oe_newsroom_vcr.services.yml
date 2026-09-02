@@ -3,3 +3,4 @@ services:
     autowire: true
   Drupal\oe_newsroom_vcr\Vcr\VcrStore: {}
   Drupal\oe_newsroom_vcr\Vcr\VcrRuntimeInterface: '@Drupal\oe_newsroom_vcr\Vcr\VcrStore'
+  Drupal\oe_newsroom_vcr\Explorer\VcrApiExplorerOperations: {}
