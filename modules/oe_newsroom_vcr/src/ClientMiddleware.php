@@ -8,6 +8,8 @@ use Drupal\Component\Serialization\Yaml;
 use Drupal\oe_newsroom_vcr\DataMapper\RequestMapper;
 use Drupal\oe_newsroom_vcr\DataMapper\ResponseMapper;
 use Drupal\oe_newsroom_vcr\Helper\ArrayHelper;
+use Drupal\oe_newsroom_vcr\Helper\CapturingHelper;
+use Drupal\oe_newsroom_vcr\Vcr\CaptureStore;
 use Drupal\oe_newsroom_vcr\Vcr\VcrMode;
 use Drupal\oe_newsroom_vcr\Vcr\VcrRuntimeInterface;
 use GuzzleHttp\Promise\Create;
@@ -26,6 +28,7 @@ class ClientMiddleware {
     protected readonly VcrRuntimeInterface $vcr,
     protected readonly RequestMapper $requestMapper,
     protected readonly ResponseMapper $responseMapper,
+    protected readonly CaptureStore $captureStore,
   ) {}
 
   /**
@@ -141,7 +144,8 @@ class ClientMiddleware {
     assert($mode === VcrMode::Replay);
     $expected = $replay_record->getValue();
     $actual = $actual_record->getValue();
-    $expected_sorted = ArrayHelper::ksortRecursive($expected);
+    $expected_processed = CapturingHelper::captureRecursive($expected, $actual, $this->captureStore->capture(...));
+    $expected_sorted = ArrayHelper::ksortRecursive($expected_processed);
     $actual_sorted = ArrayHelper::ksortRecursive($actual);
     // Comparing yaml is more strict than ->assertEquals(), but still allows
     // different object identity for TaggedValue instances.
