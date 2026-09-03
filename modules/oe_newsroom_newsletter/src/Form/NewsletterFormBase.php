@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\oe_newsroom_newsletter\Form;
 
 use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\RemoveCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Form\FormBase;
@@ -87,6 +88,7 @@ abstract class NewsletterFormBase extends FormBase {
     }
     else {
       $messages = ['#type' => 'status_messages'];
+      $response->addCommand(new RemoveCommand('.block-title-' . $form_state->getUserInput()['newsroom_form_unique_id']));
       $response->addCommand(new ReplaceCommand(NULL, $messages));
     }
 

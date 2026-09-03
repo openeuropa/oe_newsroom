@@ -78,7 +78,12 @@ class SubscribeForm extends NewsletterFormBase {
       $selected_language = $this->accountProxy->getPreferredLangcode(FALSE);
     }
 
-    $form['#id'] = Html::getUniqueId($this->getFormId());
+    $unique_id = Html::getUniqueId($this->getFormId());
+    $form['#id'] = $unique_id;
+    $form['newsroom_form_unique_id'] = [
+      '#type' => 'hidden',
+      '#value' => $form_state->getUserInput()['newsroom_form_unique_id'] ?? $unique_id,
+    ];
 
     // Start building up form.
     $form['intro_text'] = [
