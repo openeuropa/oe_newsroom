@@ -24,3 +24,12 @@ function oe_newsroom_newsletter_local_tasks_alter(&$local_tasks) {
 function oe_newsroom_newsletter_locale_translation_projects_alter(&$projects) {
   $projects['oe_newsroom_newsletter']['info']['interface translation server pattern'] = \Drupal::service('extension.list.module')->getPath('oe_newsroom_newsletter') . '/translations/%project-%language.po';
 }
+
+/**
+ * Implements hook_preprocess_block().
+ */
+function oe_newsroom_newsletter_preprocess_block(array &$variables) {
+  if ($variables['plugin_id'] === 'oe_newsroom_newsletter_subscription_block') {
+    $variables['title_attributes']['class'][] = 'block-title-' . $variables['elements']['content']['#id'];
+  }
+}
