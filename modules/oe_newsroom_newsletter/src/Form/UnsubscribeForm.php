@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\oe_newsroom_newsletter\Form;
 
-use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Utility\Error;
@@ -37,8 +36,6 @@ class UnsubscribeForm extends NewsletterFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state, array $distribution_lists = []): array {
     $form = parent::buildForm($form, $form_state, $distribution_lists);
-
-    $form['#id'] = Html::getUniqueId($this->getFormId());
 
     $form['actions'] = [
       '#type' => 'actions',

@@ -14,7 +14,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\oe_newsroom\Newsroom;
-use Drupal\oe_newsroom_newsletter\Ajax\ReplaceFormWrapperCommand;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClientInterface;
 use Drupal\oe_newsroom_newsletter\Form\SubscribeForm;
 use Drupal\oe_newsroom_newsletter\NewsroomNewsletter;
@@ -170,9 +169,8 @@ class NewsletterSubscriptionBlock extends BlockBase implements ContainerFactoryP
     // #attributes, so add the form-id class via #wrapper_attributes (a no-op
     // on older core, which still copies the class from #attributes).
     $build['#wrapper_attributes']['class'][] = Html::getClass(SubscribeForm::FORM_ID);
-    // Mark the block wrapper so a successful submission replaces it as a
-    // whole, block title included.
-    return ReplaceFormWrapperCommand::markFormWrapper($build);
+
+    return $build;
   }
 
   /**
