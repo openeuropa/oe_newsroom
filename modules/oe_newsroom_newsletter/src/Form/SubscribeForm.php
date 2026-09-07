@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\oe_newsroom_newsletter\Form;
 
-use Drupal\Component\Utility\Html;
 use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
@@ -77,8 +76,6 @@ class SubscribeForm extends NewsletterFormBase {
     if (!$this->accountProxy->isAnonymous() && $this->accountProxy->getPreferredLangcode(FALSE) !== '') {
       $selected_language = $this->accountProxy->getPreferredLangcode(FALSE);
     }
-
-    $form['#id'] = Html::getUniqueId($this->getFormId());
 
     // Start building up form.
     $form['intro_text'] = [
