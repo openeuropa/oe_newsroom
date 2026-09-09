@@ -50,6 +50,14 @@ class NewsroomSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('app_id'),
       '#required' => TRUE,
     ];
+    // Not required for now.
+    $form['node_service_id'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Node notification service ID'),
+      '#description' => $this->t("Currently this is only useful in combination with the 'oe_newsroom_node' submodule."),
+      '#maxlength' => 64,
+      '#default_value' => $config->get('node_service_id'),
+    ];
     $form['hash_method'] = [
       '#type' => 'select',
       '#title' => $this->t('Hash method'),
@@ -81,6 +89,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
       ->set('app_id', $form_state->getValue('app_id'))
       ->set('hash_method', $form_state->getValue('hash_method'))
       ->set('normalised', $form_state->getValue('normalised'))
+      ->set('node_service_id', $form_state->getValue('node_service_id'))
       ->save();
   }
 
