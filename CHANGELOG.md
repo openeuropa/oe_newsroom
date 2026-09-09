@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/openeuropa/oe_newsroom/tree/1.2.0) (2026-09-09)
+
+[Full Changelog](https://github.com/openeuropa/oe_newsroom/compare/1.1.0...1.2.0)
+
+**Merged pull requests:**
+
+- EWPP-7146: Hide the title of the block reference after a subscription… [\#29](https://github.com/openeuropa/oe_newsroom/pull/29) ([nagyad](https://github.com/nagyad))
+- EWPP-6988: Run with openeuropa github CI. [\#27](https://github.com/openeuropa/oe_newsroom/pull/27) ([nagyad](https://github.com/nagyad))
+- D8EMA-5406: Modernize services and constructors. [\#23](https://github.com/openeuropa/oe_newsroom/pull/23) ([donquixote](https://github.com/donquixote))
+- D8EMA-5582: Create API Explorer submodule [\#22](https://github.com/openeuropa/oe_newsroom/pull/22) ([donquixote](https://github.com/donquixote))
+- EWPP-6954: Fix bug with multiple distribution lists. [\#21](https://github.com/openeuropa/oe_newsroom/pull/21) ([nagyad](https://github.com/nagyad))
+
 ## [1.1.0](https://github.com/openeuropa/oe_newsroom/tree/1.1.0) (2026-06-02)
 
 [Full Changelog](https://github.com/openeuropa/oe_newsroom/compare/1.0.0...1.1.0)
