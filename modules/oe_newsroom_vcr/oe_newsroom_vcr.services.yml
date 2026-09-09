@@ -1,0 +1,12 @@
+services:
+  _defaults:
+    autowire: true
+  Drupal\oe_newsroom_vcr\Capture\CaptureStore: {}
+  Drupal\oe_newsroom_vcr\Vcr\VcrStore: {}
+  Drupal\oe_newsroom_vcr\Vcr\VcrRuntimeInterface: '@Drupal\oe_newsroom_vcr\Vcr\VcrStore'
+  Drupal\oe_newsroom_vcr\Explorer\VcrApiExplorerOperations: {}
+  Drupal\oe_newsroom_vcr\Http\RequestMapper: {}
+  Drupal\oe_newsroom_vcr\Http\ResponseMapper: {}
+  Drupal\oe_newsroom_vcr\Http\ClientMiddleware:
+    tags:
+      - { name: http_client_middleware }
