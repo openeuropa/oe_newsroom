@@ -22,6 +22,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
+use Drupal\oe_newsroom_api_explorer\Helper\ReflectionHelper;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Promise\Create;
@@ -155,7 +156,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
     $param_tags = [];
     // Use phpDocumentor if available.
     if (class_exists(DocBlockFactory::class)) {
-      $doc_comment = $this->findMethodDocComment($method);
+      $doc_comment = ReflectionHelper::findOriginalMethodDocComment($method);
       if ($doc_comment !== NULL) {
         $phpdoc = DocBlockFactory::createInstance()->create($doc_comment);
         foreach ($phpdoc->getTagsByName('param') as $tag) {
@@ -213,7 +214,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
     [$class, $method_name] = explode('::', $endpoint_name);
     $method = new \ReflectionMethod($class, $method_name);
     $subform = [];
-    $doc_comment = $this->findMethodDocComment($method);
+    $doc_comment = ReflectionHelper::findOriginalMethodDocComment($method);
     $doc_description = $doc_comment;
 
     // Use phpDocumentor if available.
@@ -248,43 +249,6 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
   }
 
   /**
-   * Finds a method doc comment, also looking at inheritance.
-   *
-   * @param \ReflectionMethod $method
-   *   The method.
-   *
-   * @return string|null
-   *   The doc comment on the method or one of its parents.
-   */
-  protected function findMethodDocComment(\ReflectionMethod $method): ?string {
-    $doc = $method->getDocComment();
-    if ($doc !== FALSE && !str_contains($doc, '@inheritdoc')) {
-      return $doc;
-    }
-    $parent_class = $method->getDeclaringClass();
-    while ($parent_class = $parent_class->getParentClass()) {
-      if (!$parent_class->hasMethod($method->name)) {
-        break;
-      }
-      $parent_method = $parent_class->getMethod($method->name);
-      $doc = $this->findMethodDocComment($parent_method);
-      if ($doc !== NULL) {
-        return $doc;
-      }
-    }
-    foreach ($method->getDeclaringClass()->getInterfaces() as $interface) {
-      if (!$interface->hasMethod($method->name)) {
-        continue;
-      }
-      $doc = $interface->getMethod($method->name)->getDocComment();
-      if ($doc !== FALSE && !str_contains($doc, '@inheritdoc')) {
-        return $doc;
-      }
-    }
-    return NULL;
-  }
-
-  /**
    * Builds a widget to set/choose an argument value.
    *
    * @param \ReflectionParameter $parameter
@@ -299,11 +263,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
    *   Form element array.
    */
   protected function buildArgumentWidget(\ReflectionParameter $parameter, ?Param $param_tag, bool &$unsupported): array {
-    $reflection_type = $parameter->getType();
-    // Currently, all relevant parameters have simple named types.
-    $type_name = $reflection_type instanceof \ReflectionNamedType
-      ? $reflection_type->getName()
-      : NULL;
+    $type_name = ltrim($parameter->getType()->__toString(), '?');
     try {
       // If $type_name is NULL, it will trigger the `UnhandledMatchError` that
       // is handled in the catch branch below.
@@ -312,7 +272,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
           '#type' => 'number',
           '#step' => 1,
         ],
-        'string' => [
+        'string', 'string|int', 'int|string' => [
           '#type' => 'textfield',
         ],
         'bool' => [
@@ -341,7 +301,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
       ];
     }
     $element['#title'] = $parameter->name;
-    $element['#required'] = !$parameter->isOptional();
+    $element['#required'] = !$parameter->isOptional() && $type_name !== 'bool';
     $description_parts = [];
     if ($param_tag !== NULL) {
       $description_parts[] = Html::escape($param_tag->getDescription()->render());
@@ -526,7 +486,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
         str_starts_with($value, '{') || str_starts_with($value, '[') => json_decode($value, TRUE, flags: JSON_THROW_ON_ERROR),
         default => preg_split('#, *#', trim($value)),
       },
-      'string' => (string) $value,
+      'string', 'string|int', 'int|string' => (string) $value,
       default => throw new \Exception(sprintf('Unsupported type %s for parameter %s', $parameter->getType()->__toString(), $parameter->name)),
     };
     if ($argument === $illegal_value) {
@@ -636,6 +596,13 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
     ];
     $options = [];
     foreach ($classes as $class) {
+      // Don't add methods for unknown classes.
+      // This is relevant if one of the classes in the list is defined in a
+      // submodule which is currently not installed.
+      if (!class_exists($class)) {
+        $options[$class . ' (not available)'] = [];
+        continue;
+      }
       $reflection = new \ReflectionClass($class);
       $methods = $reflection->getMethods(\ReflectionMethod::IS_PUBLIC);
       foreach ($methods as $method) {
@@ -697,6 +664,9 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
       }
       if ($input instanceof EntityInterface) {
         return new TaggedValue('entity', get_class($input) . ' ' . ($input->id() ?? '#new'));
+      }
+      if ($input instanceof TaggedValue) {
+        return new TaggedValue('TaggedValue.' . $input->getTag(), $input->getValue());
       }
       return new TaggedValue('object', get_class($input));
     }
