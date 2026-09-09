@@ -25,6 +25,7 @@ use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints;
 use Drupal\oe_newsroom_api_explorer\Helper\ReflectionHelper;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
+use Drupal\oe_newsroom_vcr\Vcr\VcrStore;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Promise\Create;
 use GuzzleHttp\Promise\PromiseInterface;
@@ -595,6 +596,8 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
     $classes = [
       NewsroomClient::class,
       NodeNotificationEndpoints::class,
+      // Allow developers to play with the VCR in the API explorer.
+      VcrStore::class,
     ];
     $options = [];
     foreach ($classes as $class) {
