@@ -49,10 +49,7 @@ trait VcrTrait {
     $this->assertVcrCaptured([]);
     $this->assertTrue(\Drupal::moduleHandler()->moduleExists('oe_newsroom_vcr'));
     $this->vcrName = $name;
-    if ($this->isRecording() == '2') {
-      \Drupal::service(VcrStore::class)->startRecording();
-    }
-    elseif ($this->isRecording()) {
+    if ($this->isRecording()) {
       \Drupal::service(VcrStore::class)->startRecording();
     }
     else {
