@@ -2,10 +2,8 @@
 
 namespace Drupal\Tests\oe_newsroom\Kernel;
 
-use Drupal\Core\Site\Settings;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints;
-use Drupal\Tests\oe_newsroom\Helper\VcrTransform\NewsroomVcrTransform;
 use Drupal\Tests\oe_newsroom\NewsroomConfigurationTestTrait;
 use Drupal\Tests\oe_newsroom\Traits\LocalTestValuesTrait;
 use Drupal\Tests\oe_newsroom\Traits\VcrTrait;
@@ -42,7 +40,7 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
    * Tests node endpoints.
    */
   public function testNodeEndpoints(): void {
-    $this->configureClient();
+    $this->initializeNewsroomAndVcrWithTestValues();
     $node_notification_endpoints = \Drupal::service(NodeNotificationEndpoints::class);
 
     // Normally the "node id" should be an integer value, corresponding to a
@@ -149,26 +147,6 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
         ],
       );
     }
-  }
-
-  /**
-   * Configures the Newsroom client, and sets transformations for the VCR.
-   */
-  protected function configureClient(): void {
-    $test_values = $this->loadNewsroomTestValues($this->isRecording());
-    $newsroom_config = $test_values['oe_newsroom_settings'];
-    $default_values = $newsroom_config + $test_values;
-    if ($this->isRecording()) {
-      $this->vcrPack = NewsroomVcrTransform::fnPackRecords($default_values);
-    }
-    else {
-      $this->vcrUnpack = NewsroomVcrTransform::fnUnpackRecords($default_values);
-    }
-    $newsroom_api_key = $test_values['newsroom_api_private_key'];
-    $settings = Settings::getAll();
-    $settings['oe_newsroom']['newsroom_api_key'] = $newsroom_api_key;
-    new Settings($settings);
-    $this->configureNewsroom($newsroom_config);
   }
 
 }
