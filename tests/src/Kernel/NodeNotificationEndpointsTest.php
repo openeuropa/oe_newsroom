@@ -45,8 +45,6 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
    */
   public function testNodeEndpoints(): void {
     $this->configureClient();
-    $this->startVcr(__METHOD__);
-
     $node_notification_endpoints = \Drupal::service(NodeNotificationEndpoints::class);
 
     // Normally the "node id" should be an integer value, corresponding to a
@@ -57,9 +55,19 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
     $test_values = $this->loadNewsroomTestValues($this->isRecording());
     $section_id = $test_values['node_notification_section_id'];
 
-    // Delete the node for a clean start.
-    $node_notification_endpoints->nodeNotificationDelete($node_id, TRUE);
-    $this->assertNodeIdUnknown($node_id);
+    // When working with a real Newsroom server, we need to make sure there is
+    // a clean starting point, to make the test behave the same every time.
+    // This part is not recorded in the VCR, because it might be different.
+    if ($this->isRecording()) {
+      // Delete the nodes, if they exist, for a clean start.
+      $node_notification_endpoints->nodeNotificationDelete($node_id, TRUE);
+      // Make sure they are gone.
+      $this->assertNodeIdUnknown($node_id);
+    }
+
+    // Start the recording or replay.
+    // Use the full method name for the vcr yaml file to read or write.
+    $this->startVcr(__METHOD__);
 
     // Create one notification for the node id.
     // This will create the topic as side effect.
@@ -105,12 +113,12 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
           '<signature key 2>',
         ],
         [
-          // Hash for '/node-notification/delete'.
-          '09616039d3598c952b63f72c96c96054',
-          // Hash for '/node-notification/get', '*/exists' and '*/count'.
-          '50d3359dff6d7b43a24e21f3991df2a9',
           // Hash for '/node-notification/create'.
           '562290d782b30bc83c551bac24f76a43',
+          // Hash for '/node-notification/get', '*/exists' and '*/count'.
+          '50d3359dff6d7b43a24e21f3991df2a9',
+          // Hash for '/node-notification/delete'.
+          '09616039d3598c952b63f72c96c96054',
         ],
       );
     }

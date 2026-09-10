@@ -1,44 +1,3 @@
-- !NewsroomRequest
-  method: POST
-  path: /newsroom/api/v1/node-notification/delete
-  data:
-    item:
-      sv_id: !Default node_service_id
-      node_id: test.1
-      deleteTopic: true
-    key: !Capture '<signature key 0>'
-    app: !Default app_id
-- !Response
-  data: 'Node and all associated data deleted successfully'
-- !NewsroomRequest
-  path: /newsroom/api/v1/node-notification/get
-  query:
-    sv_id: !Default node_service_id
-    node_id: test.1
-    key: !Capture '<signature key 1>'
-    app: !Default app_id
-- !Response
-  data: {  }
-- !NewsroomRequest
-  path: /newsroom/api/v1/node-notification/count
-  query:
-    sv_id: !Default node_service_id
-    node_id: test.1
-    key: !Capture '<signature key 1>'
-    app: !Default app_id
-- !Response
-  data:
-    count: 0
-- !NewsroomRequest
-  path: /newsroom/api/v1/node-notification/exists
-  query:
-    sv_id: !Default node_service_id
-    node_id: test.1
-    key: !Capture '<signature key 1>'
-    app: !Default app_id
-- !Response
-  data:
-    exists: false
 - !Comment 'Create a node notification.'
 - !NewsroomRequest
   method: POST
@@ -52,7 +11,7 @@
       notification_URL: 'https://www.example.com'
       node_id: test.1
       node_title: 'The node title'
-    key: !Capture '<signature key 2>'
+    key: !Capture '<signature key 0>'
     app: !Default app_id
 - !Response
   data: 'Node notification created successfully'
@@ -162,7 +121,7 @@
       sv_id: !Default node_service_id
       node_id: test.1
       deleteTopic: true
-    key: !Capture '<signature key 0>'
+    key: !Capture '<signature key 2>'
     app: !Default app_id
 - !Response
   data: 'Node and all associated data deleted successfully'
