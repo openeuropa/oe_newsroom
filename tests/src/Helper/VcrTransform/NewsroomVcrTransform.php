@@ -132,12 +132,17 @@ class NewsroomVcrTransform {
 
     $transformations_by_path = [
       '/newsroom/api/v1/node-notification/get' => Transform::assoc([
-        'data' => Transform::eachAssocInArray([
-          'id' => $fn_notification_id,
-          'topics' => Transform::eachAssocInArray([
-            'id' => $fn_topic_id,
-            'name' => $fn_topic_name,
-            'service' => $fn_service_name,
+        'data' => Transform::multiple([
+          // The order of records in the response can be random.
+          // Order by id, to stabilize the recording.
+          Transform::orderListByColumn('id'),
+          Transform::eachAssocInArray([
+            'id' => $fn_notification_id,
+            'topics' => Transform::eachAssocInArray([
+              'id' => $fn_topic_id,
+              'name' => $fn_topic_name,
+              'service' => $fn_service_name,
+            ]),
           ]),
         ]),
       ]),

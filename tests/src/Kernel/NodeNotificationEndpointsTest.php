@@ -89,6 +89,28 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
     $this->assertSame(1, $node_notification_endpoints->nodeNotificationCount($node_id));
     $this->assertTrue($node_notification_endpoints->nodeNotificationExists($node_id));
 
+    // Create another notification for the same node id.
+    // Pass modified values, to see how this changes the response.
+    $this->vcrComment('Create another node notification for the same id.');
+    $node_notification_endpoints->nodeNotificationCreate(
+      section_id: $section_id,
+      notification_title: 'The title of the notification (modified)',
+      notification_description: 'The description of the notification (modified)',
+      notification_url: 'https://www.example.com/modified',
+      node_id: $node_id,
+      node_title: 'The node title (modified)',
+    );
+
+    // Now two notifications exists in the list.
+    $this->vcrComment('Load node notifications, expecting two.');
+    $get_result = $node_notification_endpoints->nodeNotificationGet($node_id);
+    $this->assertEqualsCanonicalizing([
+      'The title of the notification',
+      'The title of the notification (modified)',
+    ], array_column($get_result, 'title'));
+    $this->assertSame(2, $node_notification_endpoints->nodeNotificationCount($node_id));
+    $this->assertTrue($node_notification_endpoints->nodeNotificationExists($node_id));
+
     $this->vcrComment('Delete pending node notifications, without deleting the topic.');
     $node_notification_endpoints->nodeNotificationDelete($node_id, FALSE);
     $this->vcrComment('The notification count is zero, but the topic still exists.');
@@ -114,12 +136,16 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
           '<signature key 0>',
           '<signature key 1>',
           '<signature key 2>',
+          '<signature key 3>',
         ],
         [
           // Hash for '/node-notification/create'.
           '562290d782b30bc83c551bac24f76a43',
           // Hash for '/node-notification/get', '*/exists' and '*/count'.
           '50d3359dff6d7b43a24e21f3991df2a9',
+          // Hash for the second request to '/node-notification/create', with
+          // different parameters.
+          'b25f550808bfbdcb2cd64cf38ae0f67d',
           // Hash for '/node-notification/delete'.
           '09616039d3598c952b63f72c96c96054',
         ],

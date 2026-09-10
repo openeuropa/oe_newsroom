@@ -133,6 +133,7 @@ class NodeNotificationEndpoints {
    *
    * @return list<array>
    *   Decoded response data.
+   *   Note that the order of records can be random.
    */
   public function nodeNotificationGet(string|int $node_id): array {
     $query = $signature_input = [

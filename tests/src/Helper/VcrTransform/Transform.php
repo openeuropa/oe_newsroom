@@ -576,4 +576,42 @@ class Transform {
     return fn () => $replacement;
   }
 
+  /**
+   * Gets a transformation to order a list of records by a column name.
+   *
+   * @param string $key
+   *   The column name to sort by - an array key to look for in each record to
+   *   get the sort value.
+   * @param string|null $tag
+   *   (optional) A tag name to wrap the replacement, if it was sorted.
+   *
+   * @return \Closure(mixed): mixed
+   *   The resulting transformation.
+   */
+  public static function orderListByColumn(string $key, ?string $tag = NULL): \Closure {
+    return function (mixed $value) use ($key, $tag) {
+      if (!is_array($value) || !array_is_list($value)) {
+        return $value;
+      }
+      $sort_values = array_map(
+        function (mixed $item) use ($key) {
+          if (
+            !is_array($item) ||
+            !isset($item[$key]) ||
+            (!is_string($item[$key]) && !is_int($item[$key]))
+          ) {
+            return '';
+          }
+          return $item[$key];
+        },
+        $value,
+      );
+      array_multisort($sort_values, $value);
+      if ($tag !== NULL) {
+        $value = new TaggedValue($tag, $value);
+      }
+      return $value;
+    };
+  }
+
 }
