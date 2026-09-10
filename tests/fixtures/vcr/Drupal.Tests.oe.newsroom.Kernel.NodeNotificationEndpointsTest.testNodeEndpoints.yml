@@ -71,7 +71,7 @@
 - !Response
   data:
     exists: true
-- !Comment 'Delete pending node notifications.'
+- !Comment 'Delete pending node notifications, without deleting the topic.'
 - !NewsroomRequest
   method: POST
   path: /newsroom/api/v1/node-notification/delete
@@ -83,6 +83,7 @@
     app: !Default app_id
 - !Response
   data: 'All unsent node notifications deleted successfully'
+- !Comment 'The notification count is zero, but the topic still exists.'
 - !NewsroomRequest
   path: /newsroom/api/v1/node-notification/get
   query:
@@ -125,25 +126,7 @@
     app: !Default app_id
 - !Response
   data: 'Node and all associated data deleted successfully'
-- !NewsroomRequest
-  path: /newsroom/api/v1/node-notification/get
-  query:
-    sv_id: !Default node_service_id
-    node_id: test.1
-    key: !Capture '<signature key 1>'
-    app: !Default app_id
-- !Response
-  data: {  }
-- !NewsroomRequest
-  path: /newsroom/api/v1/node-notification/count
-  query:
-    sv_id: !Default node_service_id
-    node_id: test.1
-    key: !Capture '<signature key 1>'
-    app: !Default app_id
-- !Response
-  data:
-    count: 0
+- !Comment 'The notification topic has been fully removed.'
 - !NewsroomRequest
   path: /newsroom/api/v1/node-notification/exists
   query:

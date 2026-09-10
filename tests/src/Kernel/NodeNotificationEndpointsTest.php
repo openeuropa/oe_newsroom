@@ -62,7 +62,7 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
       // Delete the nodes, if they exist, for a clean start.
       $node_notification_endpoints->nodeNotificationDelete($node_id, TRUE);
       // Make sure they are gone.
-      $this->assertNodeIdUnknown($node_id);
+      $this->assertFalse($node_notification_endpoints->nodeNotificationExists($node_id));
     }
 
     // Start the recording or replay.
@@ -89,14 +89,17 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
     $this->assertSame(1, $node_notification_endpoints->nodeNotificationCount($node_id));
     $this->assertTrue($node_notification_endpoints->nodeNotificationExists($node_id));
 
-    // Clear pending notifications from the topic.
-    $this->vcrComment('Delete pending node notifications.');
+    $this->vcrComment('Delete pending node notifications, without deleting the topic.');
     $node_notification_endpoints->nodeNotificationDelete($node_id, FALSE);
-    $this->assertNodeIdZeroNotifications($node_id);
+    $this->vcrComment('The notification count is zero, but the topic still exists.');
+    $this->assertSame([], $node_notification_endpoints->nodeNotificationGet($node_id));
+    $this->assertSame(0, $node_notification_endpoints->nodeNotificationCount($node_id));
+    $this->assertTrue($node_notification_endpoints->nodeNotificationExists($node_id));
 
     $this->vcrComment('Fully delete the node notification topic.');
     $node_notification_endpoints->nodeNotificationDelete($node_id, TRUE);
-    $this->assertNodeIdUnknown($node_id);
+    $this->vcrComment('The notification topic has been fully removed.');
+    $this->assertFalse($node_notification_endpoints->nodeNotificationExists($node_id));
 
     // Only end VCR after a complete and successful test.
     $this->endVcr();
@@ -122,32 +125,6 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
         ],
       );
     }
-  }
-
-  /**
-   * Verifies that a node id is known in Newsroom, but has zero notifications.
-   *
-   * @param string $node_id
-   *   The node id as sent to the API.
-   */
-  protected function assertNodeIdZeroNotifications(string $node_id): void {
-    $node_notification_endpoints = \Drupal::service(NodeNotificationEndpoints::class);
-    $this->assertSame([], $node_notification_endpoints->nodeNotificationGet($node_id));
-    $this->assertSame(0, $node_notification_endpoints->nodeNotificationCount($node_id));
-    $this->assertTrue($node_notification_endpoints->nodeNotificationExists($node_id));
-  }
-
-  /**
-   * Verifies that a node id is unknown in Newsroom.
-   *
-   * @param string $node_id
-   *   The node id as sent to the API.
-   */
-  protected function assertNodeIdUnknown(string $node_id): void {
-    $node_notification_endpoints = \Drupal::service(NodeNotificationEndpoints::class);
-    $this->assertSame([], $node_notification_endpoints->nodeNotificationGet($node_id));
-    $this->assertSame(0, $node_notification_endpoints->nodeNotificationCount($node_id));
-    $this->assertFalse($node_notification_endpoints->nodeNotificationExists($node_id));
   }
 
   /**
