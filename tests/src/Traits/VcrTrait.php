@@ -9,6 +9,7 @@ use Drupal\oe_newsroom_vcr\Capture\CaptureStore;
 use Drupal\oe_newsroom_vcr\Vcr\VcrMode;
 use Drupal\oe_newsroom_vcr\Vcr\VcrStore;
 use Drupal\Tests\oe_newsroom\Helper\BackwardsCompatibility;
+use Symfony\Component\VarExporter\VarExporter;
 use Symfony\Component\Yaml\Tag\TaggedValue;
 
 /**
@@ -68,6 +69,11 @@ trait VcrTrait {
 
   /**
    * Ends the VCR session, and writes to the VCR file if in recording mode.
+   *
+   * In replay mode, it will also assert captured values.
+   *
+   * @param array $expected_captured_if_replay
+   *   Expected captured values if in replay mode.
    */
   protected function endVcr(array $expected_captured_if_replay = []): void {
     $this->assertNotNull($this->vcrName);
@@ -82,8 +88,6 @@ trait VcrTrait {
         $records = ($this->vcrPack)($records);
         BackwardsCompatibility::assertIsList($records);
       }
-      $this->assertVcrCaptured($expected_captured_if_replay);
-      $this->resetVcrCaptured();
       $vcr_file = $this->getVcrFile($vcr_name);
       $this->assertDirectoryIsWritable(dirname($vcr_file));
       $yaml = Yaml::encode($records);
@@ -136,12 +140,20 @@ trait VcrTrait {
   /**
    * Asserts captured values.
    *
-   * @param array $expected
-   *   Expected captured values.
+   * Keys and values are passed and asserted separately, to make the git diff
+   * between versions less noisy.
+   *
+   * @param list<array-key> $expected_keys
+   *   Expected keys for captured values.
+   * @param list<mixed> $expected_values
+   *   Expected values for captured values.
    */
-  protected function assertVcrCaptured(array $expected): void {
+  protected function assertVcrCaptured(array $expected_keys = [], array $expected_values = []): void {
     $actual = \Drupal::service(CaptureStore::class)->getCapturedValues();
-    $this->assertSame($expected, $actual);
+    $this->assertSame(
+      VarExporter::export([$expected_keys, $expected_values]),
+      VarExporter::export([array_keys($actual), array_values($actual)]),
+    );
   }
 
   /**

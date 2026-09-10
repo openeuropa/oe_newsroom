@@ -92,6 +92,28 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
 
     // Only end VCR after a complete and successful test.
     $this->endVcr();
+
+    if (!$this->isRecording()) {
+      // Assert captured authentication hashes.
+      // Hashes that are used multiple times are only collected once.
+      // By doing this in a single assertion at the end of the test, a developer
+      // can update the hashes all at once.
+      $this->assertVcrCaptured(
+        [
+          '<signature key 0>',
+          '<signature key 1>',
+          '<signature key 2>',
+        ],
+        [
+          // Hash for '/node-notification/delete'.
+          '09616039d3598c952b63f72c96c96054',
+          // Hash for '/node-notification/get', '*/exists' and '*/count'.
+          '50d3359dff6d7b43a24e21f3991df2a9',
+          // Hash for '/node-notification/create'.
+          '562290d782b30bc83c551bac24f76a43',
+        ],
+      );
+    }
   }
 
   /**
