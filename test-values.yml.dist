@@ -19,4 +19,4 @@ newsroom_api_private_key: 'phpunit-test-private-key'  # Please replace.
 newsroom_api_private_key_env_name:
 
 # Additional values for testing.
-node_notification_section_id: '77744'  # Please replace.
+node_notification_section_id: 77744  # Please replace.

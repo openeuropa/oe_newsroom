@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\oe_newsroom\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;

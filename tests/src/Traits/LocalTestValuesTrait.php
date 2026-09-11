@@ -21,6 +21,7 @@ trait LocalTestValuesTrait {
     $newsroom_config = $test_values['oe_newsroom_settings'];
     $default_values = $newsroom_config + $test_values;
     $default_values['node_service_id'] = (string) $default_values['node_service_id'];
+    $default_values['node_notification_section_id'] = (string) $default_values['node_notification_section_id'];
     if ($this->isRecording()) {
       $this->vcrPack = NewsroomVcrTransform::fnPackRecords($default_values);
     }
