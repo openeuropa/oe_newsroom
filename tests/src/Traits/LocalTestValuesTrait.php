@@ -14,6 +14,11 @@ use Drupal\Tests\oe_newsroom\Helper\VcrTransform\NewsroomVcrTransform;
 trait LocalTestValuesTrait {
 
   /**
+   * The section id for node notifications.
+   */
+  protected int $nodeNotificationSectionId;
+
+  /**
    * Configures the Newsroom client, and sets transformations for the VCR.
    */
   protected function initializeNewsroomAndVcrWithTestValues(): void {
@@ -33,6 +38,7 @@ trait LocalTestValuesTrait {
     $settings['oe_newsroom']['newsroom_api_key'] = $newsroom_api_key;
     new Settings($settings);
     $this->configureNewsroom($newsroom_config);
+    $this->nodeNotificationSectionId = $test_values['node_notification_section_id'];
   }
 
   /**

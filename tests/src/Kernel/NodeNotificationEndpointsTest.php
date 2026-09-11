@@ -50,8 +50,6 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
     // The API also accepts string values, this way we can reduce side effects
     // on a test server in recording mode.
     $node_id = 'test.1';
-    $test_values = $this->loadNewsroomTestValues($this->isRecording());
-    $section_id = $test_values['node_notification_section_id'];
 
     // When working with a real Newsroom server, we need to make sure there is
     // a clean starting point, to make the test behave the same every time.
@@ -71,7 +69,7 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
     // This will create the topic as side effect.
     $this->vcrComment('Create a node notification.');
     $node_notification_endpoints->nodeNotificationCreate(
-      section_id: $section_id,
+      section_id: $this->nodeNotificationSectionId,
       notification_title: 'The title of the notification',
       notification_description: 'The description of the notification',
       notification_url: 'https://www.example.com',
@@ -91,7 +89,7 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
     // Pass modified values, to see how this changes the response.
     $this->vcrComment('Create another node notification for the same id.');
     $node_notification_endpoints->nodeNotificationCreate(
-      section_id: $section_id,
+      section_id: $this->nodeNotificationSectionId,
       notification_title: 'The title of the notification (modified)',
       notification_description: 'The description of the notification (modified)',
       notification_url: 'https://www.example.com/modified',
