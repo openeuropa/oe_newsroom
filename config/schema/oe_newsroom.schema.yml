@@ -15,5 +15,5 @@ oe_newsroom.settings:
       type: string
       label: 'Newsroom app ID'
     node_service_id:
-      type: string
+      type: integer
       label: 'Node notification service ID'

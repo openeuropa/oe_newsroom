@@ -20,6 +20,7 @@ trait LocalTestValuesTrait {
     $test_values = $this->loadNewsroomTestValues($this->isRecording());
     $newsroom_config = $test_values['oe_newsroom_settings'];
     $default_values = $newsroom_config + $test_values;
+    $default_values['node_service_id'] = (string) $default_values['node_service_id'];
     if ($this->isRecording()) {
       $this->vcrPack = NewsroomVcrTransform::fnPackRecords($default_values);
     }
@@ -62,7 +63,7 @@ trait LocalTestValuesTrait {
     $test_values_yaml = file_get_contents($test_values_file);
     $test_values = Yaml::decode($test_values_yaml);
     $this->assertIsArray($test_values['oe_newsroom_settings']);
-    $this->assertIsString($test_values['oe_newsroom_settings']['node_service_id']);
+    $this->assertIsInt($test_values['oe_newsroom_settings']['node_service_id']);
     if (empty($test_values['newsroom_api_private_key'])) {
       if (!empty($test_values['newsroom_api_private_key_env_name'])) {
         $test_values['newsroom_api_private_key'] = getenv($test_values['newsroom_api_private_key_env_name']);

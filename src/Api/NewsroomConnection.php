@@ -37,8 +37,8 @@ class NewsroomConnection {
    *   The universe alias.
    * @param string $appId
    *   The application id.
-   * @param string $nodeServiceId
-   *   The service id for node notifications.
+   * @param int|null $nodeServiceId
+   *   The service id for node notifications, or NULL if not configured.
    */
   public function __construct(
     public readonly string $url,
@@ -49,7 +49,7 @@ class NewsroomConnection {
     public readonly bool $normalised,
     public readonly string $universe,
     public readonly string $appId,
-    public readonly string $nodeServiceId,
+    public readonly ?int $nodeServiceId,
   ) {}
 
   /**

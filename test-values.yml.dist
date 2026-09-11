@@ -8,7 +8,7 @@ oe_newsroom_settings:
   normalised: true  # Please replace.
   universe: 'test-universe'  # Please replace.
   app_id: 'test-app-id'  # Please replace.
-  node_service_id: '1234'  # Please replace.
+  node_service_id: 1234  # Please replace.
 
 # The secret API key.
 # If NULL, the value from an env variable will be used.
