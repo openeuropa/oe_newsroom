@@ -26,17 +26,17 @@ class NewsroomConnection {
    * Constructor.
    *
    * @param string $url
-   *   The Newsroom server URL.
+   *   The Newsroom server URL, or '' if not configured.
    * @param string $privateKey
    *   A private key associated with the app id and universe.
    * @param string $hashMethod
-   *   The hash method.
+   *   The hash method, or '' if not configured.
    * @param bool $normalised
    *   TRUE, if email addresses should be normalized to lowercase.
    * @param string $universe
-   *   The universe alias.
+   *   The universe alias, or '' if not configured.
    * @param string $appId
-   *   The application id.
+   *   The application id, or '' if not configured.
    * @param int|null $nodeServiceId
    *   The service id for node notifications, or NULL if not configured.
    */
