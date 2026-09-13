@@ -149,8 +149,8 @@ class ClientMiddleware {
     // different object identity for TaggedValue instances.
     if (Yaml::encode($expected_sorted) !== Yaml::encode($actual_sorted)) {
       return "Request does not match recording at position $position.\n" . Yaml::encode([
-        'expected' => $expected,
-        'actual' => $actual,
+        'expected' => $expected_sorted,
+        'actual' => $actual_sorted,
       ]);
     }
     return NULL;

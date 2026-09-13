@@ -138,21 +138,22 @@ EOT,
     $this->assertSame(VcrMode::Poisoned, $vcr->getMode());
     // A failure has been recorded.
     $failure = $vcr->getFailure();
+    // The arrays in the assertion failure message are sorted by key.
     $this->assertSame(
       <<<EOT
 Request does not match recording at position 0.
 expected:
-  scheme: http
-  host: !Capture 'placeholder for host'
-  port: 8080
+  host: web
   path: /build/oe-newsroom-vcr-test/api
+  port: 8080
   query:
     x: 'y'
-actual:
   scheme: http
+actual:
   host: web
-  port: 8080
   path: /build/oe-newsroom-vcr-test/api
+  port: 8080
+  scheme: http
 
 EOT,
       $failure,
