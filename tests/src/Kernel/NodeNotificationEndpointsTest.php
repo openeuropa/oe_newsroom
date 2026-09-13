@@ -11,7 +11,7 @@ use Drupal\Tests\oe_newsroom\Traits\LocalTestValuesTrait;
 use Drupal\Tests\oe_newsroom\Traits\VcrTrait;
 
 /**
- * Tests the NodeSubscriptionEndpoints class.
+ * Tests the NodeNotificationEndpoints class.
  */
 class NodeNotificationEndpointsTest extends KernelTestBase {
 
