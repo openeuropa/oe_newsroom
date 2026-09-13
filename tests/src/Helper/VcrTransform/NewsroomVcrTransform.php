@@ -72,15 +72,15 @@ class NewsroomVcrTransform {
   /**
    * Creates a transformation to pack Newsroom API requests.
    *
-   * @param array{node_service_id: int, app_id: string} $newsroom_settings
-   *   Newsroom configuration values.
+   * @param array $defaults
+   *   Default values based on the local configuration.
    *
    * @return \Closure(list<TaggedValue>): list<TaggedValue>
    *   A transformation to call on the full recording.
    */
-  protected static function fnPackNewsroomRequests(array $newsroom_settings): \Closure {
+  protected static function fnPackNewsroomRequests(array $defaults): \Closure {
     $fn_fn_default_key = fn (string $key) => Transform::replace(
-      $newsroom_settings[$key],
+      $defaults[$key],
       new TaggedValue('Default', $key),
     );
     $fn_default_node_service_id = $fn_fn_default_key('node_service_id');
