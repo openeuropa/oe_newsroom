@@ -9,6 +9,7 @@ use Drupal\oe_newsroom_vcr\Capture\CaptureStore;
 use Drupal\oe_newsroom_vcr\Vcr\VcrMode;
 use Drupal\oe_newsroom_vcr\Vcr\VcrStore;
 use Drupal\Tests\oe_newsroom\Helper\BackwardsCompatibility;
+use PHPUnit\Framework\AssertionFailedError;
 use Symfony\Component\VarExporter\VarExporter;
 use Symfony\Component\Yaml\Tag\TaggedValue;
 
@@ -175,7 +176,14 @@ trait VcrTrait {
    */
   public function tearDown(): void {
     $vcr = \Drupal::service(VcrStore::class);
-    $vcr->assertNoFailure();
+    try {
+      $vcr->assertNoFailure();
+    }
+    catch (\Throwable $e) {
+      // The exception needs to be a specific type when in tearDown(), or
+      // PhpUnit will not print it.
+      throw new AssertionFailedError("Failure in VCR", previous: $e);
+    }
     parent::tearDown();
   }
 
