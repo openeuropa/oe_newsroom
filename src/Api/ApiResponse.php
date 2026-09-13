@@ -101,7 +101,7 @@ class ApiResponse {
       $previous_exception = NULL;
     }
     catch (MalformedResponseException $e) {
-      $message = $this->getResponseBody();
+      $message = $this->getResponse()->getReasonPhrase();
       $previous_exception = $e;
     }
     $message = $code . ' ' . $message;
@@ -140,7 +140,7 @@ class ApiResponse {
           $this->response->getStatusCode() . ' ' . $this->response->getReasonPhrase(),
           $this->request,
           $this->response,
-          $this->getResponseBody(),
+          $this->response->getReasonPhrase(),
         );
       }
       $this->fail(sprintf(
