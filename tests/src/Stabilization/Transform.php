@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\oe_newsroom\Helper\VcrTransform;
+namespace Drupal\Tests\oe_newsroom\Stabilization;
 
 use Drupal\oe_newsroom_vcr\Helper\ArrayHelper;
 use PHPUnit\Framework\Assert;

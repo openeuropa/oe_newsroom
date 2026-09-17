@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\oe_newsroom\Helper\VcrTransform;
+namespace Drupal\Tests\oe_newsroom\Stabilization;
 
 use Drupal\oe_newsroom_vcr\Capture\CapturingHelper;
 use Drupal\Tests\oe_newsroom\Helper\BackwardsCompatibility;
@@ -9,11 +9,11 @@ use PHPUnit\Framework\Assert;
 use Symfony\Component\Yaml\Tag\TaggedValue;
 
 /**
- * Provides transformations specific to Newsroom VCR data.
+ * Provides stabilization of Newsroom VCR data.
  *
  * @internal
  */
-class NewsroomVcrTransform {
+class NewsroomVcrStabilization {
 
   const STABILIZED_TAG_NAME = 'Stabilized';
 

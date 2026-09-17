@@ -6,7 +6,7 @@ namespace Drupal\Tests\oe_newsroom\Traits;
 
 use Drupal\Core\Site\Settings;
 use Drupal\oe_newsroom\Newsroom;
-use Drupal\Tests\oe_newsroom\Helper\VcrTransform\NewsroomVcrTransform;
+use Drupal\Tests\oe_newsroom\Stabilization\NewsroomVcrStabilization;
 use Drupal\Tests\oe_newsroom\Value\NewsroomTestValues;
 
 /**
@@ -25,13 +25,13 @@ trait LocalTestValuesTrait {
   protected function initializeNewsroomAndVcrWithTestValues(): void {
     $test_values = $this->loadNewsroomTestValuesObject($this->isRecording());
     if ($this->isRecording()) {
-      $this->vcrPack = NewsroomVcrTransform::fnPackRecords(
+      $this->vcrPack = NewsroomVcrStabilization::fnPackRecords(
         $test_values,
         $this->loadNewsroomTestValuesObject(FALSE),
       );
     }
     else {
-      $this->vcrUnpack = NewsroomVcrTransform::fnUnpackRecords();
+      $this->vcrUnpack = NewsroomVcrStabilization::fnUnpackRecords();
     }
 
     $settings = Settings::getAll();
