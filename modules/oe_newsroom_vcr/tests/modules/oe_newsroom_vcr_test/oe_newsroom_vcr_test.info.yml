@@ -1,0 +1,4 @@
+name: 'OpenEuropa Newsroom VCR Test'
+type: module
+description: 'Test module for to test the VCR in functional tests.'
+package: Testing

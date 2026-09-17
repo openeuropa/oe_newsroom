@@ -1,0 +1,12 @@
+oe_newsroom_vcr_test.api:
+  path: '/oe-newsroom-vcr-test/api'
+  defaults:
+    _controller: '\Drupal\oe_newsroom_vcr_test\Controller\VcrTestController::api'
+  requirements:
+    _access: 'TRUE'
+oe_newsroom_vcr_test.page:
+  path: '/oe-newsroom-vcr-test/page'
+  defaults:
+    _controller: '\Drupal\oe_newsroom_vcr_test\Controller\VcrTestController::page'
+  requirements:
+    _access: 'TRUE'
