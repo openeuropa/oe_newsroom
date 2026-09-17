@@ -142,6 +142,40 @@ class Transform {
   }
 
   /**
+   * Gets a transformation that replaces specific values.
+   *
+   * Integer and string representations are treated as equivalent: a stringified
+   * integer matches an integer needle, and the replacement is cast to match the
+   * type of the original value.
+   *
+   * @param array $old_values
+   *   The values to replace if they match.
+   * @param array $new_values
+   *   The replacement values.
+   *   This must have the same array keys as $old_values.
+   * @param (callable(mixed, array-key): mixed)|null $wrapper
+   *   A wrapper callback to process a replacement value if it matches.
+   *
+   * @return \Closure(mixed): mixed
+   *   The resulting transformation.
+   *   If the value passed to this transformation is found in $old_values, then
+   *   it is replaced with the corresponding value from $new_values.
+   */
+  public static function lookupReplace(array $old_values, array $new_values, ?callable $wrapper = NULL): \Closure {
+    assert(array_keys($old_values) === array_keys($new_values));
+    return function (mixed $value) use ($old_values, $new_values, $wrapper): mixed {
+      foreach ($old_values as $key => $old_value) {
+        if ($value === $old_value) {
+          return ($wrapper !== NULL)
+            ? $wrapper($new_values[$key], $key)
+            : $new_values[$key];
+        }
+      }
+      return $value;
+    };
+  }
+
+  /**
    * Gets a transformation that replaces one value with another.
    *
    * Integer and string representations are treated as equivalent: a stringified

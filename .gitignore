@@ -14,4 +14,4 @@ runner.yml
 vendor
 yarn.lock
 /recipes/
-/test-values.yml
+/test-values.php

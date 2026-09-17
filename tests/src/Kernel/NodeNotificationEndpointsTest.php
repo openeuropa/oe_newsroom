@@ -70,7 +70,7 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
     // This will create the topic as side effect.
     $this->vcrComment('Create a node notification.');
     $node_notification_endpoints->nodeNotificationCreate(
-      section_id: $this->nodeNotificationSectionId,
+      section_id: $this->newsroomTestValues->nodeNotificationSectionId,
       notification_title: 'The title of the notification',
       notification_description: 'The description of the notification',
       notification_url: 'https://www.example.com',
@@ -103,7 +103,7 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
     // Pass modified values, to see how this changes the response.
     $this->vcrComment('Create another node notification for the same id.');
     $node_notification_endpoints->nodeNotificationCreate(
-      section_id: $this->nodeNotificationSectionId,
+      section_id: $this->newsroomTestValues->nodeNotificationSectionId,
       notification_title: 'The title of the notification (modified)',
       notification_description: 'The description of the notification (modified)',
       notification_url: 'https://www.example.com/modified',

@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\oe_newsroom\Traits;
 
-use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Site\Settings;
+use Drupal\oe_newsroom\Newsroom;
 use Drupal\Tests\oe_newsroom\Helper\VcrTransform\NewsroomVcrTransform;
+use Drupal\Tests\oe_newsroom\Value\NewsroomTestValues;
 
 /**
  * Contains a method to load per-environment test values in "recording" mode.
@@ -14,73 +15,60 @@ use Drupal\Tests\oe_newsroom\Helper\VcrTransform\NewsroomVcrTransform;
 trait LocalTestValuesTrait {
 
   /**
-   * The section id for node notifications.
+   * Contains values to use in the test.
    */
-  protected int $nodeNotificationSectionId;
+  protected NewsroomTestValues $newsroomTestValues;
 
   /**
    * Configures the Newsroom client, and sets transformations for the VCR.
    */
   protected function initializeNewsroomAndVcrWithTestValues(): void {
-    $test_values = $this->loadNewsroomTestValues($this->isRecording());
-    $newsroom_config = $test_values['oe_newsroom_settings'];
-    $default_values = $newsroom_config + $test_values;
-    $default_values['node_service_id'] = (string) $default_values['node_service_id'];
-    $default_values['node_notification_section_id'] = (string) $default_values['node_notification_section_id'];
+    $test_values = $this->loadNewsroomTestValuesObject($this->isRecording());
     if ($this->isRecording()) {
-      $this->vcrPack = NewsroomVcrTransform::fnPackRecords($default_values);
+      $this->vcrPack = NewsroomVcrTransform::fnPackRecords(
+        $test_values,
+        $this->loadNewsroomTestValuesObject(FALSE),
+      );
     }
     else {
-      $this->vcrUnpack = NewsroomVcrTransform::fnUnpackRecords($default_values);
+      $this->vcrUnpack = NewsroomVcrTransform::fnUnpackRecords();
     }
-    $newsroom_api_key = $test_values['newsroom_api_private_key'];
+
     $settings = Settings::getAll();
-    $settings['oe_newsroom']['newsroom_api_key'] = $newsroom_api_key;
+    $settings['oe_newsroom']['newsroom_api_key'] = $test_values->privateKey;
     new Settings($settings);
-    $this->configureNewsroom($newsroom_config);
-    $this->nodeNotificationSectionId = $test_values['node_notification_section_id'];
+
+    $config = \Drupal::configFactory()->getEditable(Newsroom::CONFIG_NAME);
+    $config->setData($test_values->getNewsroomModuleSettings());
+    $config->save();
+
+    $this->newsroomTestValues = $test_values;
   }
 
   /**
-   * Loads test values.
+   * Loads a test values object.
    *
    * @param bool $use_local_values
-   *   TRUE to load local values from 'test-values.yml'.
-   *   FALSE to load dist values from 'test-values.yml.dist'.
+   *   TRUE to load local values from 'test-values.php'.
+   *   FALSE to load dist values from 'test-values.example.php'.
    *
-   * phpcs:disable Drupal.Commenting.FunctionComment.ReturnCommentIndentation
-   * @return array{
-   *   oe_newsroom_settings: array,
-   *   newsroom_api_private_key: string,
-   *   node_notification_section_id: int,
-   * }
-   *   Values to use in the test.
+   * @return \Drupal\Tests\oe_newsroom\Value\NewsroomTestValues
+   *   A value object with test values.
    */
-  protected function loadNewsroomTestValues(bool $use_local_values): array {
+  protected function loadNewsroomTestValuesObject(bool $use_local_values): NewsroomTestValues {
     if ($use_local_values) {
-      $test_values_file = dirname(__DIR__, 3) . '/test-values.yml';
-      $missing_file_message = 'Please copy `test-values.yml.dist` to `test-values.yml`, and replace the values to connect to a real Newsroom sandbox.';
+      $test_values_file = dirname(__DIR__, 3) . '/test-values.php';
+      $missing_file_message = 'Please copy `test-values.example.php` to `test-values.php`, and replace the values to connect to a real Newsroom sandbox.';
     }
     else {
-      $test_values_file = dirname(__DIR__, 3) . '/test-values.yml.dist';
+      $test_values_file = dirname(__DIR__, 3) . '/test-values.example.php';
       $missing_file_message = '';
     }
     $this->assertFileExists($test_values_file, $missing_file_message);
     $this->assertFileIsReadable($test_values_file);
-    $test_values_yaml = file_get_contents($test_values_file);
-    $test_values = Yaml::decode($test_values_yaml);
-    $this->assertIsArray($test_values['oe_newsroom_settings']);
-    $this->assertIsInt($test_values['oe_newsroom_settings']['node_service_id']);
-    if (empty($test_values['newsroom_api_private_key'])) {
-      if (!empty($test_values['newsroom_api_private_key_env_name'])) {
-        $test_values['newsroom_api_private_key'] = getenv($test_values['newsroom_api_private_key_env_name']);
-      }
-      else {
-        $test_values['newsroom_api_private_key'] = getenv('NEWSROOM_API_PRIVATE_KEY');
-      }
-    }
-    $this->assertNotEmpty($test_values['newsroom_api_private_key']);
-    return $test_values;
+    $test_values_object = include $test_values_file;
+    $this->assertInstanceOf(NewsroomTestValues::class, $test_values_object);
+    return $test_values_object;
   }
 
 }
