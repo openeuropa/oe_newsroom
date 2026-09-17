@@ -1,17 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\oe_newsroom\Kernel;
 
-use Drupal\Core\Site\Settings;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints;
-use Drupal\Tests\oe_newsroom\Helper\VcrTransform\NewsroomVcrTransform;
+use Drupal\Tests\oe_newsroom\Constraint\AssocValuesMatch;
 use Drupal\Tests\oe_newsroom\NewsroomConfigurationTestTrait;
 use Drupal\Tests\oe_newsroom\Traits\LocalTestValuesTrait;
 use Drupal\Tests\oe_newsroom\Traits\VcrTrait;
 
 /**
- * Tests the NodeSubscriptionEndpoints class.
+ * Tests the NodeNotificationEndpoints class.
  */
 class NodeNotificationEndpointsTest extends KernelTestBase {
 
@@ -24,7 +25,6 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
    */
   protected static $modules = [
     'oe_newsroom',
-    'oe_newsroom_newsletter',
     'oe_newsroom_vcr',
   ];
 
@@ -36,7 +36,6 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
 
     $this->installConfig([
       'oe_newsroom',
-      'oe_newsroom_newsletter',
     ]);
   }
 
@@ -44,9 +43,7 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
    * Tests node endpoints.
    */
   public function testNodeEndpoints(): void {
-    $this->configureClient();
-    $this->startVcr(__METHOD__);
-
+    $this->initializeNewsroomAndVcrWithTestValues();
     $node_notification_endpoints = \Drupal::service(NodeNotificationEndpoints::class);
 
     // Normally the "node id" should be an integer value, corresponding to a
@@ -54,18 +51,26 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
     // The API also accepts string values, this way we can reduce side effects
     // on a test server in recording mode.
     $node_id = 'test.1';
-    $test_values = $this->loadNewsroomTestValues($this->isRecording());
-    $section_id = $test_values['node_notification_section_id'];
 
-    // Delete the node for a clean start.
-    $node_notification_endpoints->nodeNotificationDelete($node_id, TRUE);
-    $this->assertNodeIdUnknown($node_id);
+    // When working with a real Newsroom server, we need to make sure there is
+    // a clean starting point, to make the test behave the same every time.
+    // This part is not recorded in the VCR, because it might be different.
+    if ($this->isRecording()) {
+      // Delete the nodes, if they exist, for a clean start.
+      $node_notification_endpoints->nodeNotificationDelete($node_id, TRUE);
+      // Make sure they are gone.
+      $this->assertFalse($node_notification_endpoints->nodeNotificationExists($node_id));
+    }
+
+    // Start the recording or replay.
+    // Use the full method name for the vcr yaml file to read or write.
+    $this->startVcr(__METHOD__);
 
     // Create one notification for the node id.
     // This will create the topic as side effect.
     $this->vcrComment('Create a node notification.');
     $node_notification_endpoints->nodeNotificationCreate(
-      section_id: $section_id,
+      section_id: $this->newsroomTestValues->nodeNotificationSectionId,
       notification_title: 'The title of the notification',
       notification_description: 'The description of the notification',
       notification_url: 'https://www.example.com',
@@ -75,69 +80,112 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
 
     // Now one notification exists in the list.
     $this->vcrComment('Load node notifications.');
-    $get_result = $node_notification_endpoints->nodeNotificationGet($node_id);
-    $this->assertSame([0], array_keys($get_result));
-    $this->assertSame('The title of the notification', $get_result[0]['title']);
+    $this->assertThat(
+      $node_notification_endpoints->nodeNotificationGet($node_id),
+      new AssocValuesMatch([
+        [
+          'title' => 'The title of the notification',
+          'topics' => [
+            // The first topic is just a generic topic for all node
+            // notifications.
+            // The second topic represents the node.
+            1 => [
+              'name' => 'The node title',
+            ],
+          ],
+        ],
+      ]),
+    );
     $this->assertSame(1, $node_notification_endpoints->nodeNotificationCount($node_id));
     $this->assertTrue($node_notification_endpoints->nodeNotificationExists($node_id));
 
-    // Clear pending notifications from the topic.
-    $this->vcrComment('Delete pending node notifications.');
+    // Create another notification for the same node id.
+    // Pass modified values, to see how this changes the response.
+    $this->vcrComment('Create another node notification for the same id.');
+    $node_notification_endpoints->nodeNotificationCreate(
+      section_id: $this->newsroomTestValues->nodeNotificationSectionId,
+      notification_title: 'The title of the notification (modified)',
+      notification_description: 'The description of the notification (modified)',
+      notification_url: 'https://www.example.com/modified',
+      node_id: $node_id,
+      node_title: 'The node title (modified)',
+    );
+
+    // Now two notifications exists in the list.
+    $this->vcrComment('Load node notifications, expecting two.');
+    // The order of notifications in the response is not deterministic.
+    $notifications = $node_notification_endpoints->nodeNotificationGet($node_id);
+    array_multisort(array_column($notifications, 'title'), $notifications);
+    $this->assertThat(
+      $notifications,
+      new AssocValuesMatch([
+        [
+          'title' => 'The title of the notification',
+          'topics' => [
+            // The first topic is just a generic topic for all node
+            // notifications.
+            // The second topic represents the node.
+            1 => [
+              // The node title is not changed.
+              'name' => 'The node title',
+            ],
+          ],
+        ],
+        [
+          'title' => 'The title of the notification (modified)',
+          'topics' => [
+            1 => [
+              // The node title is not changed.
+              'name' => 'The node title',
+            ],
+          ],
+        ],
+      ]),
+    );
+    $this->assertSame(2, $node_notification_endpoints->nodeNotificationCount($node_id));
+    $this->assertTrue($node_notification_endpoints->nodeNotificationExists($node_id));
+
+    $this->vcrComment('Delete pending node notifications, without deleting the topic.');
     $node_notification_endpoints->nodeNotificationDelete($node_id, FALSE);
-    $this->assertNodeIdZeroNotifications($node_id);
 
-    $this->vcrComment('Fully delete the node notification topic.');
-    $node_notification_endpoints->nodeNotificationDelete($node_id, TRUE);
-    $this->assertNodeIdUnknown($node_id);
-
-    // Only end VCR after a complete and successful test.
-    $this->endVcr();
-  }
-
-  /**
-   * Verifies that a node id is known in Newsroom, but has zero notifications.
-   *
-   * @param string $node_id
-   *   The node id as sent to the API.
-   */
-  protected function assertNodeIdZeroNotifications(string $node_id): void {
-    $node_notification_endpoints = \Drupal::service(NodeNotificationEndpoints::class);
+    $this->vcrComment('The notification count is zero, but the topic still exists.');
     $this->assertSame([], $node_notification_endpoints->nodeNotificationGet($node_id));
     $this->assertSame(0, $node_notification_endpoints->nodeNotificationCount($node_id));
     $this->assertTrue($node_notification_endpoints->nodeNotificationExists($node_id));
-  }
 
-  /**
-   * Verifies that a node id is unknown in Newsroom.
-   *
-   * @param string $node_id
-   *   The node id as sent to the API.
-   */
-  protected function assertNodeIdUnknown(string $node_id): void {
-    $node_notification_endpoints = \Drupal::service(NodeNotificationEndpoints::class);
-    $this->assertSame([], $node_notification_endpoints->nodeNotificationGet($node_id));
-    $this->assertSame(0, $node_notification_endpoints->nodeNotificationCount($node_id));
+    $this->vcrComment('Fully delete the node notification topic.');
+    $node_notification_endpoints->nodeNotificationDelete($node_id, TRUE);
+    $this->vcrComment('The notification topic has been fully removed.');
     $this->assertFalse($node_notification_endpoints->nodeNotificationExists($node_id));
-  }
 
-  /**
-   * Configures the Newsroom client, and sets transformations for the VCR.
-   */
-  protected function configureClient(): void {
-    $test_values = $this->loadNewsroomTestValues($this->isRecording());
-    $newsroom_config = $test_values['oe_newsroom_settings'];
-    $default_values = $newsroom_config + $test_values;
-    if ($this->isRecording()) {
-      $this->vcrPack = NewsroomVcrTransform::fnPackRecords($default_values);
+    // Only end VCR after a complete and successful test.
+    $this->endVcr();
+
+    if (!$this->isRecording()) {
+      // Assert captured authentication hashes.
+      // Hashes that are used multiple times are only collected once.
+      // By doing this in a single assertion at the end of the test, a developer
+      // can update the hashes all at once.
+      $this->assertVcrCaptured(
+        [
+          '<signature key 0>',
+          '<signature key 1>',
+          '<signature key 2>',
+          '<signature key 3>',
+        ],
+        [
+          // Hash for '/node-notification/create'.
+          '562290d782b30bc83c551bac24f76a43',
+          // Hash for '/node-notification/get', '*/exists' and '*/count'.
+          '50d3359dff6d7b43a24e21f3991df2a9',
+          // Hash for the second request to '/node-notification/create', with
+          // different parameters.
+          'b25f550808bfbdcb2cd64cf38ae0f67d',
+          // Hash for '/node-notification/delete'.
+          '09616039d3598c952b63f72c96c96054',
+        ],
+      );
     }
-    else {
-      $this->vcrUnpack = NewsroomVcrTransform::fnUnpackRecords($default_values);
-    }
-    $newsroom_api_key = $test_values['newsroom_api_private_key'];
-    $settings = Settings::getAll();
-    $settings['oe_newsroom']['newsroom_api_key'] = $newsroom_api_key;
-    new Settings($settings);
-    $this->configureNewsroom($newsroom_config);
   }
 
 }

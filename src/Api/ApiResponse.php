@@ -101,7 +101,7 @@ class ApiResponse {
       $previous_exception = NULL;
     }
     catch (MalformedResponseException $e) {
-      $message = $this->getResponseBody();
+      $message = $this->getResponse()->getReasonPhrase();
       $previous_exception = $e;
     }
     $message = $code . ' ' . $message;
@@ -140,10 +140,10 @@ class ApiResponse {
           $this->response->getStatusCode() . ' ' . $this->response->getReasonPhrase(),
           $this->request,
           $this->response,
-          $this->getResponseBody(),
+          $this->response->getReasonPhrase(),
         );
       }
-      $this->fail(sprintf(
+      $this->malformed(sprintf(
         "Expected 'content-type' header 'application/json', found %s.",
         var_export($content_type_header, TRUE),
       ));
@@ -179,7 +179,7 @@ class ApiResponse {
       throw $e;
     }
     catch (\Exception $e) {
-      $this->fail(sprintf(
+      $this->malformed(sprintf(
         "Unexpected JSON data: %s.\nOriginal data:\n%s",
         $e->getMessage(),
         Yaml::encode($data),
@@ -202,7 +202,7 @@ class ApiResponse {
   public function getJsonArray(): array {
     $data = $this->getJsonData();
     if (!is_array($data)) {
-      $this->fail(sprintf('Expected JSON data to be an array. Found:\n%s.', Yaml::encode($data)));
+      $this->malformed(sprintf('Expected JSON data to be an array. Found:\n%s.', Yaml::encode($data)));
     }
     return $data;
   }
@@ -222,7 +222,7 @@ class ApiResponse {
   public function getJsonString(): string {
     $data = $this->getJsonData();
     if (!is_string($data)) {
-      $this->fail(sprintf('Expected JSON data to be a string. Found:\n%s.', Yaml::encode($data)));
+      $this->malformed(sprintf('Expected JSON data to be a string. Found:\n%s.', Yaml::encode($data)));
     }
     return $data;
   }
@@ -244,21 +244,21 @@ class ApiResponse {
     $this->assertJsonHeader();
     $body = $this->getResponseBody();
     if ($body === '') {
-      $this->fail('Expected non-empty JSON response body.');
+      $this->malformed('Expected non-empty JSON response body.');
     }
     try {
       // Drupal's Json::encode() is not consistent across Drupal versions.
       $data = json_decode($body, TRUE, flags: JSON_THROW_ON_ERROR);
     }
     catch (\JsonException $e) {
-      $this->fail(sprintf(
+      $this->malformed(sprintf(
         "Invalid JSON: %s.\nMessage: %s",
         $body,
         $e->getMessage(),
       ));
     }
     if (!is_array($data) && !is_string($data)) {
-      $this->fail(sprintf(
+      $this->malformed(sprintf(
         "Expected JSON response data to be string or array. Found: %s",
         Yaml::encode($data),
       ));
@@ -278,7 +278,7 @@ class ApiResponse {
    * @throws \Drupal\oe_newsroom\Exception\Api\MalformedResponseException
    *   The exception.
    */
-  public function fail(string $message, ?\Throwable $previous = NULL): never {
+  protected function malformed(string $message, ?\Throwable $previous = NULL): never {
     $message = $this->buildFailureMessage($message);
     throw new MalformedResponseException($message, $this->request, $this->response, $previous);
   }

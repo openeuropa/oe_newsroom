@@ -6,6 +6,7 @@ namespace Drupal\oe_newsroom\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\oe_newsroom\Helper\ValueHelper;
 use Drupal\oe_newsroom\Newsroom;
 
 /**
@@ -51,6 +52,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
     // Not required for now.
+    // @todo Review field type and constraints.
     $form['node_service_id'] = [
       '#type' => 'number',
       '#title' => $this->t('Node notification service ID'),
@@ -89,7 +91,7 @@ class NewsroomSettingsForm extends ConfigFormBase {
       ->set('app_id', $form_state->getValue('app_id'))
       ->set('hash_method', $form_state->getValue('hash_method'))
       ->set('normalised', $form_state->getValue('normalised'))
-      ->set('node_service_id', $form_state->getValue('node_service_id'))
+      ->set('node_service_id', ValueHelper::toIntIdOrNull($form_state->getValue('node_service_id')))
       ->save();
   }
 

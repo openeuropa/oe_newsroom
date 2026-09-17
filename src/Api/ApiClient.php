@@ -36,11 +36,11 @@ class ApiClient {
   /**
    * Gets the service id for the node service.
    *
-   * @return string
-   *   Service id for the node service.
+   * @return ?int
+   *   Service id for the node service, or NULL if not configured.
    *   Some endpoints expect this as 'sv_id' parameter.
    */
-  public function getNodeServiceId(): string {
+  public function getNodeServiceId(): ?int {
     return $this->connection->nodeServiceId;
   }
 

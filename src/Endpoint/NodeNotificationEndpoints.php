@@ -49,7 +49,7 @@ class NodeNotificationEndpoints {
     $payload = [
       'item' => [
         ...$signature_input = [
-          'sv_id' => $this->apiClient->getNodeServiceId(),
+          'sv_id' => (string) $this->apiClient->getNodeServiceId(),
           'section_id' => (string) $section_id,
           'notification_title' => $notification_title,
           'notification_description' => $notification_description,
@@ -97,7 +97,7 @@ class NodeNotificationEndpoints {
   public function nodeNotificationDelete(string|int $node_id, bool $delete_topic): void {
     $payload = [
       'item' => $signature_input = [
-        'sv_id' => $this->apiClient->getNodeServiceId(),
+        'sv_id' => (string) $this->apiClient->getNodeServiceId(),
         'node_id' => (string) $node_id,
       ],
     ];
@@ -133,10 +133,11 @@ class NodeNotificationEndpoints {
    *
    * @return list<array>
    *   Decoded response data.
+   *   Note that the order of records can be random.
    */
   public function nodeNotificationGet(string|int $node_id): array {
     $query = $signature_input = [
-      'sv_id' => $this->apiClient->getNodeServiceId(),
+      'sv_id' => (string) $this->apiClient->getNodeServiceId(),
       'node_id' => (string) $node_id,
     ];
     return $this->apiClient
@@ -171,7 +172,7 @@ class NodeNotificationEndpoints {
    */
   public function nodeNotificationCount(string|int $node_id): int {
     $query = $signature_input = [
-      'sv_id' => $this->apiClient->getNodeServiceId(),
+      'sv_id' => (string) $this->apiClient->getNodeServiceId(),
       'node_id' => (string) $node_id,
     ];
     return $this->apiClient
@@ -205,7 +206,7 @@ class NodeNotificationEndpoints {
    */
   public function nodeNotificationExists(string|int $node_id): bool {
     $query = $signature_input = [
-      'sv_id' => $this->apiClient->getNodeServiceId(),
+      'sv_id' => (string) $this->apiClient->getNodeServiceId(),
       'node_id' => (string) $node_id,
     ];
     return $this->apiClient

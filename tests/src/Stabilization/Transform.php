@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\oe_newsroom\Helper\VcrTransform;
+namespace Drupal\Tests\oe_newsroom\Stabilization;
 
 use Drupal\oe_newsroom_vcr\Helper\ArrayHelper;
 use PHPUnit\Framework\Assert;
@@ -138,6 +138,40 @@ class Transform {
         return $value;
       }
       return $transform_recursive($value);
+    };
+  }
+
+  /**
+   * Gets a transformation that replaces specific values.
+   *
+   * Integer and string representations are treated as equivalent: a stringified
+   * integer matches an integer needle, and the replacement is cast to match the
+   * type of the original value.
+   *
+   * @param array $old_values
+   *   The values to replace if they match.
+   * @param array $new_values
+   *   The replacement values.
+   *   This must have the same array keys as $old_values.
+   * @param (callable(mixed, array-key): mixed)|null $wrapper
+   *   A wrapper callback to process a replacement value if it matches.
+   *
+   * @return \Closure(mixed): mixed
+   *   The resulting transformation.
+   *   If the value passed to this transformation is found in $old_values, then
+   *   it is replaced with the corresponding value from $new_values.
+   */
+  public static function lookupReplace(array $old_values, array $new_values, ?callable $wrapper = NULL): \Closure {
+    assert(array_keys($old_values) === array_keys($new_values));
+    return function (mixed $value) use ($old_values, $new_values, $wrapper): mixed {
+      foreach ($old_values as $key => $old_value) {
+        if ($value === $old_value) {
+          return ($wrapper !== NULL)
+            ? $wrapper($new_values[$key], $key)
+            : $new_values[$key];
+        }
+      }
+      return $value;
     };
   }
 
@@ -574,6 +608,44 @@ class Transform {
       $replacement = new TaggedValue($tag, $replacement);
     }
     return fn () => $replacement;
+  }
+
+  /**
+   * Gets a transformation to order a list of records by a column name.
+   *
+   * @param string $key
+   *   The column name to sort by - an array key to look for in each record to
+   *   get the sort value.
+   * @param string|null $tag
+   *   (optional) A tag name to wrap the replacement, if it was sorted.
+   *
+   * @return \Closure(mixed): mixed
+   *   The resulting transformation.
+   */
+  public static function orderListByColumn(string $key, ?string $tag = NULL): \Closure {
+    return function (mixed $value) use ($key, $tag) {
+      if (!is_array($value) || !array_is_list($value)) {
+        return $value;
+      }
+      $sort_values = array_map(
+        function (mixed $item) use ($key) {
+          if (
+            !is_array($item) ||
+            !isset($item[$key]) ||
+            (!is_string($item[$key]) && !is_int($item[$key]))
+          ) {
+            return '';
+          }
+          return $item[$key];
+        },
+        $value,
+      );
+      array_multisort($sort_values, $value);
+      if ($tag !== NULL) {
+        $value = new TaggedValue($tag, $value);
+      }
+      return $value;
+    };
   }
 
 }
