@@ -138,10 +138,19 @@ class NewsroomVcrTransform {
           Transform::orderListByColumn('id'),
           Transform::eachAssocInArray([
             'id' => $fn_notification_id,
-            'topics' => Transform::eachAssocInArray([
-              'id' => $fn_topic_id,
-              'name' => $fn_topic_name,
-              'service' => $fn_service_name,
+            'topics' => Transform::multiple([
+              // The first item is a generic topic that already exists on the
+              // server.
+              Transform::assoc([
+                0 => Transform::assoc([
+                  'name' => $fn_topic_name,
+                ]),
+              ]),
+              // The second item .
+              Transform::eachAssocInArray([
+                'id' => $fn_topic_id,
+                'service' => $fn_service_name,
+              ]),
             ]),
           ]),
         ]),

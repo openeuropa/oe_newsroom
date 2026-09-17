@@ -44,7 +44,7 @@
           service: !Replaced 'Service name (0)'
         -
           id: !Replaced '20001'
-          name: !Replaced 'Topic name (1)'
+          name: 'The node title'
           status: Valid
           submittedBy: 'Newsroom System'
           service: !Replaced 'Service name (1)'
@@ -117,7 +117,7 @@
           service: !Replaced 'Service name (0)'
         -
           id: !Replaced '20001'
-          name: !Replaced 'Topic name (1)'
+          name: 'The node title'
           status: Valid
           submittedBy: 'Newsroom System'
           service: !Replaced 'Service name (1)'
@@ -143,7 +143,7 @@
           service: !Replaced 'Service name (0)'
         -
           id: !Replaced '20001'
-          name: !Replaced 'Topic name (1)'
+          name: 'The node title'
           status: Valid
           submittedBy: 'Newsroom System'
           service: !Replaced 'Service name (1)'

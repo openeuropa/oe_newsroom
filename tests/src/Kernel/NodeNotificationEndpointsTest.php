@@ -6,6 +6,7 @@ namespace Drupal\Tests\oe_newsroom\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints;
+use Drupal\Tests\oe_newsroom\Constraint\AssocValuesMatch;
 use Drupal\Tests\oe_newsroom\NewsroomConfigurationTestTrait;
 use Drupal\Tests\oe_newsroom\Traits\LocalTestValuesTrait;
 use Drupal\Tests\oe_newsroom\Traits\VcrTrait;
@@ -79,9 +80,22 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
 
     // Now one notification exists in the list.
     $this->vcrComment('Load node notifications.');
-    $get_result = $node_notification_endpoints->nodeNotificationGet($node_id);
-    $this->assertSame([0], array_keys($get_result));
-    $this->assertSame('The title of the notification', $get_result[0]['title']);
+    $this->assertThat(
+      $node_notification_endpoints->nodeNotificationGet($node_id),
+      new AssocValuesMatch([
+        [
+          'title' => 'The title of the notification',
+          'topics' => [
+            // The first topic is just a generic topic for all node
+            // notifications.
+            // The second topic represents the node.
+            1 => [
+              'name' => 'The node title',
+            ],
+          ],
+        ],
+      ]),
+    );
     $this->assertSame(1, $node_notification_endpoints->nodeNotificationCount($node_id));
     $this->assertTrue($node_notification_endpoints->nodeNotificationExists($node_id));
 
@@ -99,16 +113,41 @@ class NodeNotificationEndpointsTest extends KernelTestBase {
 
     // Now two notifications exists in the list.
     $this->vcrComment('Load node notifications, expecting two.');
-    $get_result = $node_notification_endpoints->nodeNotificationGet($node_id);
-    $this->assertEqualsCanonicalizing([
-      'The title of the notification',
-      'The title of the notification (modified)',
-    ], array_column($get_result, 'title'));
+    // The order of notifications in the response is not deterministic.
+    $notifications = $node_notification_endpoints->nodeNotificationGet($node_id);
+    array_multisort(array_column($notifications, 'title'), $notifications);
+    $this->assertThat(
+      $notifications,
+      new AssocValuesMatch([
+        [
+          'title' => 'The title of the notification',
+          'topics' => [
+            // The first topic is just a generic topic for all node
+            // notifications.
+            // The second topic represents the node.
+            1 => [
+              // The node title is not changed.
+              'name' => 'The node title',
+            ],
+          ],
+        ],
+        [
+          'title' => 'The title of the notification (modified)',
+          'topics' => [
+            1 => [
+              // The node title is not changed.
+              'name' => 'The node title',
+            ],
+          ],
+        ],
+      ]),
+    );
     $this->assertSame(2, $node_notification_endpoints->nodeNotificationCount($node_id));
     $this->assertTrue($node_notification_endpoints->nodeNotificationExists($node_id));
 
     $this->vcrComment('Delete pending node notifications, without deleting the topic.');
     $node_notification_endpoints->nodeNotificationDelete($node_id, FALSE);
+
     $this->vcrComment('The notification count is zero, but the topic still exists.');
     $this->assertSame([], $node_notification_endpoints->nodeNotificationGet($node_id));
     $this->assertSame(0, $node_notification_endpoints->nodeNotificationCount($node_id));
