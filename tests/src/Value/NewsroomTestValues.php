@@ -30,6 +30,10 @@ class NewsroomTestValues {
    *   The section id for node notifications.
    * @param string $nodeNotificationTopicName
    *   The service name for node notifications.
+   * @param string $subscriberEmail
+   *   The email address used for tests.
+   *   In the local version, this should be an address where the developer can
+   *   actually receive emails.
    */
   public function __construct(
     #[\SensitiveParameter]
@@ -41,7 +45,12 @@ class NewsroomTestValues {
     public readonly int $nodeNotificationServiceId,
     public readonly int $nodeNotificationSectionId,
     public readonly string $nodeNotificationTopicName,
-  ) {}
+    public readonly string $subscriberEmail,
+  ) {
+    if ($subscriberEmail === mb_strtolower($subscriberEmail)) {
+      throw new \InvalidArgumentException('Please use some uppercase characters in the test email address, to test normalization.');
+    }
+  }
 
   /**
    * Gets default values to stabilize VCR recordings.
@@ -69,6 +78,10 @@ class NewsroomTestValues {
       ],
       'topic_name' => [
         $this->nodeNotificationTopicName,
+      ],
+      'email' => [
+        0 => $this->subscriberEmail,
+        'mb_strtolower' => mb_strtolower($this->subscriberEmail),
       ],
     ];
   }
