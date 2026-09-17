@@ -85,10 +85,6 @@ class NewsroomVcrTransform {
     );
     $fn_default_node_service_id = $fn_fn_default_key('node_service_id');
     $fn_default_section_id = $fn_fn_default_key('node_notification_section_id');
-    $fn_default_email = Transform::multiple([
-      $fn_fn_default_key('test_email'),
-      $fn_fn_default_key('test_email.mb_strtolower'),
-    ]);
     $fn_signature_key = Transform::uniquePatternSprintf(
       '<signature key %d>',
       '#.#',
@@ -97,11 +93,8 @@ class NewsroomVcrTransform {
     $fn_newsroom_request_data = Transform::nested([
       'sv_id' => $fn_default_node_service_id,
       'item.sv_id' => $fn_default_node_service_id,
-      'subscription.sv_id' => $fn_default_node_service_id,
       'app' => $fn_fn_default_key('app_id'),
       'key' => $fn_signature_key,
-      'user_email' => $fn_default_email,
-      'subscription.email' => $fn_default_email,
       'item.section_id' => $fn_default_section_id,
     ]);
     $fn_transform_request = Transform::ifTag(
@@ -131,7 +124,6 @@ class NewsroomVcrTransform {
     $fn_topic_id = $fn_fn_unique_int(20000);
     $fn_topic_name = $fn_fn_unique_string('Topic name (%d)');
     $fn_service_name = $fn_fn_unique_string('Service name (%d)');
-    $fn_default_email = $fn_fn_default_key('test_email');
     $fn_ignore_string = Transform::ifString(Transform::ignore('<ignored>', static::REPLACED_TAG_NAME));
     $fn_item_type_id = $fn_fn_unique_int(30000);
     $fn_item_type_name = $fn_fn_unique_string('Item type name (%d)');
@@ -146,30 +138,6 @@ class NewsroomVcrTransform {
             'id' => $fn_topic_id,
             'name' => $fn_topic_name,
             'service' => $fn_service_name,
-          ]),
-        ]),
-      ]),
-      '/newsroom/api/v1/subscriptions' => Transform::assoc([
-        'data' => Transform::eachAssocInArray([
-          'email' => $fn_default_email,
-          'universeId' => $fn_universe_id,
-          'universeName' => $fn_universe_name,
-          // The 'univers(e)Acronym' key is misspelled in the response.
-          'universAcronym' => $fn_fn_default_key('universe'),
-          'hostBy' => $fn_ignore_string,
-          'newsletterId' => $fn_fn_default_key('node_service_id'),
-          'newsletterName' => $fn_service_name,
-          'unsubscriptionLink' => $fn_ignore_string,
-          'profileLink' => $fn_ignore_string,
-          'pattern' => $fn_ignore_string,
-          'subscribedNotificationItemType' => Transform::eachAssocInArray([
-            'name' => $fn_item_type_name,
-            'id' => $fn_item_type_id,
-          ]),
-          'subscribedNotificationTopicType' => Transform::eachAssocInArray([
-            'id' => $fn_topic_id,
-            'groupId' => $fn_ignore_string,
-            'groupName' => $fn_ignore_string,
           ]),
         ]),
       ]),
