@@ -1,0 +1,577 @@
+- !Comment 'No subscriptions exist at first.'
+- !NewsroomRequest
+  path: /newsroom/api/v1/subscriptions
+  query:
+    user_email: !Stabilized.default.email teSt@eXample.com
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  data: {  }
+- !Comment 'Unsubscribing an unknown user from an existing node will fail.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/unsubscribe/node-notification
+  data:
+    subscription:
+      sv_id: !Stabilized.default.service_id.node_notification '1234'
+      node_id: test.1
+      email: !Stabilized.default.email teSt@eXample.com
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  status: 404
+  headers:
+    Strict-Transport-Security:
+      - max-age=0;
+  data: 'User not found'
+- !Comment 'Unsubscribing an unknown user from an unknown node will fail.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/unsubscribe/node-notification
+  data:
+    subscription:
+      sv_id: !Stabilized.default.service_id.node_notification '1234'
+      node_id: test.unknown
+      email: !Stabilized.default.email teSt@eXample.com
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  status: 404
+  headers:
+    Strict-Transport-Security:
+      - max-age=0;
+  data: 'User not found'
+- !Comment 'Unsubscribing an unknown user from the entire node service will fail.'
+- !NewsroomRequest
+  path: /newsroom/api/v1/unsubscribe
+  query:
+    user_email: !Stabilized.default.email teSt@eXample.com
+    sv_id: !Stabilized.default.service_id.node_notification '1234'
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  status: 404
+  headers:
+    Strict-Transport-Security:
+      - max-age=0;
+  data: 'Not found'
+- !Comment 'Subscribe to a node id. The subscription will be pending, until the email is verified.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/subscribe
+  data:
+    subscription:
+      sv_id: !Stabilized.default.service_id.node_notification '1234'
+      email: !Stabilized.default.email teSt@eXample.com
+      frequency: 2103
+      node_id: test.1
+      nomail: false
+      email_custom:
+        verify:
+          email_custom_subject: 'Newsroom test - confirm email address'
+          email_custom_header: 'This is a <em>custom</em> header text'
+          email_custom_description: 'This is a <em>custom</em> description'
+          email_custom_action_description: 'This is a <em>custom</em> action description'
+          email_custom_action_text: 'This is a <em>custom</em> action text'
+          email_custom_footer: 'This is a <em>custom</em> footer'
+          email_custom_redirect: 'https://example.com/subscribe#verify'
+        subscription:
+          email_custom_subject: 'Newsroom test - successful subscription'
+          email_custom_header: 'This is a <em>custom</em> header text for a success message.'
+          email_custom_description: 'This is a <em>custom</em> description for a success message.'
+          email_custom_action_description: 'This is a <em>custom</em> action description for a success message.'
+          email_custom_action_text: 'This is a <em>custom</em> action text for a success message.'
+          email_custom_footer: 'This is a <em>custom</em> footer for a success message.'
+          email_custom_redirect: 'https://example.com/subscribe#success'
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  data:
+    status: pending_verification
+    message: 'Confirmation email sent. Your subscription will be activated after you click the confirmation link.'
+- !Comment 'Unsubscribing from the given node id is still not possible, because the subscription is pending.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/unsubscribe/node-notification
+  data:
+    subscription:
+      sv_id: !Stabilized.default.service_id.node_notification '1234'
+      node_id: test.1
+      email: !Stabilized.default.email teSt@eXample.com
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  status: 500
+  data: 'Error: No active subscription found for this service'
+- !Comment 'Unsubscribing that user from the entire node service is still not possible, because the subscription is pending.'
+- !NewsroomRequest
+  path: /newsroom/api/v1/unsubscribe
+  query:
+    user_email: !Stabilized.default.email teSt@eXample.com
+    sv_id: !Stabilized.default.service_id.node_notification '1234'
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  status: 404
+  headers:
+    Strict-Transport-Security:
+      - max-age=0;
+  data: 'Not found'
+- !Comment 'Click the confirm link in the verification email.'
+- !Comment 'Load subscriptions for that email.'
+- !NewsroomRequest
+  path: /newsroom/api/v1/subscriptions
+  query:
+    user_email: !Stabilized.default.email teSt@eXample.com
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  data:
+    -
+      responseType: json
+      email: !Stabilized.default.email teSt@eXample.com
+      firstName: null
+      lastName: null
+      organisation: null
+      country: null
+      position: null
+      twitter: null
+      facebook: null
+      linkedIn: null
+      phone: null
+      organisationShort: null
+      address: null
+      address2: null
+      postCode: null
+      city: null
+      department: null
+      media: null
+      website: null
+      role: null
+      universeId: !Stabilized.universe_id '9000'
+      universeName: !Stabilized 'Universe name (0)'
+      universAcronym: !Stabilized.default.universe test-universe
+      newsletterId: !Stabilized.default.service_id.node_notification '1234'
+      newsletterName: !Stabilized 'Service name (0)'
+      status: Valid
+      unsubscriptionLink: !Stabilized '<ignored>'
+      isNewUser: false
+      hostBy: !Stabilized '<ignored>'
+      profileLink: !Stabilized '<ignored>'
+      isNewSubscription: false
+      feedbackMessage: 'A subscription for this service is already registered for this email address'
+      language: default
+      frequency: Weekly
+      defaultLanguage: '0'
+      pattern: !Stabilized '<ignored>'
+      subscribedNotificationItemType:
+        -
+          name: !Stabilized 'Item type name (0)'
+          id: !Stabilized.item_type_id '30000'
+      subscribedNotificationTopicType:
+        -
+          name: 'The node title (test.1)'
+          id: !Stabilized.topic_id '20000'
+          externalApp: null
+          externalId: test.1
+          groupName: !Stabilized '<ignored>'
+          groupId: !Stabilized '<ignored>'
+          groupDisplay: '0'
+- !Comment 'Attempt to subscribe again to the same node.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/subscribe
+  data:
+    subscription:
+      sv_id: !Stabilized.default.service_id.node_notification '1234'
+      email: !Stabilized.default.email teSt@eXample.com
+      frequency: 2103
+      node_id: test.1
+      nomail: false
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  data:
+    -
+      responseType: json
+      email: !Stabilized.default.email teSt@eXample.com
+      firstName: null
+      lastName: null
+      organisation: null
+      country: null
+      position: null
+      twitter: null
+      facebook: null
+      linkedIn: null
+      phone: null
+      organisationShort: null
+      address: null
+      address2: null
+      postCode: null
+      city: null
+      department: null
+      media: null
+      website: null
+      role: null
+      universeId: !Stabilized.universe_id '9000'
+      universeName: !Stabilized 'Universe name (0)'
+      universAcronym: !Stabilized.default.universe test-universe
+      newsletterId: !Stabilized.default.service_id.node_notification '1234'
+      newsletterName: !Stabilized 'Service name (0)'
+      status: Valid
+      unsubscriptionLink: !Stabilized '<ignored>'
+      isNewUser: false
+      hostBy: !Stabilized '<ignored>'
+      profileLink: !Stabilized '<ignored>'
+      isNewSubscription: false
+      feedbackMessage: 'A subscription for this service is already registered for this email address'
+      language: default
+      frequency: Weekly
+      defaultLanguage: '0'
+      pattern: !Stabilized '<ignored>'
+      subscribedNotificationItemType:
+        -
+          name: !Stabilized 'Item type name (0)'
+          id: !Stabilized.item_type_id '30000'
+      subscribedNotificationTopicType:
+        -
+          name: 'The node title (test.1)'
+          id: !Stabilized.topic_id '20000'
+          externalApp: null
+          externalId: test.1
+          groupName: !Stabilized '<ignored>'
+          groupId: !Stabilized '<ignored>'
+          groupDisplay: '0'
+- !Comment 'Attempt to subscribe to an unknown node.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/subscribe
+  data:
+    subscription:
+      sv_id: !Stabilized.default.service_id.node_notification '1234'
+      email: !Stabilized.default.email teSt@eXample.com
+      frequency: 2103
+      node_id: test.unknown
+      nomail: false
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  status: 404
+  headers:
+    Strict-Transport-Security:
+      - max-age=0;
+  data: 'Not found'
+- !Comment 'Attempt to subscribe to a node with zero notifications.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/subscribe
+  data:
+    subscription:
+      sv_id: !Stabilized.default.service_id.node_notification '1234'
+      email: !Stabilized.default.email teSt@eXample.com
+      frequency: 2103
+      node_id: test.empty
+      nomail: false
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  data:
+    status: pending_verification
+    message: 'Confirmation email sent. Your subscription will be updated after you click the confirmation link.'
+- !Comment 'Attempt to subscribe to a different node.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/subscribe
+  data:
+    subscription:
+      sv_id: !Stabilized.default.service_id.node_notification '1234'
+      email: !Stabilized.default.email teSt@eXample.com
+      frequency: 2103
+      node_id: test.other
+      nomail: false
+      email_custom:
+        verify:
+          email_custom_subject: 'Newsroom test - Subscribe to other node'
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  data:
+    status: pending_verification
+    message: 'Confirmation email sent. Your subscription will be updated after you click the confirmation link.'
+- !Comment 'Attempt to subscribe again to that different node.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/subscribe
+  data:
+    subscription:
+      sv_id: !Stabilized.default.service_id.node_notification '1234'
+      email: !Stabilized.default.email teSt@eXample.com
+      frequency: 2103
+      node_id: test.other
+      nomail: false
+      email_custom:
+        verify:
+          email_custom_subject: 'Newsroom test - Subscribe to other node, again'
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  data:
+    status: pending_verification
+    message: 'Confirmation email sent. Your subscription will be updated after you click the confirmation link.'
+- !Comment 'Load subscriptions, again.'
+- !NewsroomRequest
+  path: /newsroom/api/v1/subscriptions
+  query:
+    user_email: !Stabilized.default.email teSt@eXample.com
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  data:
+    -
+      responseType: json
+      email: !Stabilized.default.email teSt@eXample.com
+      firstName: null
+      lastName: null
+      organisation: null
+      country: null
+      position: null
+      twitter: null
+      facebook: null
+      linkedIn: null
+      phone: null
+      organisationShort: null
+      address: null
+      address2: null
+      postCode: null
+      city: null
+      department: null
+      media: null
+      website: null
+      role: null
+      universeId: !Stabilized.universe_id '9000'
+      universeName: !Stabilized 'Universe name (0)'
+      universAcronym: !Stabilized.default.universe test-universe
+      newsletterId: !Stabilized.default.service_id.node_notification '1234'
+      newsletterName: !Stabilized 'Service name (0)'
+      status: Valid
+      unsubscriptionLink: !Stabilized '<ignored>'
+      isNewUser: false
+      hostBy: !Stabilized '<ignored>'
+      profileLink: !Stabilized '<ignored>'
+      isNewSubscription: false
+      feedbackMessage: 'A subscription for this service is already registered for this email address'
+      language: default
+      frequency: Weekly
+      defaultLanguage: '0'
+      pattern: !Stabilized '<ignored>'
+      subscribedNotificationItemType:
+        -
+          name: !Stabilized 'Item type name (0)'
+          id: !Stabilized.item_type_id '30000'
+      subscribedNotificationTopicType:
+        -
+          name: 'The node title (test.1)'
+          id: !Stabilized.topic_id '20000'
+          externalApp: null
+          externalId: test.1
+          groupName: !Stabilized '<ignored>'
+          groupId: !Stabilized '<ignored>'
+          groupDisplay: '0'
+- !Comment 'Unsubscribing from the other node id now possible, even though the subscription is pending.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/unsubscribe/node-notification
+  data:
+    subscription:
+      sv_id: !Stabilized.default.service_id.node_notification '1234'
+      node_id: test.other
+      email: !Stabilized.default.email teSt@eXample.com
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  data: 'Node notification unsubscribed successfully'
+- !Comment 'Unsubscribing is idempotent.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/unsubscribe/node-notification
+  data:
+    subscription:
+      sv_id: !Stabilized.default.service_id.node_notification '1234'
+      node_id: test.other
+      email: !Stabilized.default.email teSt@eXample.com
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  data: 'Node notification unsubscribed successfully'
+- !Comment 'Click the confirm link in the verification email for the node that was just unsubscribed.'
+- !Comment 'Load subscriptions, again. Now there should be two.'
+- !NewsroomRequest
+  path: /newsroom/api/v1/subscriptions
+  query:
+    user_email: !Stabilized.default.email teSt@eXample.com
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  data:
+    -
+      responseType: json
+      email: !Stabilized.default.email teSt@eXample.com
+      firstName: null
+      lastName: null
+      organisation: null
+      country: null
+      position: null
+      twitter: null
+      facebook: null
+      linkedIn: null
+      phone: null
+      organisationShort: null
+      address: null
+      address2: null
+      postCode: null
+      city: null
+      department: null
+      media: null
+      website: null
+      role: null
+      universeId: !Stabilized.universe_id '9000'
+      universeName: !Stabilized 'Universe name (0)'
+      universAcronym: !Stabilized.default.universe test-universe
+      newsletterId: !Stabilized.default.service_id.node_notification '1234'
+      newsletterName: !Stabilized 'Service name (0)'
+      status: Valid
+      unsubscriptionLink: !Stabilized '<ignored>'
+      isNewUser: false
+      hostBy: !Stabilized '<ignored>'
+      profileLink: !Stabilized '<ignored>'
+      isNewSubscription: false
+      feedbackMessage: 'A subscription for this service is already registered for this email address'
+      language: default
+      frequency: Weekly
+      defaultLanguage: '0'
+      pattern: !Stabilized '<ignored>'
+      subscribedNotificationItemType:
+        -
+          name: !Stabilized 'Item type name (0)'
+          id: !Stabilized.item_type_id '30000'
+      subscribedNotificationTopicType:
+        -
+          name: 'The node title (test.1)'
+          id: !Stabilized.topic_id '20000'
+          externalApp: null
+          externalId: test.1
+          groupName: !Stabilized '<ignored>'
+          groupId: !Stabilized '<ignored>'
+          groupDisplay: '0'
+        -
+          name: 'The node title (test.other)'
+          id: !Stabilized.topic_id '20001'
+          externalApp: null
+          externalId: test.other
+          groupName: !Stabilized '<ignored>'
+          groupId: !Stabilized '<ignored>'
+          groupDisplay: '0'
+- !Comment 'Unsubscribe from node.other which was just confirmed.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/unsubscribe/node-notification
+  data:
+    subscription:
+      sv_id: !Stabilized.default.service_id.node_notification '1234'
+      node_id: test.other
+      email: !Stabilized.default.email teSt@eXample.com
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  data: 'Node notification unsubscribed successfully'
+- !Comment 'Load subscriptions. Now there should be one left.'
+- !NewsroomRequest
+  path: /newsroom/api/v1/subscriptions
+  query:
+    user_email: !Stabilized.default.email teSt@eXample.com
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  data:
+    -
+      responseType: json
+      email: !Stabilized.default.email teSt@eXample.com
+      firstName: null
+      lastName: null
+      organisation: null
+      country: null
+      position: null
+      twitter: null
+      facebook: null
+      linkedIn: null
+      phone: null
+      organisationShort: null
+      address: null
+      address2: null
+      postCode: null
+      city: null
+      department: null
+      media: null
+      website: null
+      role: null
+      universeId: !Stabilized.universe_id '9000'
+      universeName: !Stabilized 'Universe name (0)'
+      universAcronym: !Stabilized.default.universe test-universe
+      newsletterId: !Stabilized.default.service_id.node_notification '1234'
+      newsletterName: !Stabilized 'Service name (0)'
+      status: Valid
+      unsubscriptionLink: !Stabilized '<ignored>'
+      isNewUser: false
+      hostBy: !Stabilized '<ignored>'
+      profileLink: !Stabilized '<ignored>'
+      isNewSubscription: false
+      feedbackMessage: 'A subscription for this service is already registered for this email address'
+      language: default
+      frequency: Weekly
+      defaultLanguage: '0'
+      pattern: !Stabilized '<ignored>'
+      subscribedNotificationItemType:
+        -
+          name: !Stabilized 'Item type name (0)'
+          id: !Stabilized.item_type_id '30000'
+      subscribedNotificationTopicType:
+        -
+          name: 'The node title (test.1)'
+          id: !Stabilized.topic_id '20000'
+          externalApp: null
+          externalId: test.1
+          groupName: !Stabilized '<ignored>'
+          groupId: !Stabilized '<ignored>'
+          groupDisplay: '0'
+- !Comment 'Unsubscribe from node.other which was just confirmed, again.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/unsubscribe/node-notification
+  data:
+    subscription:
+      sv_id: !Stabilized.default.service_id.node_notification '1234'
+      node_id: test.other
+      email: !Stabilized.default.email teSt@eXample.com
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  data: 'Node notification unsubscribed successfully'
+- !Comment 'Unsubscribe from the entire node notification service.'
+- !NewsroomRequest
+  path: /newsroom/api/v1/unsubscribe
+  query:
+    user_email: !Stabilized.default.email teSt@eXample.com
+    sv_id: !Stabilized.default.service_id.node_notification '1234'
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  data: 'User unsubscribed!'
+- !Comment 'Load subscriptions. Now there should be zero left.'
+- !NewsroomRequest
+  path: /newsroom/api/v1/subscriptions
+  query:
+    user_email: !Stabilized.default.email teSt@eXample.com
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  data: {  }

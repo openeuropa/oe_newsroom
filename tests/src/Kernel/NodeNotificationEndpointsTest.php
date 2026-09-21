@@ -7,7 +7,6 @@ namespace Drupal\Tests\oe_newsroom\Kernel;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints;
 use Drupal\Tests\oe_newsroom\Constraint\AssocValuesMatch;
-use Drupal\Tests\oe_newsroom\NewsroomConfigurationTestTrait;
 use Drupal\Tests\oe_newsroom\Traits\LocalTestValuesTrait;
 use Drupal\Tests\oe_newsroom\Traits\VcrTrait;
 
@@ -17,7 +16,6 @@ use Drupal\Tests\oe_newsroom\Traits\VcrTrait;
 class NodeNotificationEndpointsTest extends KernelTestBase {
 
   use LocalTestValuesTrait;
-  use NewsroomConfigurationTestTrait;
   use VcrTrait;
 
   /**

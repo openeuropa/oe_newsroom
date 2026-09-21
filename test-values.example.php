@@ -32,4 +32,5 @@ return new NewsroomTestValues(
   // These values are used in the test itself.
   nodeNotificationSectionId: 77744,
   nodeNotificationTopicName: 'Node notification topic',
+  subscriberEmail: 'teSt@eXample.com',
 );

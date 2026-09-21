@@ -10,7 +10,9 @@ namespace Drupal\oe_newsroom\Helper;
 class ArrayHelper {
 
   /**
-   * Removes NULL and empty string from an array, while preserving keys.
+   * Removes NULL, empty string and empty array from an array.
+   *
+   * Array keys are preserved.
    *
    * @param array<TKey, TValue|null|''> $values
    *   Values to filter.
@@ -19,12 +21,12 @@ class ArrayHelper {
    * @template TValue of mixed
    *
    * @return array<TKey, TValue>
-   *   The array without any '' or NULL.
+   *   The array without any '', NULL or [].
    */
   public static function filter(array $values): array {
     return array_filter(
       $values,
-      fn ($value) => $value !== '' && $value !== NULL,
+      fn ($value) => $value !== '' && $value !== NULL && $value !== [],
     );
   }
 
