@@ -55,7 +55,6 @@
     Strict-Transport-Security:
       - max-age=0;
   data: 'Not found'
-- !Comment 'Attempt to subscribe to a non-existing node id.'
 - !Comment 'Subscribe to a node id. The subscription will be pending, until the email is verified.'
 - !NewsroomRequest
   method: POST
