@@ -131,7 +131,7 @@
       dateTo: null
       publicationDate: !Stabilized.date '2005-02-15 13:10:00'
       publicationDateTo: null
-      validationDate: !Stabilized.date '2005-02-15 13:10:00'
+      validationDate: !Stabilized.date '2005-02-15 13:20:00'
       author: 'Newsroom System'
       statusBy: 'Newsroom System'
       topics:

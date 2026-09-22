@@ -34,7 +34,6 @@ class NodeSubscriptionEndpointsTest extends KernelTestBase {
    */
   protected static $modules = [
     'oe_newsroom',
-    'oe_newsroom_newsletter',
     'oe_newsroom_vcr',
   ];
 
@@ -46,7 +45,6 @@ class NodeSubscriptionEndpointsTest extends KernelTestBase {
 
     $this->installConfig([
       'oe_newsroom',
-      'oe_newsroom_newsletter',
     ]);
 
     $this->initializeNewsroomAndVcrWithTestValues();

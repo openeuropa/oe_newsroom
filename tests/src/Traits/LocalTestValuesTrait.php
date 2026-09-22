@@ -6,6 +6,7 @@ namespace Drupal\Tests\oe_newsroom\Traits;
 
 use Drupal\Core\Site\Settings;
 use Drupal\oe_newsroom\Newsroom;
+use Drupal\oe_newsroom_vcr\Capture\CaptureStore;
 use Drupal\Tests\oe_newsroom\Stabilization\NewsroomVcrStabilization;
 use Drupal\Tests\oe_newsroom\Value\NewsroomTestValues;
 
@@ -28,6 +29,7 @@ trait LocalTestValuesTrait {
       $this->vcrPack = NewsroomVcrStabilization::fnPackRecords(
         $test_values,
         $this->loadNewsroomTestValuesObject(FALSE),
+        \Drupal::service(CaptureStore::class)->capture(...),
       );
     }
     else {

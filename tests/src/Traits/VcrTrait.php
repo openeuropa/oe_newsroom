@@ -70,13 +70,8 @@ trait VcrTrait {
 
   /**
    * Ends the VCR session, and writes to the VCR file if in recording mode.
-   *
-   * In replay mode, it will also assert captured values.
-   *
-   * @param array $expected_captured_if_replay
-   *   Expected captured values if in replay mode.
    */
-  protected function endVcr(array $expected_captured_if_replay = []): void {
+  protected function endVcr(): void {
     $this->assertNotNull($this->vcrName);
     // Make sure this method cannot be called twice.
     $vcr_name = $this->vcrName;
@@ -113,7 +108,8 @@ trait VcrTrait {
       $vcr_store->addRecord($record);
     }
     elseif ($vcr_store->getMode() === VcrMode::Replay) {
-      $this->assertEquals($record, $vcr_store->readNextRecord($position), "Comment at position $position does not match.");
+      $expected_record = $vcr_store->readNextRecord($position);
+      $this->assertEquals($expected_record, $record, "Comment at position $position does not match.");
     }
   }
 
@@ -127,7 +123,7 @@ trait VcrTrait {
    *   The path to the VCR file.
    */
   protected function getVcrFile(string $name): string {
-    $name = preg_replace('/[^a-zA-Z0-9]+/', '.', $name);
+    $name = preg_replace('/[^a-zA-Z0-9_]+/', '.', $name);
     return dirname(__DIR__, 2) . '/fixtures/vcr/' . $name . '.yml';
   }
 

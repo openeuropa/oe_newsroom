@@ -323,22 +323,24 @@ class Transform {
    * from the sprintf() template and an incrementing index.
    *
    * @param string $replace
-   *   The regular expression a value must match to be replaced.
-   * @param string $pattern
    *   A sprintf() template for the replacement. Must contain '%d', which is
    *   filled with an incrementing index per distinct value.
-   * @param string|null $tag
-   *   An optional tag to wrap the replacement value in, or NULL for none.
+   * @param string $pattern
+   *   The regular expression a value must match to be replaced.
+   * @param (callable(string, string): mixed)|null $wrap
+   *   Addititional transformation to apply to a replacement value.
+   *   The first parameter is the replacement value.
+   *   The second parameter is the original value.
    *
    * @return \Closure(mixed): mixed
    *   The resulting transformation.
    */
-  public static function uniquePatternSprintf(string $replace, string $pattern = '#.#', ?string $tag = NULL): \Closure {
+  public static function uniquePatternSprintf(string $replace, string $pattern = '#.#', ?callable $wrap = NULL): \Closure {
     Assert::assertStringContainsString('%d', $replace);
     $create_value = fn (int $index) => sprintf($replace, $index);
     $transformation = static::unique($create_value);
-    if ($tag !== NULL) {
-      $transformation = static::tag($tag, $transformation);
+    if ($wrap !== NULL) {
+      $transformation = fn ($value) => $wrap($transformation($value), $value);
     }
     return static::ifPattern($pattern, $transformation);
   }
