@@ -70,13 +70,8 @@ trait VcrTrait {
 
   /**
    * Ends the VCR session, and writes to the VCR file if in recording mode.
-   *
-   * In replay mode, it will also assert captured values.
-   *
-   * @param array $expected_captured_if_replay
-   *   Expected captured values if in replay mode.
    */
-  protected function endVcr(array $expected_captured_if_replay = []): void {
+  protected function endVcr(): void {
     $this->assertNotNull($this->vcrName);
     // Make sure this method cannot be called twice.
     $vcr_name = $this->vcrName;
