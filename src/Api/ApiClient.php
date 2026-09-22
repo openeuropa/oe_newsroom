@@ -143,7 +143,7 @@ class ApiClient {
    *   Values that will be part of the signature key.
    * @param list<string|int>|null $signature_keys_to_normalize
    *   Signature keys that should be normalized with mb_strtolower() depending
-   *   on a setting, or NULL o normalize all signature keys.
+   *   on a setting, or NULL to normalize all signature keys.
    * @param bool $assert_success
    *   TRUE to throw exception on non-200 response code.
    *   FALSE to return all responses.
