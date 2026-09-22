@@ -140,7 +140,9 @@ class ApiClient {
    * @param array<string, mixed> $payload
    *   The payload.
    * @param array<string> $signature_input
-   *   Values that will be part of the signature key.
+   *   Values that will be part of the signature/authentication key.
+   *   The array keys are ignored.
+   *   If this is empty, no authentication key will be added.
    * @param list<string|int>|null $signature_keys_to_normalize
    *   Signature keys that should be normalized with mb_strtolower() depending
    *   on a setting, or NULL to normalize all signature keys.
@@ -167,9 +169,8 @@ class ApiClient {
     if (!str_starts_with($endpoint_path, '/')) {
       throw new \InvalidArgumentException("Expected a path with leading slash, found '$endpoint_path'.");
     }
-    $signature = $this->generateComposedKey($signature_input, $signature_keys_to_normalize);
-    if ($signature !== NULL) {
-      $payload['key'] = $signature;
+    if ($signature_input !== []) {
+      $payload['key'] = $this->generateComposedKey($signature_input, $signature_keys_to_normalize);
     }
     $payload['app'] = $this->connection->appId;
     $json = Json::encode($payload);
