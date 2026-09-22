@@ -127,7 +127,7 @@ trait VcrTrait {
    *   The path to the VCR file.
    */
   protected function getVcrFile(string $name): string {
-    $name = preg_replace('/[^a-zA-Z0-9]+/', '.', $name);
+    $name = preg_replace('/[^a-zA-Z0-9_]+/', '.', $name);
     return dirname(__DIR__, 2) . '/fixtures/vcr/' . $name . '.yml';
   }
 
