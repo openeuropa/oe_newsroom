@@ -108,7 +108,8 @@ trait VcrTrait {
       $vcr_store->addRecord($record);
     }
     elseif ($vcr_store->getMode() === VcrMode::Replay) {
-      $this->assertEquals($record, $vcr_store->readNextRecord($position), "Comment at position $position does not match.");
+      $expected_record = $vcr_store->readNextRecord($position);
+      $this->assertEquals($expected_record, $record, "Comment at position $position does not match.");
     }
   }
 
