@@ -45,11 +45,18 @@ class NewsroomVcrStabilization {
    *   Newsroom test values from `test-values.php`.
    * @param \Drupal\Tests\oe_newsroom\Value\NewsroomTestValues $virtual_values
    *   Newsroom test values from `test-values.example.php`.
+   * @param callable(string, mixed): void $collect_captured
+   *   A callback to collect captured values.
+   *   The first parameter is the capture name, the second the actual value.
    *
    * @return \Closure(list<TaggedValue>): list<TaggedValue>
    *   The resulting transformation that will be applied to the complete list.
    */
-  public static function fnPackRecords(NewsroomTestValues $local_values, NewsroomTestValues $virtual_values): \Closure {
+  public static function fnPackRecords(
+    NewsroomTestValues $local_values,
+    NewsroomTestValues $virtual_values,
+    callable $collect_captured,
+  ): \Closure {
     $fn_date = Transform::uniqueDateString('2005-02-15 13:00:00', tag: static::STABILIZED_TAG_NAME . '.date');
     $local_values_array = $local_values->getVcrStabilizationDefaults();
     $virtual_values_array = $virtual_values->getVcrStabilizationDefaults();
@@ -67,7 +74,7 @@ class NewsroomVcrStabilization {
       // in responses.
       Transform::deepRecursive($fn_date),
       // Further pack requests if they go to Newsroom API.
-      self::fnPackNewsroomRequests($fn_fn_default_key),
+      self::fnPackNewsroomRequests($fn_fn_default_key, $collect_captured),
       self::fnPackNewsroomResponses($fn_fn_default_key),
     ]);
     // Wrap with assertions, to match the documented return type.
@@ -84,25 +91,26 @@ class NewsroomVcrStabilization {
    *
    * @param \Closure(string): (\Closure(mixed): mixed) $fn_fn_default_key
    *   A callback to create a lookup function for default values.
+   * @param callable(string, mixed): void $collect_captured
+   *   A callback to collect captured values.
+   *   The first parameter is the capture name, the second the actual value.
    *
    * @return \Closure(list<TaggedValue>): list<TaggedValue>
    *   A transformation to call on the full recording.
    */
-  protected static function fnPackNewsroomRequests(\Closure $fn_fn_default_key): \Closure {
+  protected static function fnPackNewsroomRequests(\Closure $fn_fn_default_key, callable $collect_captured): \Closure {
     $fn_default_node_service_id = $fn_fn_default_key('service_id');
     $fn_default_section_id = $fn_fn_default_key('node_notification_section_id');
     $fn_default_email = $fn_fn_default_key('email');
-    $fn_signature_key = Transform::uniquePatternSprintf(
-      '<signature key %d>',
-      '#.#',
-      CapturingHelper::CAPTURE_TAG_NAME,
-    );
     $fn_newsroom_request_data = Transform::nested([
       'sv_id' => $fn_default_node_service_id,
       'item.sv_id' => $fn_default_node_service_id,
       'subscription.sv_id' => $fn_default_node_service_id,
       'app' => $fn_fn_default_key('app_id'),
-      'key' => $fn_signature_key,
+      'key' => self::fnCaptureString(
+        '<signature key %d>',
+        $collect_captured,
+      ),
       'user_email' => $fn_default_email,
       'subscription.email' => $fn_default_email,
       'item.section_id' => $fn_default_section_id,
@@ -128,7 +136,7 @@ class NewsroomVcrStabilization {
    */
   protected static function fnPackNewsroomResponses(\Closure $fn_fn_default_key): \Closure {
     $fn_fn_unique_int = fn (int $offset, string $label) => Transform::uniqueIntegerIncrement($offset, tag: static::STABILIZED_TAG_NAME . '.' . $label);
-    $fn_fn_unique_string = fn (string $replace, string $pattern = '#.#') => Transform::uniquePatternSprintf($replace, $pattern, static::STABILIZED_TAG_NAME);
+    $fn_fn_unique_string = fn (string $replace, string $pattern = '#.#') => Transform::uniquePatternSprintf($replace, $pattern, Transform::tag(static::STABILIZED_TAG_NAME));
     $fn_notification_id = $fn_fn_unique_int(10000, 'notification_id');
     $fn_topic_id = $fn_fn_unique_int(20000, 'topic_id');
     $fn_topic_name = $fn_fn_default_key('topic_name');
@@ -222,6 +230,39 @@ class NewsroomVcrStabilization {
       }
       return $records;
     };
+  }
+
+  /**
+   * Gets a callback to replace a string with `!Capture <placeholder>`.
+   *
+   * @param string $template
+   *   A sprintf() template for the replacement. Must contain '%d', which is
+   *   filled with an incrementing index per distinct value.
+   * @param callable(string, mixed): void $collect_captured
+   *   A callback to collect captured values.
+   *   The first parameter is the capture name, the second the actual value.
+   * @param string $pattern
+   *   A regular expression a value must match to be replaced.
+   *
+   * @return \Closure(mixed): mixed
+   *   The resulting transformation.
+   */
+  protected static function fnCaptureString(
+    string $template,
+    callable $collect_captured,
+    string $pattern = '#.#',
+  ): \Closure {
+    return Transform::uniquePatternSprintf(
+      $template,
+      '#.#',
+      function (string $replacement, string $value) use ($collect_captured) {
+        $collect_captured($replacement, $value);
+        return new TaggedValue(
+          CapturingHelper::CAPTURE_TAG_NAME,
+          $replacement,
+        );
+      },
+    );
   }
 
 }
