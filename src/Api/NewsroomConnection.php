@@ -6,6 +6,7 @@ namespace Drupal\oe_newsroom\Api;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Site\Settings;
+use Drupal\oe_newsroom\Helper\ValueHelper;
 use Drupal\oe_newsroom\Newsroom;
 
 /**
@@ -78,7 +79,8 @@ class NewsroomConnection {
       $config->get('normalised'),
       $config->get('universe'),
       $config->get('app_id'),
-      $config->get('node_service_id'),
+      // Handle stringified integers that might be stuck in configuration.
+      ValueHelper::toIntIdOrNull($config->get('node_service_id')),
     );
   }
 
