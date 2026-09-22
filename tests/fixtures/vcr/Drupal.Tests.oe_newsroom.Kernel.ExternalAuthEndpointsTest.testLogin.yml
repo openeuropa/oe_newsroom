@@ -1,0 +1,11 @@
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/auth/login
+  data:
+    user_email: test@example.com
+    token: !Capture '<login token 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  data:
+    user_email: test@example.com
+    user_id: 1283627

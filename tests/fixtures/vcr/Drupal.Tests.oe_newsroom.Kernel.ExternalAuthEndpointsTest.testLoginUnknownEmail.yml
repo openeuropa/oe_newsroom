@@ -1,0 +1,13 @@
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/auth/login
+  data:
+    user_email: test123unknown@example.com
+    token: !Capture '<login token 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  status: 401
+  headers:
+    Proxy-support:
+      - Session-based-authentication
+  data: Unauthorized
