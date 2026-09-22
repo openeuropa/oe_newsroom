@@ -323,10 +323,10 @@ class Transform {
    * from the sprintf() template and an incrementing index.
    *
    * @param string $replace
-   *   The regular expression a value must match to be replaced.
-   * @param string $pattern
    *   A sprintf() template for the replacement. Must contain '%d', which is
    *   filled with an incrementing index per distinct value.
+   * @param string $pattern
+   *   The regular expression a value must match to be replaced.
    * @param string|null $tag
    *   An optional tag to wrap the replacement value in, or NULL for none.
    *
