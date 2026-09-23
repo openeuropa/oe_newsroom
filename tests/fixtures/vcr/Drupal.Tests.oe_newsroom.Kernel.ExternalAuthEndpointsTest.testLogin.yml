@@ -1,3 +1,4 @@
+- !Comment 'Verify an authentication token.'
 - !NewsroomRequest
   method: POST
   path: /newsroom/api/v1/auth/login

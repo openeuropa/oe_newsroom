@@ -50,6 +50,7 @@ class ExternalAuthEndpointsTest extends KernelTestBase {
 
     $this->startVcr(__METHOD__);
 
+    $this->vcrComment('Request to send an email with an authentication link.');
     // In recording mode, the email will be sent to the email address provided
     // by the developer, allowing them to inspect the shape of the email.
     $external_auth_endpoints->tokenEmail(
@@ -76,6 +77,7 @@ class ExternalAuthEndpointsTest extends KernelTestBase {
     $external_auth_endpoints = \Drupal::service(ExternalAuthEndpoints::class);
     $this->startVcr(__METHOD__);
 
+    $this->vcrComment('Request an authentication token, without sending an email.');
     $this->assertThat(
       $external_auth_endpoints->tokenNomail($email),
       new AssocValuesMatch([
@@ -110,6 +112,7 @@ class ExternalAuthEndpointsTest extends KernelTestBase {
 
     $this->startVcr(__METHOD__);
 
+    $this->vcrComment('Verify an authentication token.');
     $result = $external_auth_endpoints->login($email, $token);
     $this->assertThat(
       $result,
@@ -136,6 +139,7 @@ class ExternalAuthEndpointsTest extends KernelTestBase {
     $external_auth_endpoints = \Drupal::service(ExternalAuthEndpoints::class);
     $this->startVcr(__METHOD__);
 
+    $this->vcrComment('Attempt to verify an invalid authentication token.');
     $this->assertSame(
       Unauthorized::Instance,
       $external_auth_endpoints->login(
@@ -161,6 +165,7 @@ class ExternalAuthEndpointsTest extends KernelTestBase {
     $external_auth_endpoints = \Drupal::service(ExternalAuthEndpoints::class);
     $this->startVcr(__METHOD__);
 
+    $this->vcrComment('Attempt to verify an authentication token for an unknown email address.');
     $this->assertSame(
       Unauthorized::Instance,
       $external_auth_endpoints->login(
