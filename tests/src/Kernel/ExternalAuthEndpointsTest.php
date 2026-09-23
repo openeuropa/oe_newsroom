@@ -9,6 +9,7 @@ use Drupal\oe_newsroom\Endpoint\ExternalAuthEndpoints;
 use Drupal\oe_newsroom\Value\Sentinel\Unauthorized;
 use Drupal\Tests\oe_newsroom\Constraint\AssocValuesMatch;
 use Drupal\Tests\oe_newsroom\Traits\LocalTestValuesTrait;
+use Drupal\Tests\oe_newsroom\Traits\TryAndCatchTrait;
 use Drupal\Tests\oe_newsroom\Traits\VcrTrait;
 use PHPUnit\Framework\Constraint\IsType;
 use PHPUnit\Framework\Constraint\RegularExpression;
@@ -19,6 +20,7 @@ use PHPUnit\Framework\Constraint\RegularExpression;
 class ExternalAuthEndpointsTest extends KernelTestBase {
 
   use LocalTestValuesTrait;
+  use TryAndCatchTrait;
   use VcrTrait;
 
   /**
@@ -49,6 +51,18 @@ class ExternalAuthEndpointsTest extends KernelTestBase {
     $external_auth_endpoints = \Drupal::service(ExternalAuthEndpoints::class);
 
     $this->startVcr(__METHOD__);
+
+    // A call with a path-less url will be rejected.
+    // No API request will be made - as can be seen in the VCR recording.
+    $this->tryAndCatch(
+      fn () => $external_auth_endpoints->tokenEmail(
+        'testuser@example.com',
+        'https://example.com',
+        'Action button text.',
+      ),
+      \InvalidArgumentException::class,
+      "Expected a url with path, found 'https://example.com'.",
+    );
 
     $this->vcrComment('Request to send an email with an authentication link.');
     // In recording mode, the email will be sent to the email address provided
