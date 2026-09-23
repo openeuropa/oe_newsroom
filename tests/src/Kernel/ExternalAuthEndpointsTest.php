@@ -113,7 +113,7 @@ class ExternalAuthEndpointsTest extends KernelTestBase {
   /**
    * Tests a successful call to ->login().
    */
-  public function testLogin(): void {
+  public function testLoginSuccess(): void {
     $email_original = 'tesTUVw1@example.com';
     $email_variant = 'testUvw1@example.com';
     $this->assertSame(mb_strtolower($email_original), mb_strtolower($email_variant));
