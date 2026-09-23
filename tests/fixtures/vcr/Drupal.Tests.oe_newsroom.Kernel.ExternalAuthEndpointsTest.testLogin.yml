@@ -1,12 +1,14 @@
-- !Comment 'Verify an authentication token.'
+- !Comment |
+  Verify an authentication token.
+  The email address stored in Newsroom uses different capitalization.
 - !NewsroomRequest
   method: POST
   path: /newsroom/api/v1/auth/login
   data:
-    user_email: test@example.com
+    user_email: testUvw1@example.com
     token: !Capture '<login token 0>'
     app: !Stabilized.default.app_id test-app-id
 - !Response
   data:
-    user_email: test@example.com
-    user_id: 1283627
+    user_email: tesTUVw1@example.com
+    user_id: 13140031

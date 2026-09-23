@@ -114,11 +114,13 @@ class ExternalAuthEndpointsTest extends KernelTestBase {
    * Tests a successful call to ->login().
    */
   public function testLogin(): void {
-    $email = 'test@example.com';
+    $email_original = 'tesTUVw1@example.com';
+    $email_variant = 'testUvw1@example.com';
+    $this->assertSame(mb_strtolower($email_original), mb_strtolower($email_variant));
     $external_auth_endpoints = \Drupal::service(ExternalAuthEndpoints::class);
 
     if ($this->isRecording()) {
-      $token = $external_auth_endpoints->tokenNomail($email)['token'];
+      $token = $external_auth_endpoints->tokenNomail($email_original)['token'];
     }
     else {
       $token = 'testToken1234567';
@@ -126,12 +128,16 @@ class ExternalAuthEndpointsTest extends KernelTestBase {
 
     $this->startVcr(__METHOD__);
 
-    $this->vcrComment('Verify an authentication token.');
-    $result = $external_auth_endpoints->login($email, $token);
+    $this->vcrComment(<<<'COMMENT'
+Verify an authentication token.
+The email address stored in Newsroom uses different capitalization.
+COMMENT
+    );
+    $result = $external_auth_endpoints->login($email_variant, $token);
     $this->assertThat(
       $result,
       new AssocValuesMatch([
-        'user_email' => 'test@example.com',
+        'user_email' => $email_original,
         'user_id' => new IsType(IsType::TYPE_INT),
       ]),
     );

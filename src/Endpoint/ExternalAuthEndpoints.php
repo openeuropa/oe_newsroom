@@ -143,7 +143,8 @@ class ExternalAuthEndpoints {
       ->assertSuccess()
       ->map(function (string|array $data) use ($email): array {
         Assert::isArray($data);
-        Assert::same($email, $data['user_email'] ?? NULL);
+        Assert::string($data['user_email']);
+        Assert::same(mb_strtolower($data['user_email']), mb_strtolower($email));
         Assert::positiveInteger($data['user_id'] ?? NULL);
         return $data;
       });
