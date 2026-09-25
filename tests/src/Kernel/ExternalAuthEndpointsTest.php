@@ -128,11 +128,7 @@ class ExternalAuthEndpointsTest extends KernelTestBase {
 
     $this->startVcr(__METHOD__);
 
-    $this->vcrComment(<<<'COMMENT'
-Verify an authentication token.
-The email address stored in Newsroom uses different capitalization.
-COMMENT
-    );
+    $this->vcrComment('Verify an authentication token.');
     $result = $external_auth_endpoints->login($email_variant, $token);
     $this->assertThat(
       $result,

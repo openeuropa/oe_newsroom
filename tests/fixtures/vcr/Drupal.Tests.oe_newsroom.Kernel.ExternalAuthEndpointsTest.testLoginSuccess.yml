@@ -1,6 +1,4 @@
-- !Comment |
-  Verify an authentication token.
-  The email address stored in Newsroom uses different capitalization.
+- !Comment 'Verify an authentication token.'
 - !NewsroomRequest
   method: POST
   path: /newsroom/api/v1/auth/login
