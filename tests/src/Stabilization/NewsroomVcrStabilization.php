@@ -114,6 +114,11 @@ class NewsroomVcrStabilization {
       'user_email' => $fn_default_email,
       'subscription.email' => $fn_default_email,
       'item.section_id' => $fn_default_section_id,
+      // This parameter exists in '/auth/login'.
+      'token' => self::fnCaptureString(
+        '<login token %d>',
+        $collect_captured,
+      ),
     ]);
     $fn_transform_request = Transform::ifTag(
       'NewsroomRequest',
@@ -147,6 +152,7 @@ class NewsroomVcrStabilization {
     $fn_item_type_name = $fn_fn_unique_string('Item type name (%d)');
     $fn_universe_id = $fn_fn_unique_int(9000, 'universe_id');
     $fn_universe_name = $fn_fn_unique_string('Universe name (%d)');
+    $fn_user_id = $fn_fn_unique_int(70000, 'user_id');
 
     $transformations_by_path = [
       '/newsroom/api/v1/node-notification/get' => Transform::assoc([
@@ -189,6 +195,35 @@ class NewsroomVcrStabilization {
         ]),
       ]),
       '/newsroom/api/v1/subscribe' => $fn_stabilize_subscriptions,
+      '/newsroom/api/v1/auth/token' => Transform::assoc([
+        'data' => Transform::assoc([
+          // Generate a string that is 16 characters long.
+          // Use '%03d' syntax for number padding like '007'.
+          'token' => Transform::uniquePatternSprintf(
+            'tokenABCu%04dxYz',
+            '#^[a-zA-Z0-9]{16}$#',
+            Transform::tag(static::STABILIZED_TAG_NAME),
+          ),
+          // For now the tests do not care how far the expiration date is in the
+          // future. Simply generate a stabilized date string with the same date
+          // format as the original value, and use microseconds to make the
+          // values distinct.
+          // All other dates in other responses have the simpler date format,
+          // which is being stabilized globally across the recording.
+          'expiration_date' => Transform::uniquePatternSprintf(
+            '2099-05-05T01:01:01.%06dZ',
+            // Use '%03d' syntax for number padding like '007'.
+            '#^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{6}Z$#',
+            Transform::tag(static::STABILIZED_TAG_NAME),
+          ),
+        ]),
+      ]),
+      '/newsroom/api/v1/auth/login' => Transform::assoc([
+        'data' => Transform::assoc([
+          'user_email' => $fn_default_email,
+          'user_id' => $fn_user_id,
+        ]),
+      ]),
     ];
     return static::fnTransformNewsroomResponsesByPath($transformations_by_path);
   }

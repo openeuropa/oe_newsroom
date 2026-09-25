@@ -336,7 +336,14 @@ class Transform {
    *   The resulting transformation.
    */
   public static function uniquePatternSprintf(string $replace, string $pattern = '#.#', ?callable $wrap = NULL): \Closure {
-    Assert::assertStringContainsString('%d', $replace);
+    // Validate the replace template, but allow advanced placeholders with
+    // number padding, like '%03d'.
+    if (sprintf($replace, 5) === $replace) {
+      throw new \InvalidArgumentException('The $replace template must contain exactly one sprintf() placeholder, found none.');
+    }
+    if (sprintf($replace, 5, 5) !== sprintf($replace, 5)) {
+      throw new \InvalidArgumentException('The $replace template must contain exactly one sprintf() placeholder, found at least two.');
+    }
     $create_value = fn (int $index) => sprintf($replace, $index);
     $transformation = static::unique($create_value);
     if ($wrap !== NULL) {

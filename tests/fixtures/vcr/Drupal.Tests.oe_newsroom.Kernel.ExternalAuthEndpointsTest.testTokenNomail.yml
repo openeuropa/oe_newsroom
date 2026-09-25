@@ -1,0 +1,13 @@
+- !Comment 'Request an authentication token, without sending an email.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/auth/token
+  data:
+    user_email: test@example.com
+    sendEmail: 0
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  data:
+    token: !Stabilized tokenABCu0000xYz
+    expiration_date: !Stabilized '2099-05-05T01:01:01.000000Z'

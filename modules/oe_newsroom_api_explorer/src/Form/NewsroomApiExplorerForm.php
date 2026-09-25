@@ -22,6 +22,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
+use Drupal\oe_newsroom\Endpoint\ExternalAuthEndpoints;
 use Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints;
 use Drupal\oe_newsroom\Endpoint\NodeSubscriptionEndpoints;
 use Drupal\oe_newsroom\Value\NotificationFrequency;
@@ -615,6 +616,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
       NewsroomClient::class,
       NodeNotificationEndpoints::class,
       NodeSubscriptionEndpoints::class,
+      ExternalAuthEndpoints::class,
       // Allow developers to play with the VCR in the API explorer.
       VcrStore::class,
       VcrApiExplorerOperations::class,
