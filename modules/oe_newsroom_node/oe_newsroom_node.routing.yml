@@ -1,0 +1,12 @@
+oe_newsroom_node.subscribe_modal:
+  path: '/newsroom-node/{node}/subscribe'
+  defaults:
+    _form: '\Drupal\oe_newsroom_node\Form\NodeSubscriptionForm'
+    _title: 'Subscribe to notifications'
+  requirements:
+    _permission: 'subscribe to newsroom node notifications'
+    node: \d+
+  options:
+    parameters:
+      node:
+        type: entity:node

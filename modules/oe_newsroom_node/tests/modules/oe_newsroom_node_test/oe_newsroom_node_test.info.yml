@@ -1,0 +1,11 @@
+name: OpenEuropa Newsroom Node test
+description: Provides configuration for testing the node subscription feature.
+package: Testing
+core_version_requirement: ^10 || ^11
+
+dependencies:
+  - drupal:block
+  - drupal:node
+  - drupal:oe_newsroom_node
+
+type: module
