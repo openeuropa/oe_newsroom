@@ -1,0 +1,22 @@
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/subscribe
+  data:
+    subscription:
+      sv_id: !Stabilized.default.service_id.node_notification '1234'
+      email: !Stabilized.default.email teSt@eXample.com
+      frequency: 2101
+      node_id: '1'
+      nomail: false
+      email_custom:
+        verify:
+          email_custom_subject: 'Confirm your subscription'
+          email_custom_redirect: 'http://web:8080/build/node/1?newsroom_node_subscribed=1'
+        subscription:
+          email_custom_subject: 'You have been subscribed'
+    key: !Capture '<signature key 0>'
+    app: !Stabilized.default.app_id test-app-id
+- !Response
+  data:
+    status: pending_verification
+    message: 'Confirmation email sent. Your subscription will be activated after you click the confirmation link.'
