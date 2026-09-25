@@ -152,6 +152,7 @@ class NewsroomVcrStabilization {
     $fn_item_type_name = $fn_fn_unique_string('Item type name (%d)');
     $fn_universe_id = $fn_fn_unique_int(9000, 'universe_id');
     $fn_universe_name = $fn_fn_unique_string('Universe name (%d)');
+    $fn_user_id = $fn_fn_unique_int(70000, 'user_id');
 
     $transformations_by_path = [
       '/newsroom/api/v1/node-notification/get' => Transform::assoc([
@@ -215,6 +216,12 @@ class NewsroomVcrStabilization {
             '#^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{6}Z$#',
             Transform::tag(static::STABILIZED_TAG_NAME),
           ),
+        ]),
+      ]),
+      '/newsroom/api/v1/auth/login' => Transform::assoc([
+        'data' => Transform::assoc([
+          'user_email' => $fn_default_email,
+          'user_id' => $fn_user_id,
         ]),
       ]),
     ];

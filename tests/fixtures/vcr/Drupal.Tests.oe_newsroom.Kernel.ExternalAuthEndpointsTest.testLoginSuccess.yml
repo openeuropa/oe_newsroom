@@ -11,4 +11,4 @@
 - !Response
   data:
     user_email: tesTUVw1@example.com
-    user_id: 13140031
+    user_id: !Stabilized.user_id 70000

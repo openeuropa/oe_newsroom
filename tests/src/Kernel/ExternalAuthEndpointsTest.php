@@ -147,7 +147,7 @@ COMMENT
     if (!$this->isRecording()) {
       $this->assertVcrCaptured(
         ['<login token 0>'],
-        ['4c7c321f44c0c650d124fb7652e41254'],
+        ['0f017da7f43eef5190070257bdd2b198'],
       );
     }
   }
