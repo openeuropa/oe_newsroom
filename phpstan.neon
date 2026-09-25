@@ -1,0 +1,8 @@
+parameters:
+  # Drupal 10.6 uses PHPStan 1, which does not report these PHPStan 2 rules.
+  # Do not fail that CI matrix entry when an ignore has no matching diagnostic.
+  reportUnmatchedIgnoredErrors: false
+  ignoreErrors:
+    - identifier: dependencySerializationTraitProperty.unsupportedReadOnlyProperty
+    - identifier: dependencySerializationTraitProperty.unsupportedPrivateProperty
+    - identifier: new.static
