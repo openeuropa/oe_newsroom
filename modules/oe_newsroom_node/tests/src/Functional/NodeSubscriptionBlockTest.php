@@ -121,6 +121,21 @@ class NodeSubscriptionBlockTest extends BrowserTestBase {
   }
 
   /**
+   * Tests that the block is hidden with an empty privacy URL.
+   */
+  public function testBlockWithEmptyPrivacyUrl(): void {
+    $assert_session = $this->assertSession();
+    $node = $this->drupalCreateNode(['type' => 'page', 'title' => 'My node']);
+
+    $this->config('oe_newsroom_node.settings')
+      ->set('privacy_url', '')
+      ->save();
+
+    $this->drupalGet($node->toUrl());
+    $assert_session->elementNotExists('css', '.oe-newsroom-node__subscribe-link');
+  }
+
+  /**
    * Tests an API failure when submitting without JavaScript.
    */
   public function testFormWithoutJavascriptApiFailure(): void {
