@@ -3,7 +3,7 @@ oe_newsroom_node.settings:
   label: 'Newsroom node settings'
   mapping:
     privacy_url:
-      type: label
+      type: uri
       label: 'Privacy URL'
 
 block.settings.oe_newsroom_node_subscription_block:
