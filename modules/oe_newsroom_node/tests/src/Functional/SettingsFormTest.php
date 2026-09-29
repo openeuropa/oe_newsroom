@@ -66,6 +66,22 @@ class SettingsFormTest extends BrowserTestBase {
     $assert_session->statusMessageContains('The configuration options have been saved.', 'status');
     $this->assertSame('internal:/my-privacy-page', $this->config('oe_newsroom_node.settings')->get('privacy_url'));
     $this->assertSame(42, $this->config('oe_newsroom.settings')->get('node_service_id'));
+
+    // Internal URIs are displayed as paths in the settings form.
+    $this->drupalGet('admin/config/system/newsroom-settings');
+    $this->assertSame('/my-privacy-page', $assert_session->fieldExists('node_privacy_url')->getValue());
+
+    // External URLs are preserved as-is.
+    $this->submitForm([
+      'universe' => 'example-universe',
+      'app_id' => 'example-app',
+      'node_service_id' => 42,
+      'node_privacy_url' => 'https://example.test/privacy',
+    ], 'Save configuration');
+    $this->assertSame('https://example.test/privacy', $this->config('oe_newsroom_node.settings')->get('privacy_url'));
+
+    $this->drupalGet('admin/config/system/newsroom-settings');
+    $this->assertSame('https://example.test/privacy', $assert_session->fieldExists('node_privacy_url')->getValue());
   }
 
   /**
