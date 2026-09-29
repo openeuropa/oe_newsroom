@@ -1,0 +1,6 @@
+services:
+  _defaults:
+    autowire: true
+  logger.channel.oe_newsroom_node:
+    parent: logger.channel_base
+    arguments: ['oe_newsroom_node']

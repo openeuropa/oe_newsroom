@@ -1,0 +1,45 @@
+<?php
+
+/**
+ * @file
+ * Install hooks for the OpenEuropa Newsroom Node test module.
+ */
+
+declare(strict_types=1);
+
+use Drupal\node\Entity\NodeType;
+use Drupal\oe_newsroom\Newsroom;
+use Drupal\user\RoleInterface;
+
+/**
+ * Implements hook_install().
+ *
+ * Sets up all the configuration required to test the node subscription feature,
+ * so that a test only needs to enable this module.
+ */
+function oe_newsroom_node_test_install(): void {
+  // Configure the Newsroom connection, including the node service id.
+  \Drupal::configFactory()
+    ->getEditable(Newsroom::CONFIG_NAME)
+    ->set('universe', 'example-universe')
+    ->set('app_id', 'example-app')
+    ->set('node_service_id', 42)
+    ->save();
+
+  // Configure the node subscription privacy URL, stored as a URI.
+  \Drupal::configFactory()
+    ->getEditable('oe_newsroom_node.settings')
+    ->set('privacy_url', 'internal:/privacy-url')
+    ->save();
+
+  // Create a content type to place the block on.
+  if (!NodeType::load('page')) {
+    NodeType::create(['type' => 'page', 'name' => 'Page'])->save();
+  }
+
+  // Anonymous users can subscribe to node notifications.
+  user_role_grant_permissions(RoleInterface::ANONYMOUS_ID, [
+    'access content',
+    'subscribe to newsroom node notifications',
+  ]);
+}

@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - oe_newsroom_node
+  theme:
+    - stark
+id: node_subscribe
+theme: stark
+region: content
+weight: 0
+provider: null
+plugin: oe_newsroom_node_subscription_block
+settings:
+  id: oe_newsroom_node_subscription_block
+  label: 'Subscribe to notifications'
+  label_display: visible
+  provider: oe_newsroom_node
+visibility: {  }
