@@ -16,4 +16,6 @@ settings:
   label: 'Subscribe to notifications'
   label_display: visible
   provider: oe_newsroom_node
+  context_mapping:
+    node: '@node.node_route_context:node'
 visibility: {  }

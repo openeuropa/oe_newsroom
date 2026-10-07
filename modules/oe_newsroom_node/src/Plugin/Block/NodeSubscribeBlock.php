@@ -10,12 +10,11 @@ use Drupal\Core\Block\Attribute\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Plugin\Context\EntityContextDefinition;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
-use Drupal\node\NodeInterface;
 use Drupal\oe_newsroom\Newsroom;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -26,6 +25,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   id: 'oe_newsroom_node_subscribe_block',
   admin_label: new TranslatableMarkup('Newsroom node subscribe block'),
   category: new TranslatableMarkup('OE Newsroom Node'),
+  context_definitions: [
+    'node' => new EntityContextDefinition('entity:node', new TranslatableMarkup('Node')),
+  ],
 )]
 class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
@@ -33,7 +35,6 @@ class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInte
     array $configuration,
     $plugin_id,
     $plugin_definition,
-    protected readonly RouteMatchInterface $routeMatch,
     protected readonly ConfigFactoryInterface $configFactory,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
@@ -47,7 +48,6 @@ class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInte
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get(RouteMatchInterface::class),
       $container->get(ConfigFactoryInterface::class),
     );
   }
@@ -56,10 +56,7 @@ class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInte
    * {@inheritdoc}
    */
   public function build(): array {
-    $node = $this->getNode();
-    if (!$node instanceof NodeInterface) {
-      return [];
-    }
+    $node = $this->getContextValue('node');
 
     // The privacy URL must be configured for the subscribe form to work.
     if (empty($this->configFactory->get('oe_newsroom_node.settings')->get('privacy_url'))) {
@@ -92,26 +89,6 @@ class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInte
    */
   protected function blockAccess(AccountInterface $account) {
     return AccessResult::allowedIfHasPermission($account, 'subscribe to newsroom node notifications');
-  }
-
-  /**
-   * Gets the node from the current route.
-   *
-   * @return \Drupal\node\NodeInterface|null
-   *   The node, or NULL if the current route has no node.
-   */
-  protected function getNode(): ?NodeInterface {
-    $node = $this->routeMatch->getParameter('node');
-    return $node instanceof NodeInterface ? $node : NULL;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getCacheContexts(): array {
-    return Cache::mergeContexts(parent::getCacheContexts(), [
-      'route',
-    ]);
   }
 
   /**
