@@ -25,7 +25,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
- * Node subscription form.
+ * A form to allow a visitor to subscribe to a node via Newsroom.
  */
 class NodeSubscriptionForm extends FormBase {
 
