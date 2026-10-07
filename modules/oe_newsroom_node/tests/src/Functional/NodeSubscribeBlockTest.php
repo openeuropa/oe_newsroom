@@ -69,11 +69,16 @@ class NodeSubscribeBlockTest extends BrowserTestBase {
     // Without the permission, the block link is not shown.
     $anonymous->revokePermission('subscribe to newsroom node notifications')->save();
     $this->drupalGet($node->toUrl());
-    $assert_session->elementNotExists('css', '.oe-newsroom-node__subscribe-link');
+    $assert_session->statusCodeEquals(200);
+    $assert_session->pageTextContains('My node');
+    $assert_session->elementNotExists('css', '#block-node-subscribe');
 
     // With the permission (granted by the test module), the link appears.
     $this->grantPermissions($anonymous, ['subscribe to newsroom node notifications']);
     $this->drupalGet($node->toUrl());
+    $assert_session->statusCodeEquals(200);
+    $assert_session->pageTextContains('My node');
+    $assert_session->elementExists('css', '#block-node-subscribe');
     $link = $assert_session->elementExists('css', '.oe-newsroom-node__subscribe-link');
     $this->assertSame('Subscribe to notifications', $link->getText());
     // The link points to the modal route and uses ajax.
@@ -81,7 +86,7 @@ class NodeSubscribeBlockTest extends BrowserTestBase {
 
     // The block is not shown on non-node pages.
     $this->drupalGet('<front>');
-    $assert_session->elementNotExists('css', '.oe-newsroom-node__subscribe-link');
+    $assert_session->elementNotExists('css', '#block-node-subscribe');
   }
 
   /**
@@ -133,7 +138,7 @@ class NodeSubscribeBlockTest extends BrowserTestBase {
       ->save();
 
     $this->drupalGet($node->toUrl());
-    $assert_session->elementNotExists('css', '.oe-newsroom-node__subscribe-link');
+    $assert_session->elementNotExists('css', '#block-node-subscribe');
   }
 
   /**
