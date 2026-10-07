@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\oe_newsroom\Traits;
 
+use Drupal\Core\Url;
+use Drupal\node\NodeInterface;
 use Drupal\oe_newsroom\Value\NotificationFrequency;
 use Drupal\oe_newsroom_vcr\Vcr\VcrStore;
-use Drupal\node\NodeInterface;
 use Symfony\Component\Yaml\Tag\TaggedValue;
 
 /**
@@ -25,11 +26,10 @@ trait NodeSubscriptionVcrTrait {
    *   The email submitted in the form.
    */
   protected function startFailedNodeSubscriptionReplay(NodeInterface $node, string $subscriber_email): void {
-    $expected_redirect = $node->toUrl('canonical', [
+    $expected_redirect = Url::fromRoute('oe_newsroom_node.subscribe_verify', [
+      'node' => $node->id(),
+    ], [
       'absolute' => TRUE,
-      'query' => [
-        'newsroom_node_subscribed' => 1,
-      ],
     ])->toString();
     \Drupal::service(VcrStore::class)->startReplay([
       new TaggedValue('NewsroomRequest', [

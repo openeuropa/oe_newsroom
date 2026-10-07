@@ -127,12 +127,9 @@ class NodeSubscribeForm extends FormBase {
     $email = $form_state->getValue('email');
     $node_id = $form_state->get('node_id');
 
-    // The confirm link in the verification email redirects here, back to the
-    // node page, with a query flag so a confirmation message can be shown.
-    $redirect_url = Url::fromRoute('entity.node.canonical', ['node' => $node_id], [
-      'query' => [
-        'newsroom_node_subscribed' => 1,
-      ],
+    // The confirmation link redirects through a controller that handles the
+    // result and then sends the user to the node page.
+    $redirect_url = Url::fromRoute('oe_newsroom_node.subscribe_verify', ['node' => $node_id], [
       'absolute' => TRUE,
     ])->toString();
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\oe_newsroom_node\Functional;
 
+use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\oe_newsroom\Traits\LocalTestValuesTrait;
 use Drupal\Tests\oe_newsroom\Traits\NodeSubscriptionVcrTrait;
@@ -158,40 +159,42 @@ class NodeSubscribeBlockTest extends BrowserTestBase {
   }
 
   /**
-   * Tests the confirmation/error message shown on return from the email.
+   * Tests the confirmation controller redirect and messages.
    */
   public function testConfirmationMessage(): void {
     $assert_session = $this->assertSession();
+    $this->grantPermissions(Role::load(RoleInterface::ANONYMOUS_ID), ['subscribe to newsroom node notifications']);
 
     $node = $this->drupalCreateNode(['type' => 'page', 'title' => 'My node']);
 
-    // Without the confirmation parameters, no message is shown.
+    // Without the confirmation result, no message is shown.
     $this->drupalGet($node->toUrl());
-    $assert_session->pageTextNotContains('Your subscription has been confirmed.');
+    $assert_session->pageTextNotContains('You are now subscribed.');
     $assert_session->pageTextNotContains('Something went wrong while confirming your subscription.');
 
-    // With the flag and success=1, the confirmation message is shown.
-    $this->drupalGet($node->toUrl()->setOption('query', [
-      'newsroom_node_subscribed' => 1,
-      'success' => 1,
-    ]));
-    $assert_session->pageTextContains('Your subscription has been confirmed.');
-    $assert_session->pageTextNotContains('Something went wrong while confirming your subscription.');
+    // A successful verification redirects to the node page and shows a message.
+    $this->drupalGet(Url::fromRoute('oe_newsroom_node.subscribe_verify', ['node' => $node->id()])->setOption('query', ['success' => 1]));
+    $assert_session->addressEquals($node->toUrl());
+    $assert_session->pageTextContains('You are now subscribed.');
 
-    // With the flag and success=0, the error message is shown.
-    $this->drupalGet($node->toUrl()->setOption('query', [
-      'newsroom_node_subscribed' => 1,
-      'success' => 0,
-    ]));
+    // A failed verification redirects to the node page and shows an error.
+    $this->drupalGet(Url::fromRoute('oe_newsroom_node.subscribe_verify', ['node' => $node->id()])->setOption('query', ['success' => 0]));
+    $assert_session->addressEquals($node->toUrl());
     $assert_session->pageTextContains('Something went wrong while confirming your subscription. Please try again.');
-    $assert_session->pageTextNotContains('Your subscription has been confirmed.');
 
-    // The flag alone, without a success value, shows no message.
-    $this->drupalGet($node->toUrl()->setOption('query', [
-      'newsroom_node_subscribed' => 1,
-    ]));
-    $assert_session->pageTextNotContains('Your subscription has been confirmed.');
-    $assert_session->pageTextNotContains('Something went wrong while confirming your subscription.');
+    // An unpublished node is not exposed by the confirmation route.
+    $unpublished_node = $this->drupalCreateNode([
+      'type' => 'page',
+      'title' => 'Unpublished node',
+      'status' => 0,
+    ]);
+    $this->drupalGet(Url::fromRoute('oe_newsroom_node.subscribe_verify', ['node' => $unpublished_node->id()]));
+    $assert_session->statusCodeEquals(404);
+
+    // A non-existent node is not exposed by the confirmation route.
+    $node->delete();
+    $this->drupalGet(Url::fromRoute('oe_newsroom_node.subscribe_verify', ['node' => $node->id()]));
+    $assert_session->statusCodeEquals(404);
   }
 
 }

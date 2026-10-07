@@ -18,7 +18,6 @@ use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
 use Drupal\oe_newsroom\Newsroom;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Provides a node subscription block.
@@ -36,7 +35,6 @@ class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInte
     $plugin_definition,
     protected readonly RouteMatchInterface $routeMatch,
     protected readonly ConfigFactoryInterface $configFactory,
-    protected readonly RequestStack $requestStack,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
@@ -51,7 +49,6 @@ class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInte
       $plugin_definition,
       $container->get(RouteMatchInterface::class),
       $container->get(ConfigFactoryInterface::class),
-      $container->get(RequestStack::class),
     );
   }
 
@@ -87,31 +84,6 @@ class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInte
       ],
     ];
 
-    // When the user returns from the verification email, the node URL contains
-    // a confirmation flag and a success indicator. Show a confirmation message
-    // on success, or an error message if something went wrong.
-    $query = $this->requestStack->getCurrentRequest()->query;
-    if ($query->has('newsroom_node_subscribed')) {
-      if ($query->get('success') === '1') {
-        $build['confirmation'] = [
-          '#theme' => 'status_messages',
-          '#message_list' => [
-            'status' => [$this->t('Your subscription has been confirmed.')],
-          ],
-          '#weight' => -10,
-        ];
-      }
-      elseif ($query->get('success') === '0') {
-        $build['confirmation'] = [
-          '#theme' => 'status_messages',
-          '#message_list' => [
-            'error' => [$this->t('Something went wrong while confirming your subscription. Please try again.')],
-          ],
-          '#weight' => -10,
-        ];
-      }
-    }
-
     return $build;
   }
 
@@ -139,8 +111,6 @@ class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInte
   public function getCacheContexts(): array {
     return Cache::mergeContexts(parent::getCacheContexts(), [
       'route',
-      'url.query_args:newsroom_node_subscribed',
-      'url.query_args:success',
     ]);
   }
 

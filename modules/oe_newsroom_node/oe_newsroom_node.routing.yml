@@ -10,3 +10,11 @@ oe_newsroom_node.subscribe_modal:
     parameters:
       node:
         type: entity:node
+
+oe_newsroom_node.subscribe_verify:
+  path: '/newsroom-node/{node}/subscribe-verify'
+  defaults:
+    _controller: '\Drupal\oe_newsroom_node\Controller\NodeSubscribeController::verify'
+  requirements:
+    _permission: 'subscribe to newsroom node notifications'
+    node: \d+

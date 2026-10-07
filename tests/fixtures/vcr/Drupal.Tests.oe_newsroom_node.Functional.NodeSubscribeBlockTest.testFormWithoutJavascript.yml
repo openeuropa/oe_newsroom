@@ -11,7 +11,7 @@
       email_custom:
         verify:
           email_custom_subject: 'Confirm your subscription'
-          email_custom_redirect: 'http://web:8080/build/node/1?newsroom_node_subscribed=1'
+          email_custom_redirect: 'http://web:8080/build/newsroom-node/1/subscribe-verify'
         subscription:
           email_custom_subject: 'You have been subscribed'
     key: !Capture '<signature key 0>'
