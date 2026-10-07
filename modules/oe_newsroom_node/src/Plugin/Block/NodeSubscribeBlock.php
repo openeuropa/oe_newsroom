@@ -49,9 +49,9 @@ class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInte
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('current_route_match'),
-      $container->get('config.factory'),
-      $container->get('request_stack'),
+      $container->get(RouteMatchInterface::class),
+      $container->get(ConfigFactoryInterface::class),
+      $container->get(RequestStack::class),
     );
   }
 
