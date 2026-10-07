@@ -8,6 +8,7 @@ use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\Tests\oe_newsroom\Traits\LocalTestValuesTrait;
 use Drupal\Tests\oe_newsroom\Traits\NodeSubscriptionVcrTrait;
 use Drupal\Tests\oe_newsroom\Traits\VcrTrait;
+use Symfony\Component\Yaml\Tag\TaggedValue;
 
 /**
  * Tests the node subscribe modal happy path.
@@ -140,6 +141,7 @@ class NodeSubscribeModalTest extends WebDriverTestBase {
     $assert_session->statusMessageContains('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.', 'error');
     $assert_session->statusMessageNotContains('A confirmation email has been sent to your address.');
 
+    \Drupal::service(\Drupal\oe_newsroom_vcr\Vcr\VcrStore::class)->readNextRecord($position);
     $this->endFailedNodeSubscriptionReplay();
   }
 

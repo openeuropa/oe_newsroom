@@ -6,6 +6,7 @@ namespace Drupal\oe_newsroom_node\Form;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\AjaxHelperTrait;
 use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\Ajax\MessageCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
@@ -30,6 +31,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 class NodeSubscribeForm extends FormBase {
 
   use AutowireTrait;
+  use AjaxHelperTrait;
 
   /**
    * The form ID.
@@ -60,8 +62,6 @@ class NodeSubscribeForm extends FormBase {
     // Store the node id to use on submit.
     $form_state->set('node_id', (int) $node->id());
 
-    $form['#id'] = Html::getUniqueId($this->getFormId());
-
     $form['email'] = [
       '#type' => 'email',
       '#title' => $this->t('Your e-mail'),
@@ -88,12 +88,18 @@ class NodeSubscribeForm extends FormBase {
       'submit' => [
         '#type' => 'submit',
         '#value' => $this->t('Subscribe'),
-        '#ajax' => [
-          'callback' => '::submitFormCallback',
-          'wrapper' => $form['#id'],
-        ],
       ],
     ];
+
+    if ($this->isAjax()) {
+      // Due to https://www.drupal.org/node/2897377 we have to declare a fixed
+      // ID for the form.
+      $form['#id'] = Html::getUniqueId($this->getFormId());
+      $form['actions']['submit']['#ajax'] = [
+        'callback' => '::submitFormCallback',
+        'wrapper' => $form['#id'],
+      ];
+    }
 
     return $form;
   }
