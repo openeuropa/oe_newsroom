@@ -63,7 +63,7 @@ class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInte
       return [];
     }
 
-    $url = Url::fromRoute('oe_newsroom_node.subscribe_modal', ['node' => $node->id()]);
+    $url = Url::fromRoute('oe_newsroom_node.subscribe_form', ['node' => $node->id()]);
 
     $build = [
       'link' => [

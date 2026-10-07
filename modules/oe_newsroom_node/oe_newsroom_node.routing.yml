@@ -1,4 +1,4 @@
-oe_newsroom_node.subscribe_modal:
+oe_newsroom_node.subscribe_form:
   path: '/newsroom-node/{node}/subscribe'
   defaults:
     _form: '\Drupal\oe_newsroom_node\Form\NodeSubscribeForm'
