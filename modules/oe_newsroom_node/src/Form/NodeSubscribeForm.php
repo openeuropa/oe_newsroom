@@ -27,14 +27,14 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 /**
  * A form to allow a visitor to subscribe to a node via Newsroom.
  */
-class NodeSubscriptionForm extends FormBase {
+class NodeSubscribeForm extends FormBase {
 
   use AutowireTrait;
 
   /**
    * The form ID.
    */
-  public const FORM_ID = 'oe_newsroom_node_subscription_form';
+  public const FORM_ID = 'oe_newsroom_node_subscribe_form';
 
   public function __construct(
     protected readonly NodeSubscriptionEndpoints $nodeSubscriptionEndpoints,

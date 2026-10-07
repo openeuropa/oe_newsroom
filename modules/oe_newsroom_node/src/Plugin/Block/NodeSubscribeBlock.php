@@ -24,11 +24,11 @@ use Symfony\Component\HttpFoundation\RequestStack;
  * Provides a node subscription block.
  */
 #[Block(
-  id: 'oe_newsroom_node_subscription_block',
-  admin_label: new TranslatableMarkup('Newsroom node subscription block'),
+  id: 'oe_newsroom_node_subscribe_block',
+  admin_label: new TranslatableMarkup('Newsroom node subscribe block'),
   category: new TranslatableMarkup('OE Newsroom Node'),
 )]
-class NodeSubscriptionBlock extends BlockBase implements ContainerFactoryPluginInterface {
+class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
   public function __construct(
     array $configuration,

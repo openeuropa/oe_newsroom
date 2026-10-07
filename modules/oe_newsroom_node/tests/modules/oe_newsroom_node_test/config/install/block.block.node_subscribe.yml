@@ -10,9 +10,9 @@ theme: stark
 region: content
 weight: 0
 provider: null
-plugin: oe_newsroom_node_subscription_block
+plugin: oe_newsroom_node_subscribe_block
 settings:
-  id: oe_newsroom_node_subscription_block
+  id: oe_newsroom_node_subscribe_block
   label: 'Subscribe to notifications'
   label_display: visible
   provider: oe_newsroom_node

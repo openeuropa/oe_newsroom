@@ -16,7 +16,7 @@ use Drupal\user\RoleInterface;
  *
  * @group oe_newsroom_node
  */
-class NodeSubscriptionBlockTest extends BrowserTestBase {
+class NodeSubscribeBlockTest extends BrowserTestBase {
 
   use LocalTestValuesTrait;
   use NodeSubscriptionVcrTrait;

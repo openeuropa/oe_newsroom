@@ -6,6 +6,6 @@ oe_newsroom_node.settings:
       type: uri
       label: 'Privacy URL'
 
-block.settings.oe_newsroom_node_subscription_block:
+block.settings.oe_newsroom_node_subscribe_block:
   type: block_settings
-  label: 'Newsroom node subscription block'
+  label: 'Newsroom node subscribe block'
