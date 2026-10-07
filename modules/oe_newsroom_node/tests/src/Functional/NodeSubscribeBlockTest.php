@@ -46,15 +46,8 @@ class NodeSubscribeBlockTest extends BrowserTestBase {
 
     parent::setUp();
 
-    $this->initializeNewsroomAndVcrWithTestValues();
+    $this->initializeNewsroomAndVcrWithTestValues(write_settings: TRUE);
 
-    // BrowserTestBase sends requests to a separate Drupal process, so write
-    // the private key to the generated settings.php as well.
-    $settings['settings']['oe_newsroom']['newsroom_api_key'] = (object) [
-      'value' => $this->newsroomTestValues->privateKey,
-      'required' => TRUE,
-    ];
-    $this->writeSettings($settings);
   }
 
   /**

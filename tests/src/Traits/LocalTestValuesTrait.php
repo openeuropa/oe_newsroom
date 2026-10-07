@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\oe_newsroom\Traits;
 
 use Drupal\Core\Site\Settings;
+use Drupal\Tests\BrowserTestBase;
 use Drupal\oe_newsroom\Newsroom;
 use Drupal\oe_newsroom_vcr\Capture\CaptureStore;
 use Drupal\Tests\oe_newsroom\Stabilization\NewsroomVcrStabilization;
@@ -22,8 +23,11 @@ trait LocalTestValuesTrait {
 
   /**
    * Configures the Newsroom client, and sets transformations for the VCR.
+   *
+   * @param bool $write_settings
+   *   Whether to write the private key to the generated settings.php file.
    */
-  protected function initializeNewsroomAndVcrWithTestValues(): void {
+  protected function initializeNewsroomAndVcrWithTestValues(bool $write_settings = FALSE): void {
     $test_values = $this->loadNewsroomTestValuesObject($this->isRecording());
     if ($this->isRecording()) {
       $this->vcrPack = NewsroomVcrStabilization::fnPackRecords(
@@ -39,6 +43,16 @@ trait LocalTestValuesTrait {
     $settings = Settings::getAll();
     $settings['oe_newsroom']['newsroom_api_key'] = $test_values->privateKey;
     new Settings($settings);
+
+    // Functional tests may send requests through a separate Drupal process.
+    // Keep its generated settings.php in sync when requested.
+    if ($write_settings && $this instanceof BrowserTestBase) {
+      $settings_override['settings']['oe_newsroom']['newsroom_api_key'] = (object) [
+        'value' => $test_values->privateKey,
+        'required' => TRUE,
+      ];
+      $this->writeSettings($settings_override);
+    }
 
     $config = \Drupal::configFactory()->getEditable(Newsroom::CONFIG_NAME);
     $config->setData($test_values->getNewsroomModuleSettings());
