@@ -51,6 +51,7 @@ class NewsroomSettingsFormAlter {
       '#maxlength' => 255,
       '#default_value' => str_replace('internal:', '', (string) $config->get('privacy_url')),
       '#required' => TRUE,
+      '#element_validate' => [[$this, 'validateUriElement']],
     ];
 
     $form['#submit'][] = [$this, 'submitForm'];
@@ -76,6 +77,41 @@ class NewsroomSettingsFormAlter {
       ->getEditable('oe_newsroom_node.settings')
       ->set('privacy_url', $url)
       ->save();
+  }
+
+  /**
+   * Validates and normalizes a user-entered URI.
+   *
+   * @param array $element
+   *   The privacy URL form element.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current form state.
+   * @param array $form
+   *   The complete settings form.
+   */
+  public function validateUriElement(array &$element, FormStateInterface $form_state, array &$form): void {
+    $value = trim((string) $element['#value']);
+    $uri = $value;
+
+    if ($value !== '' && parse_url($value, PHP_URL_SCHEME) === NULL) {
+      if (str_starts_with($value, '<front>')) {
+        $uri = '/' . substr($value, strlen('<front>'));
+      }
+      $uri = 'internal:' . $uri;
+    }
+
+    $form_state->setValueForElement($element, $uri);
+
+    // Internal paths must start with '/', '?' or '#'. Relative internal paths
+    // are normalized to the URI format used by the configuration value.
+    if (
+      parse_url($uri, PHP_URL_SCHEME) === 'internal'
+      && $value !== ''
+      && !in_array($value[0], ['/', '?', '#'], TRUE)
+      && !str_starts_with($value, '<front>')
+    ) {
+      $form_state->setError($element, $this->t('Manually entered paths should start with one of the following characters: / ? #'));
+    }
   }
 
 }

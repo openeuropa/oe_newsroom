@@ -106,6 +106,34 @@ class SettingsFormTest extends BrowserTestBase {
     $assert_session->statusMessageNotContains('The configuration options have been saved.');
     $this->assertSame('', $this->config('oe_newsroom_node.settings')->get('privacy_url'));
 
+    $this->submitForm([
+      'universe' => 'example-universe',
+      'app_id' => 'example-app',
+      'node_service_id' => 42,
+      'node_privacy_url' => 'privacy-page',
+    ], 'Save configuration');
+    $assert_session->statusMessageContains('Manually entered paths should start with one of the following characters: / ? #', 'error');
+    $this->assertSame('', $this->config('oe_newsroom_node.settings')->get('privacy_url'));
+
+    // Query-string-only and fragment-only internal paths are valid.
+    $this->submitForm([
+      'universe' => 'example-universe',
+      'app_id' => 'example-app',
+      'node_service_id' => 42,
+      'node_privacy_url' => '?privacy-page',
+    ], 'Save configuration');
+    $assert_session->statusMessageContains('The configuration options have been saved.', 'status');
+    $this->assertSame('internal:?privacy-page', $this->config('oe_newsroom_node.settings')->get('privacy_url'));
+
+    $this->submitForm([
+      'universe' => 'example-universe',
+      'app_id' => 'example-app',
+      'node_service_id' => 42,
+      'node_privacy_url' => '#privacy-page',
+    ], 'Save configuration');
+    $assert_session->statusMessageContains('The configuration options have been saved.', 'status');
+    $this->assertSame('internal:#privacy-page', $this->config('oe_newsroom_node.settings')->get('privacy_url'));
+
     // Submitting valid values saves the configuration.
     $this->submitForm([
       'universe' => 'example-universe',
