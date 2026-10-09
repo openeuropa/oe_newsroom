@@ -46,8 +46,7 @@ class NodeSubscribeBlockTest extends BrowserTestBase {
 
     parent::setUp();
 
-    $this->initializeNewsroomAndVcrWithTestValues(write_settings: TRUE);
-
+    $this->initializeNewsroomAndVcrWithTestValues();
   }
 
   /**

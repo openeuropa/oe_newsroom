@@ -105,10 +105,10 @@ class NewsroomSettingsFormAlter {
     // Internal paths must start with '/', '?' or '#'. Relative internal paths
     // are normalized to the URI format used by the configuration value.
     if (
-      parse_url($uri, PHP_URL_SCHEME) === 'internal'
-      && $value !== ''
-      && !in_array($value[0], ['/', '?', '#'], TRUE)
-      && !str_starts_with($value, '<front>')
+      parse_url($uri, PHP_URL_SCHEME) === 'internal' &&
+      $value !== '' &&
+      !in_array($value[0], ['/', '?', '#'], TRUE) &&
+      !str_starts_with($value, '<front>')
     ) {
       $form_state->setError($element, $this->t('Manually entered paths should start with one of the following characters: / ? #'));
     }

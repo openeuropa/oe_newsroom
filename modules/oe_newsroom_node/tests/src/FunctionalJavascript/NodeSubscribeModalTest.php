@@ -44,8 +44,7 @@ class NodeSubscribeModalTest extends WebDriverTestBase {
 
     parent::setUp();
 
-    $this->initializeNewsroomAndVcrWithTestValues(write_settings: TRUE);
-
+    $this->initializeNewsroomAndVcrWithTestValues();
   }
 
   /**

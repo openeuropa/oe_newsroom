@@ -23,11 +23,8 @@ trait LocalTestValuesTrait {
 
   /**
    * Configures the Newsroom client, and sets transformations for the VCR.
-   *
-   * @param bool $write_settings
-   *   Whether to write the private key to the generated settings.php file.
    */
-  protected function initializeNewsroomAndVcrWithTestValues(bool $write_settings = FALSE): void {
+  protected function initializeNewsroomAndVcrWithTestValues(): void {
     $test_values = $this->loadNewsroomTestValuesObject($this->isRecording());
     if ($this->isRecording()) {
       $this->vcrPack = NewsroomVcrStabilization::fnPackRecords(
@@ -46,7 +43,7 @@ trait LocalTestValuesTrait {
 
     // Functional tests may send requests through a separate Drupal process.
     // Keep its generated settings.php in sync when requested.
-    if ($write_settings && $this instanceof BrowserTestBase) {
+    if ($this instanceof BrowserTestBase) {
       $settings_override['settings']['oe_newsroom']['newsroom_api_key'] = (object) [
         'value' => $test_values->privateKey,
         'required' => TRUE,
