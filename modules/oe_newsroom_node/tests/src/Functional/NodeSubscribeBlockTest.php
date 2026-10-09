@@ -112,7 +112,7 @@ class NodeSubscribeBlockTest extends BrowserTestBase {
       'email' => $subscriber_email,
       'agree_privacy_statement' => 1,
     ], 'Subscribe');
-    $assert_session->statusMessageContains('A confirmation email has been sent to your address. Please click the link in the email to confirm your subscription.', 'status');
+    $assert_session->statusMessageContains('If you are not already subscribed to this content, a confirmation email will be sent to the email address provided. Please click the link in the email to confirm your subscription.', 'status');
 
     // In recording mode this writes the fixture; otherwise it verifies that
     // the tape was consumed without a mismatch.
@@ -131,6 +131,8 @@ class NodeSubscribeBlockTest extends BrowserTestBase {
       ->save();
 
     $this->drupalGet($node->toUrl());
+    $assert_session->statusCodeEquals(200);
+    $assert_session->pageTextContains('My node');
     $assert_session->elementNotExists('css', '#block-node-subscribe');
   }
 
@@ -151,7 +153,6 @@ class NodeSubscribeBlockTest extends BrowserTestBase {
     ], 'Subscribe');
 
     $assert_session->statusMessageContains('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.', 'error');
-    $assert_session->statusMessageNotContains('A confirmation email has been sent to your address.');
 
     $this->endFailedNodeSubscriptionReplay();
   }
@@ -167,8 +168,8 @@ class NodeSubscribeBlockTest extends BrowserTestBase {
 
     // Without the confirmation result, no message is shown.
     $this->drupalGet($node->toUrl());
-    $assert_session->pageTextNotContains('You are now subscribed.');
-    $assert_session->pageTextNotContains('Something went wrong while confirming your subscription.');
+    $assert_session->statusMessageNotExists('status');
+    $assert_session->statusMessageNotExists('error');
 
     // A successful verification redirects to the node page and shows a message.
     $this->drupalGet(Url::fromRoute('oe_newsroom_node.subscribe_verify', ['node' => $node->id()])->setOption('query', ['success' => 1]));

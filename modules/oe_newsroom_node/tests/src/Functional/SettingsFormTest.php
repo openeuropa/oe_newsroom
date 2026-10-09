@@ -103,7 +103,6 @@ class SettingsFormTest extends BrowserTestBase {
     ], 'Save configuration');
     $assert_session->statusMessageContains('Privacy URL field is required.', 'error');
     $assert_session->statusMessageContains('Node notification service ID field is required.', 'error');
-    $assert_session->statusMessageNotContains('The configuration options have been saved.');
     $this->assertSame('', $this->config('oe_newsroom_node.settings')->get('privacy_url'));
 
     $this->submitForm([

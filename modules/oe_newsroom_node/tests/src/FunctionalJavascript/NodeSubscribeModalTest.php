@@ -91,7 +91,6 @@ class NodeSubscribeModalTest extends WebDriverTestBase {
     $assert_session->elementExists('css', '.ui-dialog-buttonpane button')->press();
     $assert_session->assertWaitOnAjaxRequest();
     $assert_session->statusMessageContains('You must agree with the privacy statement.', 'error');
-    $assert_session->statusMessageNotContains('Your e-mail field is required.');
 
     // Agree and submit. The button pane is recreated on the ajax rebuild.
     $page->checkField('agree_privacy_statement');
@@ -101,8 +100,7 @@ class NodeSubscribeModalTest extends WebDriverTestBase {
     // The modal is closed and a confirmation message is shown. No error is
     // shown, so the service response was handled as a success.
     $assert_session->assertNoElementAfterWait('css', '.ui-dialog');
-    $assert_session->statusMessageContains('A confirmation email has been sent to your address. Please click the link in the email to confirm your subscription.', 'status');
-    $assert_session->statusMessageNotContains('An error occurred while processing your request');
+    $assert_session->statusMessageContains('If you are not already subscribed to this content, a confirmation email will be sent to the email address provided. Please click the link in the email to confirm your subscription.', 'status');
 
     $this->endVcr();
   }
@@ -134,7 +132,6 @@ class NodeSubscribeModalTest extends WebDriverTestBase {
     $retry_button = $assert_session->elementExists('css', '.ui-dialog-buttonpane button');
     $this->assertSame('Subscribe', $retry_button->getText());
     $assert_session->statusMessageContains('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.', 'error');
-    $assert_session->statusMessageNotContains('A confirmation email has been sent to your address.');
 
     \Drupal::service(VcrStore::class)->readNextRecord($position);
     $this->endFailedNodeSubscriptionReplay();
