@@ -1,5 +1,7 @@
 imports:
   - { resource: ./vendor/openeuropa/code-review-drupal/dist/oe-component-conventions.yml }
+parameters:
+  tasks.phpstan.configuration: ./phpstan.neon
 grumphp:
   tasks:
     phpparser:
