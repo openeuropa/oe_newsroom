@@ -305,20 +305,25 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
       };
     }
     catch (\UnhandledMatchError) {
-      $unsupported = TRUE;
       $element = [
         '#disabled' => TRUE,
         '#type' => 'textfield',
-        '#element_validate' => ['::' . [$this, 'validateUnsupportedParameter'][1]],
-        '#validation_error' => $type_name !== NULL
-          ? $this->t('The parameter @name has an unsupported type @type.', [
-            '@name' => '$' . $parameter->name,
-            '@type' => $type_name,
-          ])
-          : $this->t('The parameter @name has a no type information.', [
-            '@name' => '$' . $parameter->name,
-          ]),
       ];
+      if (!$parameter->isOptional()) {
+        $unsupported = TRUE;
+        $element = [
+          ...$element,
+          '#element_validate' => ['::' . [$this, 'validateUnsupportedParameter'][1]],
+          '#validation_error' => $type_name !== NULL
+            ? $this->t('The parameter @name has an unsupported type @type.', [
+              '@name' => '$' . $parameter->name,
+              '@type' => $type_name,
+            ])
+            : $this->t('The parameter @name has a no type information.', [
+              '@name' => '$' . $parameter->name,
+            ]),
+        ];
+      }
     }
     $element['#title'] = $parameter->name;
     $element['#required'] = !$parameter->isOptional() && $type_name !== 'bool';
@@ -508,7 +513,10 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
       },
       'string', 'string|int', 'int|string' => (string) $value,
       NotificationFrequency::class => NotificationFrequency::from($value),
-      default => throw new \Exception(sprintf('Unsupported type %s for parameter %s', $parameter->getType()->__toString(), $parameter->name)),
+      default => match (TRUE) {
+        $parameter->isOptional() => $parameter->getDefaultValue(),
+        default => throw new \Exception(sprintf('Unsupported type %s for parameter %s', $parameter->getType()->__toString(), $parameter->name)),
+      },
     };
     if ($argument === $illegal_value) {
       throw new \Exception(sprintf("Illegal value %s for parameter %s", var_export($value, TRUE), $parameter->name));
