@@ -80,31 +80,21 @@ class NodeSubscribeModalTest extends WebDriverTestBase {
     // Submitting the empty form returns both required-field errors at once:
     // the e-mail is required and the privacy statement must be agreed to.
     $submit->press();
-    $assert_session->assertWaitOnAjaxRequest();
     $assert_session->statusMessageContains('Your e-mail field is required.', 'error');
     $assert_session->statusMessageContains('You must agree with the privacy statement.', 'error');
 
-    // Filling only the e-mail still shows the privacy error. The button pane is
-    // recreated on the ajax rebuild, so look it up again.
+    // Filling only the e-mail still shows the privacy error.
     $page->fillField('email', $subscriber_email);
-    $assert_session->elementExists('css', '.ui-dialog-buttonpane button')->press();
-    $assert_session->assertWaitOnAjaxRequest();
+    $page->pressButton('Subscribe');
     $assert_session->statusMessageContains('You must agree with the privacy statement.', 'error');
 
-    // Agree and submit. The button pane is recreated on the ajax rebuild.
+    // Agree and submit. A successful non-AJAX submission redirects back to
+    // the node page.
     $page->checkField('agree_privacy_statement');
-    $assert_session->elementExists('css', '.ui-dialog-buttonpane button')->press();
-    $assert_session->assertWaitOnAjaxRequest();
+    $page->pressButton('Subscribe');
 
-    // The modal is closed and a confirmation message is shown. No error is
-    // shown, so the service response was handled as a success.
-    $assert_session->assertNoElementAfterWait('css', '.ui-dialog');
+    // A confirmation message is shown and no error is present.
     $assert_session->statusMessageContains('If you are not already subscribed to this content, a confirmation email will be sent to the email address provided. Please click the link in the email to confirm your subscription.', 'status');
-
-    // The AJAX success message must not be stored in the messenger service and
-    // shown again after a full page request.
-    $this->drupalGet($node->toUrl());
-    $assert_session->statusMessageNotExists('status');
 
     $this->endVcr();
   }
@@ -129,12 +119,9 @@ class NodeSubscribeModalTest extends WebDriverTestBase {
     $page->fillField('email', $subscriber_email);
     $page->checkField('agree_privacy_statement');
     $assert_session->elementExists('css', '.ui-dialog-buttonpane button')->press();
-    $assert_session->assertWaitOnAjaxRequest();
 
-    // The modal stays open and the error message is shown inside it.
-    $assert_session->elementExists('css', '.ui-dialog');
-    $retry_button = $assert_session->elementExists('css', '.ui-dialog-buttonpane button');
-    $this->assertSame('Subscribe', $retry_button->getText());
+    // A failed non-AJAX submission renders the form page with an error.
+    $assert_session->fieldExists('email');
     $assert_session->statusMessageContains('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.', 'error');
 
     \Drupal::service(VcrStore::class)->readNextRecord($position);

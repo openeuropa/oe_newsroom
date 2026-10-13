@@ -4,12 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\oe_newsroom_node\Form;
 
-use Drupal\Component\Utility\Html;
-use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\AjaxHelperTrait;
-use Drupal\Core\Ajax\CloseModalDialogCommand;
-use Drupal\Core\Ajax\MessageCommand;
-use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -31,7 +25,6 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 class NodeSubscribeForm extends FormBase {
 
   use AutowireTrait;
-  use AjaxHelperTrait;
 
   /**
    * The form ID.
@@ -91,16 +84,6 @@ class NodeSubscribeForm extends FormBase {
       ],
     ];
 
-    if ($this->isAjax()) {
-      // Due to https://www.drupal.org/node/2897377 we have to declare a fixed
-      // ID for the form.
-      $form['#id'] = Html::getUniqueId($this->getFormId());
-      $form['actions']['submit']['#ajax'] = [
-        'callback' => '::submitFormCallback',
-        'wrapper' => $form['#id'],
-      ];
-    }
-
     return $form;
   }
 
@@ -151,9 +134,8 @@ class NodeSubscribeForm extends FormBase {
         ),
       );
 
-      if (!$this->isAjax()) {
-        $this->messenger->addStatus($this->t('If you are not already subscribed to this content, a confirmation email will be sent to the email address provided. Please click the link in the email to confirm your subscription.'));
-      }
+      $this->messenger->addStatus($this->t('If you are not already subscribed to this content, a confirmation email will be sent to the email address provided. Please click the link in the email to confirm your subscription.'));
+      $form_state->setRedirect('entity.node.canonical', ['node' => $node_id]);
     }
     catch (\Exception $e) {
       $this->messenger->addError($this->t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));
@@ -163,39 +145,6 @@ class NodeSubscribeForm extends FormBase {
         '%node_id' => $node_id,
       ] + Error::decodeException($e));
     }
-  }
-
-  /**
-   * Ajax callback for the submit button.
-   *
-   * @param array $form
-   *   The subscription form.
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   The current form state.
-   *
-   * @return \Drupal\Core\Ajax\AjaxResponse
-   *   The Ajax commands that update or close the modal form.
-   */
-  public function submitFormCallback(array &$form, FormStateInterface $form_state): AjaxResponse {
-    $response = new AjaxResponse();
-
-    if ($form_state->getErrors() || $form_state->isRebuilding()) {
-      unset($form['#prefix'], $form['#suffix']);
-      $form['status_messages'] = [
-        '#type' => 'status_messages',
-        '#weight' => -10,
-      ];
-      $response->addCommand(new ReplaceCommand(NULL, $form));
-      return $response;
-    }
-
-    $response->addCommand(new CloseModalDialogCommand());
-    $response->addCommand(new MessageCommand(
-      $this->t('If you are not already subscribed to this content, a confirmation email will be sent to the email address provided. Please click the link in the email to confirm your subscription.'),
-      NULL,
-      ['type' => 'status'],
-    ));
-    return $response;
   }
 
 }
