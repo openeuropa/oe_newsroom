@@ -151,7 +151,9 @@ class NodeSubscribeForm extends FormBase {
         ),
       );
 
-      $this->messenger->addStatus($this->t('If you are not already subscribed to this content, a confirmation email will be sent to the email address provided. Please click the link in the email to confirm your subscription.'));
+      if (!$this->isAjax()) {
+        $this->messenger->addStatus($this->t('If you are not already subscribed to this content, a confirmation email will be sent to the email address provided. Please click the link in the email to confirm your subscription.'));
+      }
     }
     catch (\Exception $e) {
       $this->messenger->addError($this->t('An error occurred while processing your request, please try again later. If the error persists, contact the site owner.'));

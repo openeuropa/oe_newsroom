@@ -101,6 +101,11 @@ class NodeSubscribeModalTest extends WebDriverTestBase {
     $assert_session->assertNoElementAfterWait('css', '.ui-dialog');
     $assert_session->statusMessageContains('If you are not already subscribed to this content, a confirmation email will be sent to the email address provided. Please click the link in the email to confirm your subscription.', 'status');
 
+    // The AJAX success message must not be stored in the messenger service and
+    // shown again after a full page request.
+    $this->drupalGet($node->toUrl());
+    $assert_session->statusMessageNotExists('status');
+
     $this->endVcr();
   }
 
