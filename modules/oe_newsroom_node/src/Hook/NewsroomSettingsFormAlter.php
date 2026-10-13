@@ -66,16 +66,9 @@ class NewsroomSettingsFormAlter {
    *   The current form state.
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
-    // Store the value as a URI so it can be passed to Url::fromUri() directly.
-    // Paths without a scheme are treated as internal.
-    $url = trim($form_state->getValue('node_privacy_url'));
-    if (parse_url($url, PHP_URL_SCHEME) === NULL) {
-      $url = 'internal:' . $url;
-    }
-
     $this->configFactory
       ->getEditable('oe_newsroom_node.settings')
-      ->set('privacy_url', $url)
+      ->set('privacy_url', $form_state->getValue('node_privacy_url'))
       ->save();
   }
 
