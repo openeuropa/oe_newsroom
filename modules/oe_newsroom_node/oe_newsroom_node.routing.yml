@@ -4,6 +4,8 @@ oe_newsroom_node.subscribe_form:
     _form: '\Drupal\oe_newsroom_node\Form\NodeSubscribeForm'
     _title: 'Subscribe to notifications'
   requirements:
+    # @todo More fine-grained access management.
+    _entity_access: 'node.view'
     _permission: 'subscribe to newsroom node notifications'
     node: \d+
   options:
@@ -17,4 +19,5 @@ oe_newsroom_node.subscribe_verify:
     _controller: '\Drupal\oe_newsroom_node\Controller\NodeSubscribeController::verify'
   requirements:
     _permission: 'subscribe to newsroom node notifications'
+    _entity_access: 'node.view'
     node: \d+
