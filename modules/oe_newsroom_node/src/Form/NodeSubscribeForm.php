@@ -75,14 +75,12 @@ class NodeSubscribeForm extends FormBase {
       '#default_value' => $this->accountProxy->isAnonymous() ? '' : $this->accountProxy->getEmail(),
       '#required' => TRUE,
     ];
-
-    $privacy_url = (string) $this->config('oe_newsroom_node.settings')->get('privacy_url');
     $form['agree_privacy_statement'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link', [
         '@privacy_link' => Link::fromTextAndUrl(
           $this->t('privacy statement'),
-          Url::fromUri($privacy_url, [
+          Url::fromUri($this->getPrivacyUrl(), [
             'attributes' => ['class' => ['oe-newsroom__privacy-url']],
           ]),
         )->toString(),
@@ -159,6 +157,16 @@ class NodeSubscribeForm extends FormBase {
         '%node_id' => $node_id,
       ] + Error::decodeException($e));
     }
+  }
+
+  /**
+   * Gets the privacy URI.
+   *
+   * @return string
+   *   The privacy URI.
+   */
+  protected function getPrivacyUrl(): string {
+    return (string) $this->config('oe_newsroom_node.settings')->get('privacy_url');
   }
 
 }
