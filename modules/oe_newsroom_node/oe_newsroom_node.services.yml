@@ -4,3 +4,4 @@ services:
   logger.channel.oe_newsroom_node:
     parent: logger.channel_base
     arguments: ['oe_newsroom_node']
+  Drupal\oe_newsroom_node\Explorer\ApiExplorerNodeOperations: {}

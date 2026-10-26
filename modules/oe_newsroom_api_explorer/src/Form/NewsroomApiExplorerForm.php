@@ -28,6 +28,7 @@ use Drupal\oe_newsroom\Endpoint\NodeSubscriptionEndpoints;
 use Drupal\oe_newsroom\Value\NotificationFrequency;
 use Drupal\oe_newsroom_api_explorer\Helper\ReflectionHelper;
 use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
+use Drupal\oe_newsroom_node\Explorer\ApiExplorerNodeOperations;
 use Drupal\oe_newsroom_vcr\Explorer\VcrApiExplorerOperations;
 use Drupal\oe_newsroom_vcr\Vcr\VcrStore;
 use GuzzleHttp\HandlerStack;
@@ -628,6 +629,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
       // Allow developers to play with the VCR in the API explorer.
       VcrStore::class,
       VcrApiExplorerOperations::class,
+      ApiExplorerNodeOperations::class,
     ];
     $options = [];
     foreach ($classes as $class) {
