@@ -74,6 +74,20 @@ class NodeSubscribeForm extends FormBase {
     // Store the node id to use on submit.
     $form_state->set('node_id', (int) $node->id());
 
+    $intro_text = $this->t(
+      'By subscribing to the updates of @title, you will be notified whenever changes are made.',
+      ['@title' => $node->getTitle()],
+    );
+
+    // Start building up form.
+    $form['intro_text'] = [
+      '#type' => 'container',
+    ];
+    $form['intro_text']['content'] = [
+      '#type' => 'inline_template',
+      '#template' => '{{ value|nl2br }}',
+      '#context' => ['value' => $intro_text],
+    ];
     $form['email'] = [
       '#type' => 'email',
       '#title' => $this->t('Your e-mail'),
