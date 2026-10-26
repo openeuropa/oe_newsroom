@@ -8,6 +8,7 @@ use Drupal\Component\Render\MarkupInterface;
 use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
@@ -38,6 +39,7 @@ class NodeSubscribeForm extends FormBase {
     MessengerInterface $messenger,
     #[Autowire('logger.channel.oe_newsroom_node')]
     protected readonly LoggerInterface $logger,
+    protected LanguageManagerInterface $languageManager,
   ) {
     $this->setMessenger($messenger);
   }
@@ -166,7 +168,16 @@ class NodeSubscribeForm extends FormBase {
    *   The privacy URI.
    */
   protected function getPrivacyUrl(): string {
-    return (string) $this->config('oe_newsroom_node.settings')->get('privacy_url');
+    $uri = $this->config('oe_newsroom_node.settings')->get('privacy_url');
+    if (parse_url($uri, PHP_URL_SCHEME) === NULL) {
+      if (str_starts_with($uri, '<front>')) {
+        $uri = '/' . substr($uri, strlen('<front>'));
+      }
+      $uri = 'internal:' . $uri;
+    }
+    $language = $this->languageManager->getCurrentLanguage()->getId();
+    // @todo Adapt to the common OE approach for pt-pt.
+    return str_replace('[lang_code]', str_replace('pt-pt', 'pt', $language), $uri);
   }
 
 }
