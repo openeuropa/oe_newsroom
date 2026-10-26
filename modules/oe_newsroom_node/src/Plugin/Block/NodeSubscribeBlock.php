@@ -20,7 +20,7 @@ use Drupal\oe_newsroom\Newsroom;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Provides a node subscription block.
+ * Block to subscribe to node notifications.
  */
 #[Block(
   id: 'oe_newsroom_node_subscribe_block',
