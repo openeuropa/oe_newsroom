@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\oe_newsroom\Endpoint;
 
 use Drupal\oe_newsroom\Api\ApiClient;
+use Drupal\oe_newsroom\Attribute\NewsroomApiExplorer;
 use Drupal\oe_newsroom\Helper\ArrayHelper;
 use Drupal\oe_newsroom\Value\EmailAction\DoNotSendEmail;
 use Drupal\oe_newsroom\Value\EmailAction\SendCustomizedEmail;
@@ -15,6 +16,7 @@ use Drupal\oe_newsroom\Value\Sentinel\SubscriptionPending;
 /**
  * Exposes endpoints related to node subscriptions.
  */
+#[NewsroomApiExplorer]
 class NodeSubscriptionEndpoints {
 
   public function __construct(

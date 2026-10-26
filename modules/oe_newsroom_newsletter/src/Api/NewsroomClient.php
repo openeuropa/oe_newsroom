@@ -11,6 +11,7 @@ use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\oe_newsroom\Attribute\NewsroomApiExplorer;
 use Drupal\oe_newsroom\Newsroom;
 use Drupal\oe_newsroom_newsletter\Exception\ClientException;
 use Drupal\oe_newsroom_newsletter\Exception\InvalidResponseException;
@@ -29,6 +30,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  *
  * @SuppressWarnings(PHPMD.TooManyFields)
  */
+#[NewsroomApiExplorer]
 final class NewsroomClient implements NewsroomClientInterface, ContainerInjectionInterface {
 
   // Rename the trait method to allow us to overwrite it.

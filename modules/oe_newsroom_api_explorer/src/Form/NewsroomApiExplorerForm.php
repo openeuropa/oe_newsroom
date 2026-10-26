@@ -12,7 +12,6 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\DependencyInjection\AutowireTrait;
-use Drupal\Core\DependencyInjection\ClassResolverInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\EntityInterface;
@@ -22,15 +21,9 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
-use Drupal\oe_newsroom\Endpoint\ExternalAuthEndpoints;
-use Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints;
-use Drupal\oe_newsroom\Endpoint\NodeSubscriptionEndpoints;
 use Drupal\oe_newsroom\Value\NotificationFrequency;
+use Drupal\oe_newsroom_api_explorer\ApiExplorerMethodRegistry;
 use Drupal\oe_newsroom_api_explorer\Helper\ReflectionHelper;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
-use Drupal\oe_newsroom_node\Explorer\ApiExplorerNodeOperations;
-use Drupal\oe_newsroom_vcr\Explorer\VcrApiExplorerOperations;
-use Drupal\oe_newsroom_vcr\Vcr\VcrStore;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Promise\Create;
 use GuzzleHttp\Promise\PromiseInterface;
@@ -51,11 +44,11 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
   use StringTranslationTrait;
 
   public function __construct(
-    protected ClassResolverInterface $classResolver,
     protected HandlerStack $handlerStack,
     protected ModuleHandlerInterface $moduleHandler,
     protected TimeInterface $time,
     protected MessengerInterface $messenger,
+    protected ApiExplorerMethodRegistry $methodRegistry,
     TranslationInterface $translation,
   ) {
     $this->setStringTranslation($translation);
@@ -72,7 +65,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    $endpoint_options = $this->getEndpointOptions();
+    $endpoint_options = $this->methodRegistry->getSelectOptions();
     $form['endpoint'] = [
       '#type' => 'select',
       '#title' => $this->t('Endpoint'),
@@ -156,8 +149,10 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
    *   Form elements array.
    */
   protected function buildEndpointArgumentsSubform(string $endpoint_name): array {
-    [$class, $method_name] = explode('::', $endpoint_name);
-    $method = new \ReflectionMethod($class, $method_name);
+    $method_closure = $this->methodRegistry->getMethodAsClosure($endpoint_name);
+    assert($method_closure !== NULL);
+    $method = ReflectionHelper::getReflectionMethodFromClosure($method_closure);
+    assert($method !== NULL);
     $subform = [];
     /** @var array<string, \phpDocumentor\Reflection\DocBlock\Tags\Param> $param_tags */
     $param_tags = [];
@@ -176,7 +171,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
       '#tree' => TRUE,
       '#type' => 'fieldset',
       '#title' => $this->t('Arguments for %endpoint', [
-        '%endpoint' => $method_name . '()',
+        '%endpoint' => $method->name . '()',
       ]),
     ];
     $unsupported = FALSE;
@@ -218,8 +213,10 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
    *   Form elements array.
    */
   protected function buildEndpointInfo(string $endpoint_name): array {
-    [$class, $method_name] = explode('::', $endpoint_name);
-    $method = new \ReflectionMethod($class, $method_name);
+    $method_closure = $this->methodRegistry->getMethodAsClosure($endpoint_name);
+    assert($method_closure !== NULL);
+    $method = ReflectionHelper::getReflectionMethodFromClosure($method_closure);
+    assert($method !== NULL);
     $subform = [];
     $doc_comment = ReflectionHelper::findOriginalMethodDocComment($method);
     $doc_description = $doc_comment;
@@ -434,12 +431,13 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
    */
   protected function invokeEndpoint(string $endpoint_name, array $submitted_arguments, array &$report): void {
     $report[]['endpoint_name'] = $endpoint_name;
-    [$class, $method_name] = explode('::', $endpoint_name);
-    $service = $this->classResolver->getInstanceFromDefinition($class);
-    $method = new \ReflectionMethod($class, $method_name);
+    $method_closure = $this->methodRegistry->getMethodAsClosure($endpoint_name);
+    assert($method_closure !== NULL);
+    $reflection_function = new \ReflectionFunction($method_closure);
+    assert($reflection_function !== NULL);
     try {
       $arguments = [];
-      foreach ($method->getParameters() as $parameter) {
+      foreach ($reflection_function->getParameters() as $parameter) {
         $arguments[$parameter->name] = $this->getArgumentValue(
           $submitted_arguments[$parameter->name] ?? NULL,
           $parameter,
@@ -461,7 +459,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
     }
     try {
       $report = [
-        ['return' => $service->$method_name(...$arguments)],
+        ['return' => $method_closure(...$arguments)],
         ...$report,
       ];
     }
@@ -612,48 +610,6 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
         '@code' => $code,
       ]),
     ];
-  }
-
-  /**
-   * Gets all endpoint methods.
-   *
-   * @return array<string, array<string, \Drupal\Component\Render\MarkupInterface|string>>
-   *   Select options to choose the endpoint.
-   */
-  protected function getEndpointOptions(): array {
-    $classes = [
-      NewsroomClient::class,
-      NodeNotificationEndpoints::class,
-      NodeSubscriptionEndpoints::class,
-      ExternalAuthEndpoints::class,
-      // Allow developers to play with the VCR in the API explorer.
-      VcrStore::class,
-      VcrApiExplorerOperations::class,
-      ApiExplorerNodeOperations::class,
-    ];
-    $options = [];
-    foreach ($classes as $class) {
-      // Don't add methods for unknown classes.
-      // This is relevant if one of the classes in the list is defined in a
-      // submodule which is currently not installed.
-      if (!class_exists($class)) {
-        $options[$class . ' (not available)'] = [];
-        continue;
-      }
-      $reflection = new \ReflectionClass($class);
-      $methods = $reflection->getMethods(\ReflectionMethod::IS_PUBLIC);
-      foreach ($methods as $method) {
-        if ($method->isStatic() || $method->isConstructor()) {
-          continue;
-        }
-        if ($method->getFileName() !== $reflection->getFileName()) {
-          // The method is defined in a parent class or trait.
-          continue;
-        }
-        $options[$class][$class . '::' . $method->name] = $method->getDeclaringClass()->getShortName() . '::' . $method->name;
-      }
-    }
-    return $options;
   }
 
   /**

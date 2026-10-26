@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Drupal\oe_newsroom\Endpoint;
 
 use Drupal\oe_newsroom\Api\ApiClient;
+use Drupal\oe_newsroom\Attribute\NewsroomApiExplorer;
 use Drupal\oe_newsroom\Helper\ArrayHelper;
 
 /**
  * Exposes endpoints related to node notifications.
  */
+#[NewsroomApiExplorer]
 class NodeNotificationEndpoints {
 
   public function __construct(

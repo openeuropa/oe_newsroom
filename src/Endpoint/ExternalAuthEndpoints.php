@@ -6,12 +6,14 @@ namespace Drupal\oe_newsroom\Endpoint;
 
 use Drupal\oe_newsroom\Api\ApiClient;
 use Drupal\oe_newsroom\Api\NewsroomConnection;
+use Drupal\oe_newsroom\Attribute\NewsroomApiExplorer;
 use Drupal\oe_newsroom\Value\Sentinel\Unauthorized;
 use Webmozart\Assert\Assert;
 
 /**
  * Service to access the Newsroom external auth API.
  */
+#[NewsroomApiExplorer]
 class ExternalAuthEndpoints {
 
   public function __construct(

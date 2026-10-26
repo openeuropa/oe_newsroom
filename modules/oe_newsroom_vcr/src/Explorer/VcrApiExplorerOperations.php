@@ -2,12 +2,14 @@
 
 namespace Drupal\oe_newsroom_vcr\Explorer;
 
+use Drupal\oe_newsroom\Attribute\NewsroomApiExplorer;
 use Drupal\oe_newsroom_vcr\Vcr\VcrMode;
 use Drupal\oe_newsroom_vcr\Vcr\VcrStore;
 
 /**
  * Provides additional VCR operations exposed in the API explorer.
  */
+#[NewsroomApiExplorer]
 class VcrApiExplorerOperations {
 
   public function __construct(

@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\oe_newsroom_node\Explorer;
 
+use Drupal\oe_newsroom\Attribute\NewsroomApiExplorer;
 use Drupal\oe_newsroom\Endpoint\NodeNotificationEndpoints;
 use Drupal\oe_newsroom\Endpoint\NodeSubscriptionEndpoints;
 use Drupal\oe_newsroom\Value\EmailAction\SendCustomizedEmail;
 use Drupal\oe_newsroom\Value\NotificationFrequency;
 use Drupal\oe_newsroom\Value\Sentinel\SubscriptionPending;
 
+#[NewsroomApiExplorer]
 class ApiExplorerNodeOperations {
 
   public function __construct(

@@ -5,11 +5,13 @@ namespace Drupal\oe_newsroom_vcr\Vcr;
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\KeyValueStore\KeyValueStoreInterface;
+use Drupal\oe_newsroom\Attribute\NewsroomApiExplorer;
 use Symfony\Component\Yaml\Tag\TaggedValue;
 
 /**
  * A storage for the VCR.
  */
+#[NewsroomApiExplorer]
 class VcrStore implements VcrRuntimeInterface {
 
   public function __construct(
