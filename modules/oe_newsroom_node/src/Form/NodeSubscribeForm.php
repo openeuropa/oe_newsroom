@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Drupal\oe_newsroom_node\Form;
 
 use Drupal\Component\Render\MarkupInterface;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -115,6 +117,18 @@ class NodeSubscribeForm extends FormBase {
       ],
     ];
 
+    $form['actions']['cancel'] = [
+      '#type' => 'link',
+      '#title' => $this->t('No, thanks'),
+      '#attributes' => ['class' => ['button', 'dialog-cancel']],
+      '#url' => $node->toUrl('canonical'),
+      '#cache' => [
+        'contexts' => [
+          'url.query_args:destination',
+        ],
+      ],
+    ];
+
     return $form;
   }
 
@@ -132,6 +146,24 @@ class NodeSubscribeForm extends FormBase {
     if (empty($element['#value'])) {
       $form_state->setError($form['agree_privacy_statement'], $this->t('You must agree with the privacy statement.'));
     }
+  }
+
+  /**
+   * Cancel button ajax callback.
+   *
+   * @param array $form
+   *   The complete form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   The ajax response.
+   */
+  public function cancel(array &$form, FormStateInterface $form_state) {
+    $response = new AjaxResponse();
+    $response->addCommand(new CloseModalDialogCommand());
+
+    return $response;
   }
 
   /**
