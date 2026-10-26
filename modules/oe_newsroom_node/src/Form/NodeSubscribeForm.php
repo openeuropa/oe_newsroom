@@ -68,6 +68,9 @@ class NodeSubscribeForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, ?NodeInterface $node = NULL): array {
+    if ($node === NULL) {
+      return [];
+    }
     // Store the node id to use on submit.
     $form_state->set('node_id', (int) $node->id());
 
