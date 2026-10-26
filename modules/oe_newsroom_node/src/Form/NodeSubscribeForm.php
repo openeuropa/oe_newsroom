@@ -135,6 +135,9 @@ class NodeSubscribeForm extends FormBase {
   /**
    * Validate callback for the privacy element.
    *
+   * This allows to show a custom message instead of the standard
+   * "field is required" one.
+   *
    * @param array $element
    *   The privacy-statement form element.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
