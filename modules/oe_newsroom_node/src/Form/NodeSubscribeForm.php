@@ -19,9 +19,7 @@ use Drupal\Core\Url;
 use Drupal\Core\Utility\Error;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
-use Drupal\oe_newsroom\Endpoint\NodeSubscriptionEndpoints;
-use Drupal\oe_newsroom\Value\EmailAction\SendCustomizedEmail;
-use Drupal\oe_newsroom\Value\NotificationFrequency;
+use Drupal\oe_newsroom_node\Domain\NodeSubscriptionService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
@@ -38,7 +36,7 @@ class NodeSubscribeForm extends FormBase {
   public const FORM_ID = 'oe_newsroom_node_subscribe_form';
 
   public function __construct(
-    protected readonly NodeSubscriptionEndpoints $nodeSubscriptionEndpoints,
+    protected NodeSubscriptionService $nodeSubscriptionService,
     protected readonly AccountProxyInterface $accountProxy,
     MessengerInterface $messenger,
     #[Autowire('logger.channel.oe_newsroom_node')]
@@ -200,21 +198,7 @@ class NodeSubscribeForm extends FormBase {
 
     // @todo Add event/hook to allow to set different parameters.
     try {
-      $this->nodeSubscriptionEndpoints->subscribe(
-        $node_id,
-        $email,
-        NotificationFrequency::OnPublication,
-        // Verification email ("hard opt-in"). The confirm button leads back to
-        // the node page.
-        new SendCustomizedEmail(
-          subject: 'Confirm your subscription',
-          redirect: $redirect_url,
-        ),
-        // Success email, sent after the subscription is confirmed.
-        new SendCustomizedEmail(
-          subject: 'You have been subscribed',
-        ),
-      );
+      $this->nodeSubscriptionService->subscribe((int) $node_id, $email);
 
       $this->messenger->addStatus($this->t('If you are not already subscribed to this content, a confirmation email will be sent to the email address provided. Please click the link in the email to confirm your subscription.'));
       $form_state->setRedirect('entity.node.canonical', ['node' => $node_id]);
