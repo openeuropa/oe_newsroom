@@ -13,6 +13,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Utility\Error;
@@ -128,6 +129,11 @@ class NodeSubscribeForm extends FormBase {
         ],
       ],
     ];
+
+    $cache = new BubbleableMetadata();
+
+    $cache->addCacheableDependency($node);
+    $cache->applyTo($form);
 
     return $form;
   }
