@@ -6,6 +6,7 @@ namespace Drupal\oe_newsroom_node\Plugin\Block;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Block\Attribute\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Cache\Cache;
@@ -88,7 +89,7 @@ class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInte
   /**
    * {@inheritdoc}
    */
-  protected function blockAccess(AccountInterface $account) {
+  protected function blockAccess(AccountInterface $account): AccessResultInterface {
     return AccessResult::allowedIfHasPermission($account, 'subscribe to newsroom node notifications');
   }
 
