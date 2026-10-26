@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\oe_newsroom_node\Form;
 
+use Drupal\Component\Render\MarkupInterface;
 use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -46,6 +47,19 @@ class NodeSubscribeForm extends FormBase {
    */
   public function getFormId(): string {
     return self::FORM_ID;
+  }
+
+  /**
+   * A page title callback.
+   *
+   * @param \Drupal\node\NodeInterface $node
+   *   The node object from url.
+   *
+   * @return \Drupal\Component\Render\MarkupInterface
+   *   The page title.
+   */
+  public function title(NodeInterface $node): MarkupInterface {
+    return t('Subscribe to @title', ['@title' => $node->label()]);
   }
 
   /**

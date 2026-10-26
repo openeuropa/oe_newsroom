@@ -2,7 +2,7 @@ oe_newsroom_node.subscribe_form:
   path: '/newsroom-node/{node}/subscribe'
   defaults:
     _form: '\Drupal\oe_newsroom_node\Form\NodeSubscribeForm'
-    _title: 'Subscribe to notifications'
+    _title_callback: '\Drupal\oe_newsroom_node\Form\NodeSubscribeForm::title'
   requirements:
     # @todo More fine-grained access management.
     _entity_access: 'node.view'
