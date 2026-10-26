@@ -17,6 +17,7 @@ use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Utility\Error;
+use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Drupal\oe_newsroom\Endpoint\NodeSubscriptionEndpoints;
 use Drupal\oe_newsroom\Value\EmailAction\SendCustomizedEmail;
@@ -181,6 +182,15 @@ class NodeSubscribeForm extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $email = $form_state->getValue('email');
     $node_id = $form_state->get('node_id');
+    $node = Node::load($node_id);
+
+    if (!$node) {
+      $this->messenger()->addWarning($this->t(
+        'The content no longer exists.',
+      ));
+      $form_state->setRedirectUrl(Url::fromRoute('<front>'));
+      return;
+    }
 
     // The confirmation link redirects through a controller that handles the
     // result and then sends the user to the node page.
