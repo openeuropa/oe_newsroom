@@ -56,6 +56,7 @@ class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInte
    * {@inheritdoc}
    */
   public function build(): array {
+    /** @var \Drupal\node\NodeInterface $node */
     $node = $this->getContextValue('node');
 
     // The privacy URL must be configured for the subscribe form to work.
