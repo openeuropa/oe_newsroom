@@ -11,6 +11,9 @@ use Drupal\oe_newsroom\Value\EmailAction\SendCustomizedEmail;
 use Drupal\oe_newsroom\Value\NotificationFrequency;
 use Drupal\oe_newsroom\Value\Sentinel\SubscriptionPending;
 
+/**
+ * Contains additional operations available in the API explorer.
+ */
 #[NewsroomApiExplorer]
 class ApiExplorerNodeOperations {
 
@@ -19,6 +22,22 @@ class ApiExplorerNodeOperations {
     protected readonly NodeNotificationEndpoints $nodeNotificationEndpoints,
   ) {}
 
+  /**
+   * Subscribes an email to a node id, with custom email text.
+   *
+   * This is only meant to be run from the API explorer form.
+   *
+   * @param string|int $node_id
+   *   The node ID.
+   *   This should be an integer, but technically any string is allowed.
+   * @param string $email
+   *   The email address to subscribe.
+   * @param \Drupal\oe_newsroom\Value\NotificationFrequency $frequency
+   *   The requested frequency.
+   *
+   * @return array|\Drupal\oe_newsroom\Value\Sentinel\SubscriptionPending
+   *   The result of the subscribe operation.
+   */
   public function subscribe(
     string|int $node_id,
     string $email,
@@ -48,6 +67,15 @@ class ApiExplorerNodeOperations {
     );
   }
 
+  /**
+   * Creates a node notification with auto-generated text.
+   *
+   * This is only meant to be run from the API explorer form.
+   *
+   * @param string|int $node_id
+   *   The node ID.
+   *   This should be an integer, but technically any string is allowed.
+   */
   public function createNotification(
     string|int $node_id,
   ): void {
