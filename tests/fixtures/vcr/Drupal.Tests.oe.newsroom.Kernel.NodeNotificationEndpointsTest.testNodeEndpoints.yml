@@ -1,0 +1,476 @@
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/node-notification/delete
+  data:
+    item:
+      sv_id: !Default node_service_id
+      node_id: test.1
+      deleteTopic: true
+    key: !Capture '<signature key 0>'
+    app: !Default app_id
+- !Response
+  data: 'Node and all associated data deleted successfully'
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/get
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data: {  }
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/count
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data:
+    count: 0
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/exists
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data:
+    exists: false
+- !Comment 'Create a node notification.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/node-notification/create
+  data:
+    item:
+      sv_id: !Default node_service_id
+      section_id: !Default node_notification_section_id
+      notification_title: 'The title of the notification'
+      notification_description: 'The description of the notification'
+      notification_URL: 'https://www.example.com'
+      node_id: test.1
+      node_title: 'The node title'
+    key: !Capture '<signature key 2>'
+    app: !Default app_id
+- !Response
+  data: 'Node notification created successfully'
+- !Comment 'Load node notifications.'
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/get
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data:
+    -
+      id: !Replaced '10000'
+      title: 'The title of the notification'
+      date: !Replaced '2005-02-15 13:00:00'
+      dateTo: null
+      publicationDate: !Replaced '2005-02-15 13:00:00'
+      publicationDateTo: null
+      validationDate: !Replaced '2005-02-15 13:00:00'
+      author: 'Newsroom System'
+      statusBy: 'Newsroom System'
+      topics:
+        -
+          id: !Replaced '20000'
+          name: !Replaced 'Topic name (0)'
+          status: Validated
+          submittedBy: 'Newsroom System'
+          service: !Replaced 'Service name (0)'
+        -
+          id: !Replaced '20001'
+          name: !Replaced 'Topic name (1)'
+          status: Valid
+          submittedBy: 'Newsroom System'
+          service: !Replaced 'Service name (1)'
+      pinnedTopic: null
+      pictureId: null
+      status: 'Accepted centrally'
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/count
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data:
+    count: 1
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/exists
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data:
+    exists: true
+- !Comment 'Attempt subscribing the other email.'
+- !Comment 'Fetch subscriptions. The result is empty.'
+- !NewsroomRequest
+  path: /newsroom/api/v1/subscriptions
+  query:
+    user_email: other@example.com
+    key: !Capture '<signature key 3>'
+    app: !Default app_id
+- !Response
+  data: {  }
+- !Comment 'Attempt to unsubscribe from a node id. An exception will be thrown.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/unsubscribe/node-notification
+  data:
+    subscription:
+      sv_id: !Default node_service_id
+      node_id: test.1
+      email: other@example.com
+    key: !Capture '<signature key 3>'
+    app: !Default app_id
+- !Response
+  status: 404
+  headers:
+    Strict-Transport-Security:
+      - max-age=0;
+  data: 'User not found'
+- !Comment 'Subscribe to a node id. The result will be pending.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/subscribe
+  data:
+    subscription:
+      sv_id: !Default node_service_id
+      email: other@example.com
+      frequency: 2103
+      node_id: test.1
+      nomail: false
+      redirect_to: 'https://example.com/subscribe'
+    key: !Capture '<signature key 3>'
+    app: !Default app_id
+- !Response
+  data:
+    status: pending_verification
+    message: 'Confirmation email sent. Your subscription will be activated after you click the confirmation link.'
+- !Comment 'Unsubscribing from the given node id is still not possible, because the subscription is pending.'
+- !Comment 'Attempt to unsubscribe from a node id. An exception will be thrown.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/unsubscribe/node-notification
+  data:
+    subscription:
+      sv_id: !Default node_service_id
+      node_id: test.1
+      email: other@example.com
+    key: !Capture '<signature key 3>'
+    app: !Default app_id
+- !Response
+  status: 500
+  data: 'Error: No active subscription found for this service'
+- !Comment 'Delete pending node notifications.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/node-notification/delete
+  data:
+    item:
+      sv_id: !Default node_service_id
+      node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data: 'All unsent node notifications deleted successfully'
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/get
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data: {  }
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/count
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data:
+    count: 0
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/exists
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data:
+    exists: true
+- !Comment 'Test subscribing other email while notification list is empty.'
+- !Comment 'Fetch subscriptions. The result is empty.'
+- !NewsroomRequest
+  path: /newsroom/api/v1/subscriptions
+  query:
+    user_email: other@example.com
+    key: !Capture '<signature key 3>'
+    app: !Default app_id
+- !Response
+  data: {  }
+- !Comment 'Attempt to unsubscribe from a node id. An exception will be thrown.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/unsubscribe/node-notification
+  data:
+    subscription:
+      sv_id: !Default node_service_id
+      node_id: test.1
+      email: other@example.com
+    key: !Capture '<signature key 3>'
+    app: !Default app_id
+- !Response
+  status: 500
+  data: 'Error: No active subscription found for this service'
+- !Comment 'Subscribe to a node id. The result will be pending.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/subscribe
+  data:
+    subscription:
+      sv_id: !Default node_service_id
+      email: other@example.com
+      frequency: 2103
+      node_id: test.1
+      nomail: false
+      redirect_to: 'https://example.com/subscribe'
+    key: !Capture '<signature key 3>'
+    app: !Default app_id
+- !Response
+  data:
+    status: pending_verification
+    message: 'Confirmation email sent. Your subscription will be activated after you click the confirmation link.'
+- !Comment 'Unsubscribing from the given node id is still not possible, because the subscription is pending.'
+- !Comment 'Attempt to unsubscribe from a node id. An exception will be thrown.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/unsubscribe/node-notification
+  data:
+    subscription:
+      sv_id: !Default node_service_id
+      node_id: test.1
+      email: other@example.com
+    key: !Capture '<signature key 3>'
+    app: !Default app_id
+- !Response
+  status: 500
+  data: 'Error: No active subscription found for this service'
+- !Comment 'Test subscribing the main email.'
+- !Comment 'Fetch subscriptions. The result is empty.'
+- !NewsroomRequest
+  path: /newsroom/api/v1/subscriptions
+  query:
+    user_email: !Default test_email
+    key: !Capture '<signature key 4>'
+    app: !Default app_id
+- !Response
+  data: {  }
+- !Comment 'Attempt to unsubscribe from a node id. An exception will be thrown.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/unsubscribe/node-notification
+  data:
+    subscription:
+      sv_id: !Default node_service_id
+      node_id: test.1
+      email: !Default test_email
+    key: !Capture '<signature key 4>'
+    app: !Default app_id
+- !Response
+  status: 404
+  headers:
+    Strict-Transport-Security:
+      - max-age=0;
+  data: 'User not found'
+- !Comment 'Subscribe to a node id. The result will be pending.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/subscribe
+  data:
+    subscription:
+      sv_id: !Default node_service_id
+      email: !Default test_email
+      frequency: 2103
+      node_id: test.1
+      nomail: false
+      redirect_to: 'https://example.com/subscribe'
+    key: !Capture '<signature key 4>'
+    app: !Default app_id
+- !Response
+  data:
+    status: pending_verification
+    message: 'Confirmation email sent. Your subscription will be activated after you click the confirmation link.'
+- !Comment 'Unsubscribing from the given node id is still not possible, because the subscription is pending.'
+- !Comment 'Attempt to unsubscribe from a node id. An exception will be thrown.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/unsubscribe/node-notification
+  data:
+    subscription:
+      sv_id: !Default node_service_id
+      node_id: test.1
+      email: !Default test_email
+    key: !Capture '<signature key 4>'
+    app: !Default app_id
+- !Response
+  status: 500
+  data: 'Error: No active subscription found for this service'
+- !Comment 'Click the confirm link in the opt-in email.'
+- !Comment 'Load subscriptions for that email.'
+- !NewsroomRequest
+  path: /newsroom/api/v1/subscriptions
+  query:
+    user_email: !Default test_email
+    key: !Capture '<signature key 4>'
+    app: !Default app_id
+- !Response
+  data:
+    -
+      responseType: json
+      email: !Default test_email
+      firstName: null
+      lastName: null
+      organisation: null
+      country: null
+      position: null
+      twitter: null
+      facebook: null
+      linkedIn: null
+      phone: null
+      organisationShort: null
+      address: null
+      address2: null
+      postCode: null
+      city: null
+      department: null
+      media: null
+      website: null
+      role: null
+      universeId: !Replaced '9000'
+      universeName: !Replaced 'Universe name (0)'
+      universAcronym: ema_notif
+      newsletterId: !Default node_service_id
+      newsletterName: !Replaced 'Service name (1)'
+      status: Valid
+      unsubscriptionLink: !Replaced '<ignored>'
+      isNewUser: false
+      hostBy: 'ema_notif Newsroom'
+      profileLink: !Replaced '<ignored>'
+      isNewSubscription: false
+      feedbackMessage: 'A subscription for this service is already registered for this email address'
+      language: default
+      frequency: Weekly
+      defaultLanguage: '0'
+      pattern: !Replaced '<ignored>'
+      subscribedNotificationItemType:
+        -
+          name: !Replaced 'Item type name (0)'
+          id: !Replaced '30000'
+      subscribedNotificationTopicType:
+        -
+          name: 'The node title'
+          id: !Replaced '20001'
+          externalApp: null
+          externalId: test.1
+          groupName: !Replaced '<ignored>'
+          groupId: !Replaced '<ignored>'
+          groupDisplay: '0'
+- !Comment Unsubscribe.
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/unsubscribe/node-notification
+  data:
+    subscription:
+      sv_id: !Default node_service_id
+      node_id: test.1
+      email: !Default test_email
+    key: !Capture '<signature key 4>'
+    app: !Default app_id
+- !Response
+  data: 'Node notification unsubscribed successfully'
+- !Comment 'Load subscriptions for that email, after unsubscribe.'
+- !NewsroomRequest
+  path: /newsroom/api/v1/subscriptions
+  query:
+    user_email: !Default test_email
+    key: !Capture '<signature key 4>'
+    app: !Default app_id
+- !Response
+  data: {  }
+- !Comment 'Fully delete the node notification topic.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/node-notification/delete
+  data:
+    item:
+      sv_id: !Default node_service_id
+      node_id: test.1
+      deleteTopic: true
+    key: !Capture '<signature key 0>'
+    app: !Default app_id
+- !Response
+  data: 'Node and all associated data deleted successfully'
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/get
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data: {  }
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/count
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data:
+    count: 0
+- !NewsroomRequest
+  path: /newsroom/api/v1/node-notification/exists
+  query:
+    sv_id: !Default node_service_id
+    node_id: test.1
+    key: !Capture '<signature key 1>'
+    app: !Default app_id
+- !Response
+  data:
+    exists: false
+- !Comment 'Test subscribing while notification list does not exist.'
+- !NewsroomRequest
+  method: POST
+  path: /newsroom/api/v1/subscribe
+  data:
+    subscription:
+      sv_id: !Default node_service_id
+      email: !Default test_email
+      frequency: 2103
+      node_id: test.1
+      nomail: false
+      redirect_to: 'https://example.com/subscribe-redirect'
+    key: !Capture '<signature key 4>'
+    app: !Default app_id
+- !Response
+  status: 404
+  headers:
+    Strict-Transport-Security:
+      - max-age=0;
+  data: 'Not found'

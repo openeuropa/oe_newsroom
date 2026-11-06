@@ -12,7 +12,6 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\DependencyInjection\AutowireTrait;
-use Drupal\Core\DependencyInjection\ClassResolverInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\EntityInterface;
@@ -22,7 +21,9 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
-use Drupal\oe_newsroom_newsletter\Api\NewsroomClient;
+use Drupal\oe_newsroom\Value\NotificationFrequency;
+use Drupal\oe_newsroom_api_explorer\ApiExplorerMethodRegistry;
+use Drupal\oe_newsroom_api_explorer\Helper\ReflectionHelper;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Promise\Create;
 use GuzzleHttp\Promise\PromiseInterface;
@@ -43,11 +44,11 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
   use StringTranslationTrait;
 
   public function __construct(
-    protected ClassResolverInterface $classResolver,
     protected HandlerStack $handlerStack,
     protected ModuleHandlerInterface $moduleHandler,
     protected TimeInterface $time,
     protected MessengerInterface $messenger,
+    protected ApiExplorerMethodRegistry $methodRegistry,
     TranslationInterface $translation,
   ) {
     $this->setStringTranslation($translation);
@@ -64,7 +65,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    $endpoint_options = $this->getEndpointOptions();
+    $endpoint_options = $this->methodRegistry->getSelectOptions();
     $form['endpoint'] = [
       '#type' => 'select',
       '#title' => $this->t('Endpoint'),
@@ -148,14 +149,16 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
    *   Form elements array.
    */
   protected function buildEndpointArgumentsSubform(string $endpoint_name): array {
-    [$class, $method_name] = explode('::', $endpoint_name);
-    $method = new \ReflectionMethod($class, $method_name);
+    $method_closure = $this->methodRegistry->getMethodAsClosure($endpoint_name);
+    assert($method_closure !== NULL);
+    $method = ReflectionHelper::getReflectionMethodFromClosure($method_closure);
+    assert($method !== NULL);
     $subform = [];
     /** @var array<string, \phpDocumentor\Reflection\DocBlock\Tags\Param> $param_tags */
     $param_tags = [];
     // Use phpDocumentor if available.
     if (class_exists(DocBlockFactory::class)) {
-      $doc_comment = $this->findMethodDocComment($method);
+      $doc_comment = ReflectionHelper::findOriginalMethodDocComment($method);
       if ($doc_comment !== NULL) {
         $phpdoc = DocBlockFactory::createInstance()->create($doc_comment);
         foreach ($phpdoc->getTagsByName('param') as $tag) {
@@ -168,7 +171,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
       '#tree' => TRUE,
       '#type' => 'fieldset',
       '#title' => $this->t('Arguments for %endpoint', [
-        '%endpoint' => $method_name . '()',
+        '%endpoint' => $method->name . '()',
       ]),
     ];
     $unsupported = FALSE;
@@ -210,10 +213,12 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
    *   Form elements array.
    */
   protected function buildEndpointInfo(string $endpoint_name): array {
-    [$class, $method_name] = explode('::', $endpoint_name);
-    $method = new \ReflectionMethod($class, $method_name);
+    $method_closure = $this->methodRegistry->getMethodAsClosure($endpoint_name);
+    assert($method_closure !== NULL);
+    $method = ReflectionHelper::getReflectionMethodFromClosure($method_closure);
+    assert($method !== NULL);
     $subform = [];
-    $doc_comment = $this->findMethodDocComment($method);
+    $doc_comment = ReflectionHelper::findOriginalMethodDocComment($method);
     $doc_description = $doc_comment;
 
     // Use phpDocumentor if available.
@@ -245,43 +250,6 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
       ];
     }
     return $subform;
-  }
-
-  /**
-   * Finds a method doc comment, also looking at inheritance.
-   *
-   * @param \ReflectionMethod $method
-   *   The method.
-   *
-   * @return string|null
-   *   The doc comment on the method or one of its parents.
-   */
-  protected function findMethodDocComment(\ReflectionMethod $method): ?string {
-    $doc = $method->getDocComment();
-    if ($doc !== FALSE && !str_contains($doc, '@inheritdoc')) {
-      return $doc;
-    }
-    $parent_class = $method->getDeclaringClass();
-    while ($parent_class = $parent_class->getParentClass()) {
-      if (!$parent_class->hasMethod($method->name)) {
-        break;
-      }
-      $parent_method = $parent_class->getMethod($method->name);
-      $doc = $this->findMethodDocComment($parent_method);
-      if ($doc !== NULL) {
-        return $doc;
-      }
-    }
-    foreach ($method->getDeclaringClass()->getInterfaces() as $interface) {
-      if (!$interface->hasMethod($method->name)) {
-        continue;
-      }
-      $doc = $interface->getMethod($method->name)->getDocComment();
-      if ($doc !== FALSE && !str_contains($doc, '@inheritdoc')) {
-        return $doc;
-      }
-    }
-    return NULL;
   }
 
   /**
@@ -322,6 +290,20 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
           '#type' => 'textfield',
           '#description' => $this->t('Use json or separate by comma'),
         ],
+        NotificationFrequency::class => [
+          '#type' => 'select',
+          '#options' => (function (): array {
+            $options = [];
+            foreach (NotificationFrequency::cases() as $case) {
+              $options[$case->value] = $case->value;
+            }
+            return $options;
+          })(),
+          ...($parameter->allowsNull()) ? [
+            '#empty_option' => $this->t('- None -'),
+            '#empty_value' => '',
+          ] : [],
+        ],
       };
     }
     catch (\UnhandledMatchError) {
@@ -341,7 +323,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
       ];
     }
     $element['#title'] = $parameter->name;
-    $element['#required'] = !$parameter->isOptional();
+    $element['#required'] = !$parameter->isOptional() && $type_name !== 'bool';
     $description_parts = [];
     if ($param_tag !== NULL) {
       $description_parts[] = Html::escape($param_tag->getDescription()->render());
@@ -448,12 +430,13 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
    */
   protected function invokeEndpoint(string $endpoint_name, array $submitted_arguments, array &$report): void {
     $report[]['endpoint_name'] = $endpoint_name;
-    [$class, $method_name] = explode('::', $endpoint_name);
-    $service = $this->classResolver->getInstanceFromDefinition($class);
-    $method = new \ReflectionMethod($class, $method_name);
+    $method_closure = $this->methodRegistry->getMethodAsClosure($endpoint_name);
+    assert($method_closure !== NULL);
+    $reflection_function = new \ReflectionFunction($method_closure);
+    assert($reflection_function !== NULL);
     try {
       $arguments = [];
-      foreach ($method->getParameters() as $parameter) {
+      foreach ($reflection_function->getParameters() as $parameter) {
         $arguments[$parameter->name] = $this->getArgumentValue(
           $submitted_arguments[$parameter->name] ?? NULL,
           $parameter,
@@ -475,7 +458,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
     }
     try {
       $report = [
-        ['return' => $service->$method_name(...$arguments)],
+        ['return' => $method_closure(...$arguments)],
         ...$report,
       ];
     }
@@ -527,6 +510,7 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
         default => preg_split('#, *#', trim($value)),
       },
       'string' => (string) $value,
+      NotificationFrequency::class => NotificationFrequency::from($value),
       default => throw new \Exception(sprintf('Unsupported type %s for parameter %s', $parameter->getType()->__toString(), $parameter->name)),
     };
     if ($argument === $illegal_value) {
@@ -625,34 +609,6 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
   }
 
   /**
-   * Gets all endpoint methods.
-   *
-   * @return array<string, array<string, \Drupal\Component\Render\MarkupInterface|string>>
-   *   Select options to choose the endpoint.
-   */
-  protected function getEndpointOptions(): array {
-    $classes = [
-      NewsroomClient::class,
-    ];
-    $options = [];
-    foreach ($classes as $class) {
-      $reflection = new \ReflectionClass($class);
-      $methods = $reflection->getMethods(\ReflectionMethod::IS_PUBLIC);
-      foreach ($methods as $method) {
-        if ($method->isStatic() || $method->isConstructor()) {
-          continue;
-        }
-        if ($method->getFileName() !== $reflection->getFileName()) {
-          // The method is defined in a parent class or trait.
-          continue;
-        }
-        $options[$class][$class . '::' . $method->name] = $method->getDeclaringClass()->getShortName() . '::' . $method->name;
-      }
-    }
-    return $options;
-  }
-
-  /**
    * Renders a report array.
    *
    * @param array $report
@@ -697,6 +653,9 @@ class NewsroomApiExplorerForm implements FormInterface, ContainerInjectionInterf
       }
       if ($input instanceof EntityInterface) {
         return new TaggedValue('entity', get_class($input) . ' ' . ($input->id() ?? '#new'));
+      }
+      if ($input instanceof TaggedValue) {
+        return new TaggedValue('TaggedValue.' . $input->getTag(), $input->getValue());
       }
       return new TaggedValue('object', get_class($input));
     }

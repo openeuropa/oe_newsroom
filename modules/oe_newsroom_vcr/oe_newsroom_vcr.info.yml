@@ -1,0 +1,9 @@
+name: OpenEuropa Newsroom Mock Server
+description: Provides a mock Newsroom server based on vcr-like recorded requests and responses.
+package: Development
+type: module
+# Newly added submodules start with a higher minimum version for Drupal core.
+core_version_requirement: ^11.3
+
+dependencies:
+  - oe_newsroom:oe_newsroom
