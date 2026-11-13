@@ -19,6 +19,7 @@ use Drupal\Core\Url;
 use Drupal\Core\Utility\Error;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
+use Drupal\oe_newsroom\Api\NewsroomConnection;
 use Drupal\oe_newsroom_node\Domain\NodeSubscriptionService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -37,10 +38,11 @@ class NodeSubscribeForm extends FormBase {
 
   public function __construct(
     protected NodeSubscriptionService $nodeSubscriptionService,
-    protected readonly AccountProxyInterface $accountProxy,
+    protected NewsroomConnection $newsroomConnection,
+    protected AccountProxyInterface $accountProxy,
     MessengerInterface $messenger,
     #[Autowire('logger.channel.oe_newsroom_node')]
-    protected readonly LoggerInterface $logger,
+    protected LoggerInterface $logger,
     protected LanguageManagerInterface $languageManager,
   ) {
     $this->setMessenger($messenger);
@@ -96,15 +98,23 @@ class NodeSubscribeForm extends FormBase {
       '#default_value' => $this->accountProxy->isAnonymous() ? '' : $this->accountProxy->getEmail(),
       '#required' => TRUE,
     ];
+
+    $privacy_url = (string) $this->config('oe_newsroom_node.settings')->get('privacy_url');
+    if ($privacy_url !== '') {
+      $privacy_text = Link::fromTextAndUrl(
+        $this->t('privacy statement'),
+        Url::fromUri($privacy_url, [
+          'attributes' => ['class' => ['oe-newsroom__privacy-url']],
+        ]),
+      )->toString();
+    }
+    else {
+      $privacy_text = $this->t('privacy statement');
+    }
     $form['agree_privacy_statement'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('By checking this box, I confirm that I want to register for this service, and I agree with the @privacy_link', [
-        '@privacy_link' => Link::fromTextAndUrl(
-          $this->t('privacy statement'),
-          Url::fromUri($this->getPrivacyUrl(), [
-            'attributes' => ['class' => ['oe-newsroom__privacy-url']],
-          ]),
-        )->toString(),
+        '@privacy_link' => $privacy_text,
       ]),
       '#element_validate' => ['::validatePrivacyElement'],
     ];
@@ -178,6 +188,12 @@ class NodeSubscribeForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
+    if (!$this->newsroomConnection->isConfigured()) {
+      $this->messenger->addError($this->t('Subscriptions are not available at this time. Please try again later.'));
+      $form_state->setRebuild();
+      return;
+    }
+
     $email = $form_state->getValue('email');
     $node_id = $form_state->get('node_id');
     $node = Node::load($node_id);

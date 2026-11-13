@@ -4,18 +4,17 @@ declare(strict_types=1);
 
 namespace Drupal\oe_newsroom_node\Plugin\Block;
 
-use Drupal\Component\Serialization\Json;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Block\Attribute\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Cache\Cache;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Plugin\Context\EntityContextDefinition;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\node\NodeInterface;
 use Drupal\oe_newsroom\Newsroom;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -26,9 +25,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   id: 'oe_newsroom_node_subscribe_block',
   admin_label: new TranslatableMarkup('Newsroom node subscribe block'),
   category: new TranslatableMarkup('OE Newsroom Node'),
-  context_definitions: [
-    'node' => new EntityContextDefinition('entity:node', new TranslatableMarkup('Node')),
-  ],
 )]
 class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
@@ -36,66 +32,56 @@ class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInte
     array $configuration,
     $plugin_id,
     $plugin_definition,
-    protected readonly ConfigFactoryInterface $configFactory,
+    protected readonly RouteMatchInterface $routeMatch,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
     return new static(
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get(ConfigFactoryInterface::class),
+      $container->get('current_route_match'),
     );
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function build(): array {
-    /** @var \Drupal\node\NodeInterface $node */
-    $node = $this->getContextValue('node');
+  protected function getNode(): ?NodeInterface {
+    $node = $this->routeMatch->getParameter('node');
+    return $node instanceof NodeInterface ? $node : NULL;
+  }
 
-    // The privacy URL must be configured for the subscribe form to work.
-    if (empty($this->configFactory->get('oe_newsroom_node.settings')->get('privacy_url'))) {
+  public function build(): array {
+    $node = $this->getNode();
+    if (!$node) {
       return [];
     }
 
     $url = Url::fromRoute('oe_newsroom_node.subscribe_form', ['node' => $node->id()]);
 
-    $build = [
-      'link' => [
-        '#type' => 'link',
-        '#title' => $this->t('Subscribe to notifications'),
-        '#url' => $url,
-        '#attributes' => [
-          'class' => ['use-ajax', 'oe-newsroom-node__subscribe-link'],
-          'data-dialog-type' => 'modal',
-          'data-dialog-options' => Json::encode(['width' => 800]),
-        ],
-        '#attached' => [
-          'library' => ['core/drupal.dialog.ajax'],
-        ],
-      ],
+    return [
+      '#theme' => 'oe_newsroom_node_subscribe_button',
+      '#url' => $url,
+      '#label' => $this->t('Subscribe'),
     ];
-
-    return $build;
   }
 
   /**
    * {@inheritdoc}
    */
   protected function blockAccess(AccountInterface $account): AccessResultInterface {
-    return AccessResult::allowedIfHasPermission($account, 'subscribe to newsroom node notifications');
+    $node = $this->getNode();
+    if (!$node instanceof NodeInterface) {
+      return AccessResult::forbidden()->addCacheContexts(['route']);
+    }
+
+    return $node->access('oe_newsroom_node.subscribe', $account, TRUE);
   }
 
-  /**
-   * {@inheritdoc}
-   */
+  public function getCacheContexts(): array {
+    return Cache::mergeContexts(parent::getCacheContexts(), ['route']);
+  }
+
   public function getCacheTags(): array {
     return Cache::mergeTags(parent::getCacheTags(), [
       'config:' . Newsroom::CONFIG_NAME,

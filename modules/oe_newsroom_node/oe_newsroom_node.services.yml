@@ -8,3 +8,7 @@ services:
   Drupal\oe_newsroom_node\Domain\NodeNotificationService:
     factory: ['Drupal\oe_newsroom_node\Domain\NodeNotificationService', create]
   Drupal\oe_newsroom_node\Domain\NodeSubscriptionService: {}
+  oe_newsroom_node.subscribe_access_check:
+    class: Drupal\oe_newsroom_node\Access\NodeSubscribeAccessCheck
+    tags:
+      - { name: access_check, applies_to: _oe_newsroom_node_subscribe_access }
