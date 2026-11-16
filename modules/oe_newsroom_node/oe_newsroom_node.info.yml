@@ -1,0 +1,11 @@
+name: OpenEuropa Newsroom Node
+description: OpenEuropa Newsroom Node module, provides a block to subscribe to node notifications.
+package: OpenEuropa
+core_version_requirement: ^11.3
+
+dependencies:
+  - drupal:block
+  - drupal:node
+  - oe_newsroom:oe_newsroom
+
+type: module

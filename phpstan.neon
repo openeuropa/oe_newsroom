@@ -1,0 +1,8 @@
+includes:
+  - ./phpstan.neon.php
+
+parameters:
+  ignoreErrors:
+    - identifier: dependencySerializationTraitProperty.unsupportedReadOnlyProperty
+    - identifier: dependencySerializationTraitProperty.unsupportedPrivateProperty
+    - identifier: new.static
