@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * @file
+ * Hooks for the oe_newsroom_node module.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\AccessResultInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\node\NodeInterface;
+use Drupal\oe_newsroom_node\Hook\NewsroomSettingsFormAlter;
+
+/**
+ * Implements hook_theme().
+ */
+function oe_newsroom_node_theme(): array {
+  return [
+    'oe_newsroom_node_subscribe_button' => [
+      'variables' => [
+        'url' => NULL,
+        'label' => NULL,
+        'attributes' => [],
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_node_access().
+ */
+function oe_newsroom_node_node_access(NodeInterface $node, string $operation, AccountInterface $account): AccessResultInterface {
+  if ($operation !== 'oe_newsroom_node.subscribe') {
+    return AccessResult::neutral();
+  }
+
+  $permission_access = AccessResult::allowedIfHasPermission($account, 'subscribe to newsroom node notifications');
+  $view_access = $node->access('view', $account, TRUE);
+
+  return $permission_access->andIf($view_access);
+}
+
+/**
+ * Implements hook_form_newsroom_settings_form_alter().
+ */
+function oe_newsroom_node_form_newsroom_settings_form_alter(array &$form, FormStateInterface $form_state): void {
+  \Drupal::service(NewsroomSettingsFormAlter::class)->alterForm($form, $form_state);
+}

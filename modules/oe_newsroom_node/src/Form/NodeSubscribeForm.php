@@ -32,11 +32,11 @@ class NodeSubscribeForm extends FormBase {
   public const FORM_ID = 'oe_newsroom_node_subscribe_form';
 
   public function __construct(
-    protected readonly NodeSubscriptionEndpoints $nodeSubscriptionEndpoints,
-    protected readonly AccountProxyInterface $accountProxy,
+    protected NodeSubscriptionEndpoints $nodeSubscriptionEndpoints,
+    protected AccountProxyInterface $accountProxy,
     MessengerInterface $messenger,
     #[Autowire('logger.channel.oe_newsroom_node')]
-    protected readonly LoggerInterface $logger,
+    protected LoggerInterface $logger,
   ) {
     $this->setMessenger($messenger);
   }

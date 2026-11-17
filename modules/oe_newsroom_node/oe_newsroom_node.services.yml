@@ -4,3 +4,9 @@ services:
   logger.channel.oe_newsroom_node:
     parent: logger.channel_base
     arguments: ['oe_newsroom_node']
+  Drupal\oe_newsroom_node\Hook\NewsroomSettingsFormAlter:
+    autowire: true
+  oe_newsroom_node.subscribe_access_check:
+    class: Drupal\oe_newsroom_node\Access\NodeSubscribeAccessCheck
+    tags:
+      - { name: access_check, applies_to: _oe_newsroom_node_subscribe_access }

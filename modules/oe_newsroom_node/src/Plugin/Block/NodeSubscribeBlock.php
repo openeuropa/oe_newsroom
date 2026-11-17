@@ -65,7 +65,7 @@ class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInte
 
     $url = Url::fromRoute('oe_newsroom_node.subscribe_form', ['node' => $node->id()]);
 
-    $build = [
+    return [
       'link' => [
         '#type' => 'link',
         '#title' => $this->t('Subscribe to notifications'),
@@ -80,8 +80,6 @@ class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInte
         ],
       ],
     ];
-
-    return $build;
   }
 
   /**

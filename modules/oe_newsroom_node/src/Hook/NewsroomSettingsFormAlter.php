@@ -6,7 +6,6 @@ namespace Drupal\oe_newsroom_node\Hook;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
 
@@ -27,9 +26,8 @@ class NewsroomSettingsFormAlter {
   }
 
   /**
-   * Implements hook_form_FORM_ID_alter() for the newsroom settings form.
+   * Alters the newsroom settings form.
    */
-  #[Hook('form_newsroom_settings_form_alter')]
   public function alterForm(array &$form, FormStateInterface $form_state): void {
     $config = $this->configFactory->get('oe_newsroom_node.settings');
 
