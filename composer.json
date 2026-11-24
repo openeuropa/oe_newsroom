@@ -12,6 +12,7 @@
     },
     "require-dev": {
         "composer/installers": "~1.11",
+        "consolidation/robo": "5.x-dev",
         "drupal/core-composer-scaffold": "^10 || ^11",
         "drupal/core-dev": "^10 || ^11",
         "drupal/http_request_mock": "^1.2",

@@ -19,7 +19,7 @@ if (version_compare(\Drupal::VERSION, '11.0.0', '<')) {
     // Hook attributes are introduced in Drupal 11.
     [
       'message' => '#^Attribute class Drupal\\\\Core\\\\Hook\\\\Attribute\\\\Hook does not exist\.$#',
-      'path' => __DIR__ . '/modules/oe_newsroom_node/src/Hook/NewsroomSettingsFormAlter.php',
+      'path' => __DIR__ . '/modules/oe_newsroom_node/src/Hook/',
     ],
   ];
 }

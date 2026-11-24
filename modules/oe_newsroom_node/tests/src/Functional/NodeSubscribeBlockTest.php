@@ -180,7 +180,7 @@ class NodeSubscribeBlockTest extends BrowserTestBase {
     $assert_session->addressEquals($node->toUrl());
     $assert_session->pageTextContains('Something went wrong while confirming your subscription. Please try again.');
 
-    // An unpublished node is not exposed by the confirmation route.
+    // An unpublished node is denied by the confirmation route.
     $unpublished_node = $this->drupalCreateNode([
       'type' => 'page',
       'title' => 'Unpublished node',

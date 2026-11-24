@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\oe_newsroom_node\Plugin\Block;
 
-use Drupal\Component\Serialization\Json;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Block\Attribute\Block;
 use Drupal\Core\Block\BlockBase;
@@ -14,7 +13,6 @@ use Drupal\Core\Plugin\Context\EntityContextDefinition;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Url;
 use Drupal\oe_newsroom\Newsroom;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -63,25 +61,10 @@ class NodeSubscribeBlock extends BlockBase implements ContainerFactoryPluginInte
       return [];
     }
 
-    $url = Url::fromRoute('oe_newsroom_node.subscribe_form', ['node' => $node->id()]);
-
-    $build = [
-      'link' => [
-        '#type' => 'link',
-        '#title' => $this->t('Subscribe to notifications'),
-        '#url' => $url,
-        '#attributes' => [
-          'class' => ['use-ajax', 'oe-newsroom-node__subscribe-link'],
-          'data-dialog-type' => 'modal',
-          'data-dialog-options' => Json::encode(['width' => 800]),
-        ],
-        '#attached' => [
-          'library' => ['core/drupal.dialog.ajax'],
-        ],
-      ],
+    return [
+      '#theme' => 'oe_newsroom_node_subscribe_button',
+      '#nid' => $node->id(),
     ];
-
-    return $build;
   }
 
   /**
