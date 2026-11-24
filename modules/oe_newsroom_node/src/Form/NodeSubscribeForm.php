@@ -18,6 +18,7 @@ use Drupal\oe_newsroom\Value\EmailAction\SendCustomizedEmail;
 use Drupal\oe_newsroom\Value\NotificationFrequency;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * A form to allow a visitor to subscribe to a node via Newsroom.
@@ -52,6 +53,10 @@ class NodeSubscribeForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, ?NodeInterface $node = NULL): array {
+    if (!$node || !$node->access('oe_newsroom_node.subscribe')) {
+      throw new NotFoundHttpException();
+    }
+
     // Store the node id to use on submit.
     $form_state->set('node_id', (int) $node->id());
 

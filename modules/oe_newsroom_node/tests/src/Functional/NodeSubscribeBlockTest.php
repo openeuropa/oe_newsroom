@@ -187,7 +187,7 @@ class NodeSubscribeBlockTest extends BrowserTestBase {
       'status' => 0,
     ]);
     $this->drupalGet(Url::fromRoute('oe_newsroom_node.subscribe_verify', ['node' => $unpublished_node->id()]));
-    $assert_session->statusCodeEquals(403);
+    $assert_session->statusCodeEquals(404);
 
     // A non-existent node is not exposed by the confirmation route.
     $node->delete();

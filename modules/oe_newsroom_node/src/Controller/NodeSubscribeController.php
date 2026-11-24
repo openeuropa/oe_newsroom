@@ -12,6 +12,7 @@ use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\node\NodeInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Handles node subscription confirmation redirects.
@@ -37,6 +38,10 @@ class NodeSubscribeController implements ContainerInjectionInterface {
    *   A redirect to the node page.
    */
   public function verify(NodeInterface $node): RedirectResponse {
+    if (!$node->access('oe_newsroom_node.subscribe')) {
+      throw new NotFoundHttpException();
+    }
+
     if ((string) $this->requestStack->getCurrentRequest()->query->get('success') === '1') {
       $this->messenger->addMessage($this->translation->translate('You are now subscribed.'));
     }

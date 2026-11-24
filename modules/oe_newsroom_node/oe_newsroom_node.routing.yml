@@ -4,7 +4,7 @@ oe_newsroom_node.subscribe_form:
     _form: '\Drupal\oe_newsroom_node\Form\NodeSubscribeForm'
     _title: 'Subscribe to notifications'
   requirements:
-    _oe_newsroom_node_subscribe_access: 'TRUE'
+    _permission: 'subscribe to newsroom node notifications'
     node: \d+
   options:
     parameters:
@@ -16,7 +16,7 @@ oe_newsroom_node.subscribe_verify:
   defaults:
     _controller: '\Drupal\oe_newsroom_node\Controller\NodeSubscribeController::verify'
   requirements:
-    _oe_newsroom_node_subscribe_access: 'TRUE'
+    _permission: 'subscribe to newsroom node notifications'
     node: \d+
   options:
     parameters:
